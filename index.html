@@ -15,13 +15,13 @@
         /* ==================== Core Styling ==================== */
         :root {
             --primary: #0056b3;        
-            --primary-dark: #003d80;   
+            --primary-dark: #003d80;    
             --dark: #f8fafc;            
             --surface: #ffffff;        
-            --surface-light: #f1f5f9;  
+            --surface-light: #f1f5f9;   
             --border: #e2e8f0;          
             --text: #1e293b;            
-            --text-muted: #64748b;      
+            --text-muted: #64748b;       
             --gold: #d97706;            
             --success: #10b981;        
             --error: #ef4444;            
@@ -267,6 +267,7 @@
         .st-working { background: #fff7ed; color: var(--warning); border: 1px solid #fed7aa; }
         .st-done { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
         .st-rejected { background: #fef2f2; color: var(--error); border: 1px solid #fecaca; }
+        .st-pending_confirmation { background: #fff7ed; color: #d97706; border: 1px solid #fdba74; }
 
         .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
         .media-item { aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: #f8fafc; border: 1px solid var(--border); position: relative; }
@@ -328,10 +329,11 @@
                 <div class="input-group"><input type="tel" id="reg-phone" placeholder="01xxxxxxxxx"></div>
                 
                 <p class="auth-section-label">الوظيفة:</p>
-                <div class="auth-grid" style="grid-template-columns: repeat(4, 1fr);">
+                <div class="auth-grid" style="grid-template-columns: repeat(3, 1fr); gap: 8px;">
                     <label><input type="radio" name="auth-role" value="employee" class="auth-card-input" checked><div class="auth-card"><i class="fa-solid fa-user-pen"></i><span style="font-size:10px;">موظف</span></div></label>
                     <label><input type="radio" name="auth-role" value="supervisor" class="auth-card-input"><div class="auth-card"><i class="fa-solid fa-user-tie"></i><span style="font-size:10px;">مشرف</span></div></label>
-                    <label><input type="radio" name="auth-role" value="technician" class="auth-card-input"><div class="auth-card"><i class="fa-solid fa-helmet-safety"></i><span style="font-size:10px;">فني</span></div></label>
+                    <label><input type="radio" name="auth-role" value="engineer" class="auth-card-input"><div class="auth-card"><i class="fa-solid fa-helmet-safety"></i><span style="font-size:10px;">مهندس</span></div></label>
+                    <label><input type="radio" name="auth-role" value="technician" class="auth-card-input"><div class="auth-card"><i class="fa-solid fa-screwdriver-wrench"></i><span style="font-size:10px;">فني</span></div></label>
                     <label><input type="radio" name="auth-role" value="manager" class="auth-card-input"><div class="auth-card"><i class="fa-solid fa-user-shield"></i><span style="font-size:10px;">مدير</span></div></label>
                 </div>
                 <div class="input-group" style="margin-top:15px;"><input type="text" id="reg-job" placeholder="المسمى الوظيفي"></div>
@@ -381,7 +383,7 @@
                     <select id="feed-filter" onchange="renderFeed()" style="padding:10px;"><option value="all">عرض الكل</option><option value="Admin">المبني الاداري</option><option value="Nursing">تمريض</option><option value="CS">حاسبات</option><option value="PT">علاج طبيعي</option><option value="Pharmacy">صيدلة</option><option value="Dentistry">أسنان</option><option value="Business">إدارة أعمال</option></select>
                 </div>
                 <div id="archive-actions" class="hidden" style="padding:0 15px 15px;">
-                     <button onclick="downloadArchivePDF()" class="btn-main btn-sm" style="background:var(--success); width:100%;"><i class="fa-solid fa-file-pdf"></i> تحميل تقرير الأرشيف (PDF)</button>
+                      <button onclick="downloadArchivePDF()" class="btn-main btn-sm" style="background:var(--success); width:100%;"><i class="fa-solid fa-file-pdf"></i> تحميل تقرير الأرشيف (PDF)</button>
                 </div>
                 <div id="requests-feed" style="padding-bottom:100px;"></div>
             </div>
@@ -611,7 +613,7 @@
             <textarea id="act-comment" rows="4" placeholder="اكتب ملاحظات..."></textarea>
             
             <div id="tech-select-area" class="hidden" style="margin-top:20px;">
-                <p style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:12px;">اختر الفني المختص:</p>
+                <p style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:12px;">اختر المهندس/الفني المختص:</p>
                 <div id="tech-list-action" class="tech-select-grid" style="max-height:200px; overflow-y:auto; padding:5px;"></div>
             </div>
 
@@ -713,7 +715,7 @@
     let isFirstLoad = true;
     let currentFriendDocId = null;
     let selectedFrameClass = '';
-    let pendingConfirmAction = null; // Global for new confirm modal
+    let pendingConfirmAction = null; 
 
     // --- Audio Recording State ---
     let mediaRecorder = null;
@@ -761,7 +763,7 @@
                 loadTeam(); 
                 loadFriendReqs();
                 loadProfilePageData();
-                loadPosts(); // Load News
+                loadPosts(); 
                 
                 // Set default dates
                 document.getElementById('req-date').valueAsDate = new Date();
@@ -787,14 +789,14 @@
             document.getElementById('emp-report-btn-container').classList.remove('hidden');
         }
         
-        // Technician: Replace "Add" button with "Report" button
-        if(userData.role === 'technician') {
+        // Technician & Engineer: Replace "Add" button with "Report" button
+        if(userData.role === 'technician' || userData.role === 'engineer') {
             const addBtn = document.querySelector('.nav-add-btn');
             addBtn.innerHTML = '<i class="fa-solid fa-file-pdf"></i>';
             addBtn.onclick = function() {
                 document.getElementById('tech-report-modal').classList.remove('hidden');
             };
-            document.getElementById('page-create').innerHTML = "<div style='text-align:center; padding:50px;'><h3 style='color:var(--text-muted)'>حساب فني</h3><p>لا يمكنك إنشاء بلاغات، فقط متابعة المهام وإرسال التقارير.</p></div>";
+            document.getElementById('page-create').innerHTML = "<div style='text-align:center; padding:50px;'><h3 style='color:var(--text-muted)'>حساب مهندس/فني</h3><p>لا يمكنك إنشاء بلاغات، فقط متابعة المهام وإرسال التقارير.</p></div>";
         }
 
         // Manager: Show Create Post & Full Report AND HIDE Create Request Button
@@ -809,9 +811,16 @@
     // 3. UI RENDERING & FEED
     // =========================================================================
     function renderHeader() {
-        const roleMap = {'employee':'موظف', 'supervisor':'مشرف', 'technician':'فني', 'manager':'مدير'};
+        const roleMap = {
+            'employee': 'موظف',
+            'supervisor': 'مشرف',
+            'manager': 'مدير',
+            'technician': 'فني',
+            'engineer': userData.gender === 'female' ? 'مهندسة' : 'مهندس' 
+        };
+        
         document.getElementById('banner-name').innerText = userData.fullName;
-        document.getElementById('banner-role').innerText = roleMap[userData.role];
+        document.getElementById('banner-role').innerText = roleMap[userData.role] || userData.role;
         document.getElementById('banner-id').innerText = "ID: " + userData.shortId;
         document.getElementById('banner-img').src = userData.photoUrl;
         
@@ -836,7 +845,7 @@
         // Permissions Logic
         if(userData.role === 'employee') q = q.where('userId','==',currentUser.uid);
         else if(userData.role === 'supervisor') q = q.where('supervisorId','==',currentUser.uid);
-        else if(userData.role === 'technician') q = q.where('technicianId','==',currentUser.uid);
+        else if(userData.role === 'technician' || userData.role === 'engineer') q = q.where('technicianId','==',currentUser.uid);
         // Manager sees ALL
         
         q.onSnapshot(snap => {
@@ -871,7 +880,7 @@
         if(currentTab === 'trash') list = list.filter(r => r.isDeleted === true);
         else {
             list = list.filter(r => r.isDeleted !== true);
-            if(currentTab === 'active') list = list.filter(r => ['pending','approved','working','suspended'].includes(r.status));
+            if(currentTab === 'active') list = list.filter(r => ['pending','approved','working','suspended','pending_confirmation'].includes(r.status));
             else if(currentTab === 'history') list = list.filter(r => ['done','rejected'].includes(r.status));
         }
 
@@ -907,11 +916,12 @@
                 if(userData.role === 'supervisor' && d.status === 'pending') {
                     actionBtns = `
                     <div style="display:flex; gap:10px;">
-                        <button onclick="event.stopPropagation(); openAction('${d.id}','approve')" class="btn-main btn-sm" style="background:var(--success);">قبول وتعيين فني</button>
+                        <button onclick="event.stopPropagation(); openAction('${d.id}','approve')" class="btn-main btn-sm" style="background:var(--success);">قبول وتعيين</button>
                         <button onclick="event.stopPropagation(); openAction('${d.id}','reject')" class="btn-main btn-danger btn-sm">رفض</button>
                     </div>`;
                 }
-                else if(userData.role === 'technician') {
+                // Updated Logic for Engineers AND Technicians
+                else if(userData.role === 'technician' || userData.role === 'engineer') {
                     if(d.status === 'approved') {
                         actionBtns = `
                         <div style="display:flex; gap:10px;">
@@ -919,8 +929,21 @@
                              <button onclick="event.stopPropagation(); openAction('${d.id}','tech_reject')" class="btn-main btn-danger btn-sm">رفض</button>
                         </div>`;
                     } else if(d.status === 'working') {
-                        actionBtns = `<button onclick="event.stopPropagation(); openAction('${d.id}','done')" class="btn-main btn-sm" style="background:var(--success);">تم الإصلاح</button>`;
+                        actionBtns = `<button onclick="event.stopPropagation(); openAction('${d.id}','done')" class="btn-main btn-sm" style="background:var(--success);">تم الإصلاح (إرسال للتأكيد)</button>`;
+                    } else if(d.status === 'pending_confirmation') {
+                         actionBtns = `<span style="font-size:11px; color:var(--warning); font-weight:bold;">بانتظار تأكيد الموظف...</span>`;
                     }
+                }
+                // Employee Logic for Confirmation
+                else if(userData.role === 'employee' && d.status === 'pending_confirmation' && d.userId === currentUser.uid) {
+                    actionBtns = `
+                    <div style="display:flex; gap:10px; flex-direction:column; width:100%;">
+                        <p style="font-size:10px; color:var(--success); margin:0;">تم إنهاء العمل من قبل المختص. هل تؤكد ذلك؟</p>
+                        <div style="display:flex; gap:5px;">
+                            <button onclick="event.stopPropagation(); openAction('${d.id}','confirm_done')" class="btn-main btn-sm" style="background:var(--success); flex:1;">تأكيد وحفظ</button>
+                            <button onclick="event.stopPropagation(); openAction('${d.id}','deny_done')" class="btn-main btn-danger btn-sm" style="flex:1;">لم يتم الإصلاح</button>
+                        </div>
+                    </div>`;
                 }
             } else {
                 actionBtns = `<div style="display:flex; gap:5px;"><button onclick="event.stopPropagation(); restoreReq('${d.id}')" class="btn-main btn-sm">استعادة</button><button onclick="event.stopPropagation(); hardDelete('${d.id}')" class="btn-danger btn-sm">حذف نهائي</button></div>`;
@@ -929,7 +952,7 @@
             let prioIcon = d.priority === 'high' ? '<i class="fa-solid fa-fire" style="color:var(--error)"></i>' : '';
             let prioColor = d.priority === 'high' ? 'var(--error)' : d.priority === 'medium' ? 'var(--warning)' : 'var(--success)';
             
-            // Render Card with Clickable Profile Logic
+            // Render Card
             container.innerHTML += `
             <div class="glass-card request-card ${cardClass}" onclick="openRequestDetails('${d.id}')" style="border-right-color:${prioColor};">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
@@ -952,7 +975,7 @@
                 
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     ${deleteBtn}
-                    <div style="margin-right:auto;">${actionBtns}</div>
+                    <div style="margin-right:auto; width:100%; display:flex; justify-content:flex-end;">${actionBtns}</div>
                 </div>
             </div>`;
         });
@@ -1008,20 +1031,22 @@
         commBox.value = "";
         
         const titles = {
-            'approve':'قبول وتعيين فني', 
+            'approve':'قبول وتعيين مختص', 
             'reject':'رفض الطلب', 
             'startWork':'بدء التنفيذ', 
-            'done':'إتمام الإصلاح',
-            'tech_reject': 'رفض المهمة'
+            'done':'تأكيد إتمام العمل (للموظف)',
+            'tech_reject': 'رفض المهمة',
+            'confirm_done': 'تأكيد استلام العمل',
+            'deny_done': 'إعادة العمل للمختص'
         };
         document.getElementById('act-title').innerText = titles[type];
 
         if(type === 'approve') {
-            commBox.placeholder = "ملاحظات للفني (اختياري)...";
+            commBox.placeholder = "ملاحظات (اختياري)...";
             document.getElementById('tech-select-area').classList.remove('hidden');
             loadTechsForAction();
         } else {
-            commBox.placeholder = "سبب الرفض / ملاحظات...";
+            commBox.placeholder = "ملاحظات...";
             document.getElementById('tech-select-area').classList.add('hidden');
         }
     }
@@ -1030,23 +1055,29 @@
         const list = document.getElementById('tech-list-action'); 
         list.innerHTML="<small>جاري التحميل...</small>";
         
-        const snap = await db.collection('users').where('role','==','technician').get();
+        // Fetch All Users then filter (since Firestore 'IN' query is limited)
+        const snap = await db.collection('users').get();
         list.innerHTML="";
         
-        if(snap.empty) {
-            list.innerHTML = "<p style='grid-column:span 2; font-size:11px; color:red;'>لا يوجد فنيين مسجلين</p>";
-            return;
-        }
-
+        let count = 0;
         snap.forEach(doc => {
              const t = doc.data();
-             list.innerHTML += `
-             <div class="tech-select-card" onclick="selTech(this, '${doc.id}', '${t.fullName}')">
-                <img src="${t.photoUrl}">
-                <div style="font-size:12px; font-weight:bold; color:var(--text);">${t.fullName}</div>
-                <div style="font-size:10px; color:var(--text-muted);">${t.jobTitle||'فني'}</div>
-             </div>`;
+             // Filter for Engineer OR Technician
+             if(t.role === 'engineer' || t.role === 'technician') {
+                 const roleLabel = t.role === 'engineer' ? (t.gender === 'female' ? 'مهندسة' : 'مهندس') : 'فني';
+                 list.innerHTML += `
+                 <div class="tech-select-card" onclick="selTech(this, '${doc.id}', '${t.fullName}')">
+                    <img src="${t.photoUrl}">
+                    <div style="font-size:12px; font-weight:bold; color:var(--text);">${t.fullName}</div>
+                    <div style="font-size:10px; color:var(--text-muted);">${roleLabel}</div>
+                 </div>`;
+                 count++;
+             }
         });
+
+        if(count === 0) {
+            list.innerHTML = "<p style='grid-column:span 2; font-size:11px; color:red;'>لا يوجد مهندسين أو فنيين مسجلين</p>";
+        }
     }
     
     function selTech(el, id, name) {
@@ -1060,7 +1091,7 @@
         const btn = document.getElementById('act-submit-btn');
 
         if((type==='reject' || type==='tech_reject') && !comment) return toast("⚠️ يجب ذكر السبب");
-        if(type==='approve' && !selectedTech) return toast("⚠️ اختر فني للمهمة");
+        if(type==='approve' && !selectedTech) return toast("⚠️ اختر مختص للمهمة");
 
         btn.disabled=true;
         try {
@@ -1078,17 +1109,27 @@
             else if(type === 'startWork') { updateData.status = 'working'; }
             else if(type === 'tech_reject') {
                 updateData.status = 'rejected';
-                updateData.rejectedBy = `الفني: ${userData.fullName}`;
-                updateData.supervisorComment = `رفض الفني: ${comment}`;
+                updateData.rejectedBy = `المختص: ${userData.fullName}`;
+                updateData.supervisorComment = `رفض المختص: ${comment}`;
             }
+            // --- Workflow Update: Tech finishes -> Waiting Confirmation ---
             else if(type === 'done') { 
+                updateData.status = 'pending_confirmation'; 
+                updateData.techFinishedAt = firebase.firestore.FieldValue.serverTimestamp();
+            }
+            // --- Employee Confirms -> Archived ---
+            else if(type === 'confirm_done') {
                 updateData.status = 'done';
                 updateData.completedAt = firebase.firestore.FieldValue.serverTimestamp();
+            }
+            // --- Employee Denies -> Back to Working ---
+            else if(type === 'deny_done') {
+                updateData.status = 'working'; 
             }
 
             await db.collection('requests').doc(id).update(updateData);
             toast("✅ تم تنفيذ الإجراء"); closeModal('action-modal');
-        } catch(e) { toast("❌ خطأ"); } finally { btn.disabled=false; }
+        } catch(e) { toast("❌ خطأ"); console.error(e); } finally { btn.disabled=false; }
     }
 
     // --- NEW: Universal User Profile Logic ---
@@ -1105,7 +1146,13 @@
             
             if(doc.exists) {
                 const u = doc.data();
-                const roleMap = {'employee':'موظف', 'supervisor':'مشرف', 'technician':'فني', 'manager':'مدير'};
+                const roleMap = {
+                    'employee': 'موظف',
+                    'supervisor': 'مشرف',
+                    'manager': 'مدير',
+                    'technician': 'فني',
+                    'engineer': u.gender === 'female' ? 'مهندسة' : 'مهندس'
+                };
 
                 // Populate Modal
                 document.getElementById('fp-pic').src = u.photoUrl;
@@ -1177,12 +1224,12 @@
         if(users.length === 0) { resDiv.innerHTML = '<p style="text-align:center; color:#999; font-size:12px;">لم يتم العثور على مستخدم</p>'; return; }
         users.forEach(u => {
             if(u.id === currentUser.uid) return;
-            const roleMap = {'employee':'موظف', 'supervisor':'مشرف', 'technician':'فني', 'manager':'مدير'};
+            const roleMap = {'employee':'موظف', 'supervisor':'مشرف', 'technician':'فني', 'manager':'مدير', 'engineer': u.gender==='female'?'مهندسة':'مهندس'};
             resDiv.innerHTML += `
             <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; background:var(--surface-light); border-radius:10px; margin-bottom:5px; border:1px solid var(--border);">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <img src="${u.photoUrl}" style="width:35px; height:35px; border-radius:50%;">
-                    <div><b style="font-size:12px; color:var(--text);">${u.fullName}</b><br><span style="font-size:10px; color:var(--gold);">${roleMap[u.role]}</span></div>
+                    <div><b style="font-size:12px; color:var(--text);">${u.fullName}</b><br><span style="font-size:10px; color:var(--gold);">${roleMap[u.role]||u.role}</span></div>
                 </div>
                 <button onclick="addFriend('${u.id}', '${u.fullName}', '${u.photoUrl}')" class="btn-main btn-sm">إضافة +</button>
             </div>`;
@@ -1396,7 +1443,7 @@
         element.innerHTML = `
             <div style="text-align:center; border-bottom:3px solid #0056b3; padding-bottom:15px; margin-bottom:20px;">
                 <h1 style="color:#0056b3;">${title}</h1>
-                <p>بواسطة الفني: ${userData.fullName}</p>
+                <p>بواسطة: ${userData.fullName}</p>
                 <p>التاريخ: ${new Date().toLocaleDateString('ar-EG')}</p>
             </div>
             <div style="font-size:14px; line-height:1.8; white-space: pre-wrap;">${content}</div>
@@ -1456,7 +1503,7 @@
                         <th style="border:1px solid #999; padding:5px;">النوع</th>
                         <th style="border:1px solid #999; padding:5px;">الوصف</th>
                         <th style="border:1px solid #999; padding:5px;">الحالة</th>
-                        <th style="border:1px solid #999; padding:5px;">الفني</th>
+                        <th style="border:1px solid #999; padding:5px;">المختص</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1517,8 +1564,9 @@
 
     function getStatusLabel(s) {
         const map = {
-            'pending': 'تم الإرسال', 'approved': 'بانتظار الفني', 'working': 'قيد التنفيذ',
-            'done': 'تم الإصلاح', 'rejected': 'مرفوض', 'suspended': 'معلق'
+            'pending': 'تم الإرسال', 'approved': 'بانتظار المختص', 'working': 'قيد التنفيذ',
+            'done': 'تم الإصلاح', 'rejected': 'مرفوض', 'suspended': 'معلق',
+            'pending_confirmation': 'بانتظار تأكيدك'
         };
         return map[s] || s;
     }
@@ -1551,7 +1599,7 @@
 
         let steps = [
             { id: 'pending', label: 'تم الإرسال', desc: 'بانتظار الموافقة' },
-            { id: 'approved', label: 'تم التوجيه', desc: d.technicianName ? `مع الفني: ${d.technicianName}` : 'تعيين فني' },
+            { id: 'approved', label: 'تم التوجيه', desc: d.technicianName ? `المختص: ${d.technicianName}` : 'تعيين مختص' },
             { id: 'working', label: 'قيد التنفيذ', desc: 'بدأ العمل' },
             { id: 'done', label: 'تم الإصلاح', desc: 'انتهت العملية' }
         ];
@@ -1571,6 +1619,7 @@
                 if(s.id === 'pending') active = true;
                 if(d.status === 'approved' && (s.id==='pending'||s.id==='approved')) active=true;
                 if(d.status === 'working' && (s.id==='pending'||s.id==='approved'||s.id==='working')) active=true;
+                if(d.status === 'pending_confirmation' && (s.id!=='done')) active=true; // Waiting confirm means working is done
                 if(d.status === 'done') active=true;
 
                 timelineHtml += `
@@ -1601,7 +1650,7 @@
                <span><i class="fa-solid fa-clock"></i> ${d.time}</span>
                <span><i class="fa-solid fa-map-pin"></i> ${d.location}</span>
             </div>
-            ${d.supervisorComment && !isRejected ? `<div style="background:#ecfdf5; color:#065f46; padding:10px; border-radius:10px; font-size:12px; margin-bottom:15px; border:1px solid #a7f3d0;"><i class="fa-solid fa-note-sticky"></i> ملاحظات المشرف: ${d.supervisorComment}</div>` : ''}
+            ${d.supervisorComment && !isRejected ? `<div style="background:#ecfdf5; color:#065f46; padding:10px; border-radius:10px; font-size:12px; margin-bottom:15px; border:1px solid #a7f3d0;"><i class="fa-solid fa-note-sticky"></i> ملاحظات: ${d.supervisorComment}</div>` : ''}
             
             <h5 style="margin:10px 0 5px; color:var(--text-muted);">المرفقات:</h5>
             <div class="media-grid" style="margin-bottom:20px;">${mediaHtml}</div>
@@ -1765,10 +1814,10 @@
             } else {
                 const role = document.querySelector('input[name="auth-role"]:checked').value;
                 if(role === 'manager') {
-                     const managerSnap = await db.collection('users').where('role', '==', 'manager').get();
-                     if(managerSnap.size >= 4) {
-                         throw new Error("⛔ نأسف، تم اكتمال عدد المديرين المسموح به (4).");
-                     }
+                      const managerSnap = await db.collection('users').where('role', '==', 'manager').get();
+                      if(managerSnap.size >= 4) {
+                          throw new Error("⛔ نأسف، تم اكتمال عدد المديرين المسموح به (4).");
+                      }
                 }
 
                 const cred = await auth.createUserWithEmailAndPassword(email, pass);
