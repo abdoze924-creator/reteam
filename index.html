@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام الصيانة الذكي - جامعة الريادة (V4.0 - Social Plus)</title>
+    <title>نظام الصيانة الذكي - جامعة الريادة (V5.0 - Ultimate)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -183,7 +183,6 @@
         .nav-item.active { color: var(--primary); }
         .nav-add-btn { width: 55px; height: 55px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 10px 25px rgba(0, 86, 179, 0.4); transform: translateY(-25px); border: 5px solid var(--dark); }
         
-        /* NEW: Notification Badge on Nav Item */
         .nav-badge { position: absolute; top: -5px; right: 8px; width: 10px; height: 10px; background: var(--error); border-radius: 50%; border: 2px solid #fff; display: none; }
         .nav-badge.active { display: block; animation: pulse 2s infinite; }
 
@@ -193,7 +192,6 @@
         .modal-content { width: 100%; max-width: 450px; background: #fff; border: 1px solid var(--border); border-radius: 30px; padding: 30px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.15); }
         .close-btn { position: absolute; top: 20px; left: 20px; background: #f1f5f9; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); }
         .status-pill { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px; width: fit-content; }
-        /* Status colors omitted for brevity, same as before */
         .st-pending { background: #e0f2fe; color: var(--info); border: 1px solid #bae6fd; } .st-at_engineer { background: #f3e8ff; color: var(--purple); border: 1px solid #d8b4fe; } .st-at_tech { background: #fff7ed; color: var(--gold); border: 1px solid #fdba74; } .st-working { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; } .st-pending_confirmation { background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; } .st-done { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; } .st-rejected { background: #fef2f2; color: var(--error); border: 1px solid #fecaca; }
         .tech-select-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .tech-select-card { border: 1px solid var(--border); border-radius: 16px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; background: var(--surface-light); }
@@ -229,7 +227,7 @@
         .date-range-container { display: flex; gap: 10px; background: #fff; padding: 15px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; }
         .date-input-mini { flex: 1; min-width: 120px; }
         
-        /* ==================== NEW: AL-BAYAN (SOCIAL FEED) STYLES ==================== */
+        /* Al-Bayan Styles */
         .feed-post { background: #fff; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; }
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .post-author { display: flex; align-items: center; gap: 10px; cursor: pointer; }
@@ -244,12 +242,8 @@
         .act-btn.liked { color: var(--error); }
         .act-btn.liked i { animation: pop 0.3s ease; }
         @keyframes pop { 50% { transform: scale(1.3); } }
-        
-        /* Seen By Indicator */
         .seen-indicator { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 5px; border-radius: 10px; transition: 0.2s; }
         .seen-indicator:hover { background: var(--surface-light); color: var(--primary); }
-        
-        /* Comments */
         .comments-section { background: var(--surface-light); margin: 15px -20px -20px; padding: 15px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; border-top: 1px solid var(--border); display: none; }
         .comments-section.show { display: block; }
         .comment-item { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
@@ -259,30 +253,53 @@
         .comment-text { font-size: 13px; color: #444; line-height: 1.4; }
         .delete-comment { position: absolute; top: 10px; left: 10px; font-size: 10px; color: var(--error); cursor: pointer; }
         .reply-btn { position: absolute; bottom: 8px; left: 10px; font-size: 10px; color: var(--primary); cursor: pointer; font-weight: bold; }
-        .reply-btn:hover { text-decoration: underline; }
-
-        /* Modals */
+        
         #media-viewer-modal .modal-content { max-width: 90%; background: transparent; box-shadow: none; border: none; padding: 0; height: auto; text-align: center; }
         .full-media-container { position: relative; display: flex; flex-direction: column; align-items: center; }
         .full-media-item { max-width: 100%; max-height: 80vh; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         .media-close-btn { position: fixed; top: 20px; left: 20px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2002; font-size: 20px; border: 1px solid rgba(255,255,255,0.3); }
-        
-        /* Seen By List Modal */
         .seen-user-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid var(--surface-light); }
         .seen-user-item img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-        .seen-user-item:last-child { border-bottom: none; }
+
+        /* ==================== NEW: INVENTORY & COST STYLES ==================== */
+        
+        /* Technician Cost Form (Modern) */
+        .tech-cost-form {
+            background: #fff; padding: 20px; border-radius: 16px; border: 1px dashed var(--gold);
+            margin-top: 20px; background-image: radial-gradient(var(--surface-light) 1px, transparent 1px); background-size: 10px 10px;
+        }
+        .cost-item-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .add-item-btn { 
+            width: 100%; padding: 10px; border: 1px dashed var(--primary); background: rgba(0,86,179,0.05); 
+            color: var(--primary); border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold;
+        }
+
+        /* Inventory Table & Stepper */
+        .inventory-search { margin-bottom: 20px; display: flex; gap: 10px; }
+        .stepper-container { display: flex; align-items: center; gap: 5px; justify-content: center; }
+        .stepper-btn { 
+            width: 25px; height: 25px; border-radius: 50%; border: 1px solid var(--border); 
+            background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; 
+            font-size: 10px; color: var(--text);
+        }
+        .stepper-btn:active { background: var(--surface-light); }
+        .stepper-input { 
+            width: 50px; text-align: center; border: none; background: transparent; 
+            font-weight: bold; font-size: 13px; padding: 0; 
+        }
 
     </style>
 </head>
 <body>
 
 <div class="app-wrapper">
-    <audio id="notify-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="sound-notify-req" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="sound-notify-post" src="https://assets.mixkit.co/active_storage/sfx/2346/2346-preview.mp3" preload="auto"></audio>
 
     <div id="loader">
         <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color:var(--primary);"></i>
         <h2 style="margin-top:20px; color:var(--primary-dark); font-size:18px; font-weight:800;">نظام الصيانة الذكي</h2>
-        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V4.0 Social Enterprise</p>
+        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V5.0 Ultimate</p>
     </div>
 
     <div id="auth-screen" class="hidden" style="min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:25px;">
@@ -382,13 +399,18 @@
                             <label class="prio-label" style="flex:1"><input type="radio" name="prio" value="high" class="prio-radio"><div class="prio-card p-high"><i class="fa-solid fa-fire"></i><span>عاجل</span></div></label>
                         </div>
                     </div>
+                    
                     <div class="input-group">
                         <label>الموقع</label>
                         <select id="req-faculty" style="margin-bottom:12px;">
-                            <option value="">جاري التحميل...</option>
+                            <option value="">اختر المبنى/الكلية...</option>
+                        </select>
+                        <select id="req-floor" style="margin-bottom:12px;">
+                             <option value="">اختر الدور...</option>
                         </select>
                         <input type="text" id="req-room" placeholder="رقم الغرفة / القاعة">
                     </div>
+
                     <div class="input-group"><label>وصف البلاغ</label><textarea id="req-desc" rows="4" placeholder="تفاصيل المشكلة..."></textarea></div>
                     
                     <div style="display:flex; gap:10px; margin-bottom:20px;">
@@ -423,13 +445,65 @@
 
                     <hr style="border:0; border-top:1px dashed var(--border); margin:20px 0;">
 
-                    <div>
+                    <div style="margin-bottom:30px;">
                         <h4 style="font-size:14px; margin-bottom:10px;">🏢 الكليات والمباني</h4>
                         <div style="display:flex; gap:10px; margin-bottom:10px;">
                             <input type="text" id="new-loc-input" placeholder="اسم المبنى الجديد...">
                             <button onclick="addSystemData('locations')" class="btn-sm btn-main" style="width:auto;"><i class="fa-solid fa-plus"></i></button>
                         </div>
                         <div id="admin-locs-list" style="max-height:200px; overflow-y:auto;"></div>
+                    </div>
+                    
+                    <hr style="border:0; border-top:1px dashed var(--border); margin:20px 0;">
+
+                    <div>
+                        <h4 style="font-size:14px; margin-bottom:10px;">📶 الأدوار</h4>
+                        <div style="display:flex; gap:10px; margin-bottom:10px;">
+                            <input type="text" id="new-floor-input" placeholder="اسم الدور (مثال: الدور الأول)...">
+                            <button onclick="addSystemData('floors')" class="btn-sm btn-main" style="width:auto;"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div id="admin-floors-list" style="max-height:200px; overflow-y:auto;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-inventory" class="page-section hidden">
+                <div class="glass-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h3 style="margin:0;"><i class="fa-solid fa-boxes-stacked" style="color:var(--primary);"></i> جرد العهدة</h3>
+                    </div>
+                    
+                    <div class="inventory-search">
+                         <input type="text" id="inv-search" placeholder="بحث عن صنف..." style="flex:2;">
+                         <select id="inv-filter" style="flex:1;">
+                             <option value="all">الكل</option>
+                             <option value="low">رصيد منخفض</option>
+                         </select>
+                    </div>
+
+                    <div style="background:var(--surface-light); padding:15px; border-radius:12px; margin-bottom:20px; border:1px dashed var(--border);">
+                        <p style="font-size:12px; font-weight:bold; margin-bottom:10px;">إضافة صنف جديد:</p>
+                        <div style="display:grid; grid-template-columns: 2fr 1fr 1fr auto; gap:5px;">
+                            <input type="text" id="inv-name" placeholder="اسم الجهاز/الأداة" style="font-size:12px; padding:8px;">
+                            <input type="number" id="inv-total" placeholder="إجمالي" style="font-size:12px; padding:8px;">
+                            <input type="number" id="inv-current" placeholder="موجود" style="font-size:12px; padding:8px;">
+                            <button onclick="addInventoryItem()" class="btn-sm btn-main" style="width:auto;"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="modern-table-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>الصنف</th>
+                                    <th>الإجمالي</th>
+                                    <th>الموجود</th>
+                                    <th>حذف</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-body">
+                                </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -440,74 +514,29 @@
                         <h3 style="margin:0;">📊 التقارير والإحصائيات</h3>
                         <button onclick="exportReportsPDF()" class="btn-sm btn-ghost" style="color:var(--primary); border-color:var(--primary);"><i class="fa-solid fa-file-pdf"></i> تصدير</button>
                     </div>
-
                     <div class="date-range-container">
-                        <div class="date-input-mini">
-                            <label>من:</label>
-                            <input type="date" id="report-start-date">
-                        </div>
-                        <div class="date-input-mini">
-                            <label>إلى:</label>
-                            <input type="date" id="report-end-date">
-                        </div>
+                        <div class="date-input-mini"><label>من:</label><input type="date" id="report-start-date"></div>
+                        <div class="date-input-mini"><label>إلى:</label><input type="date" id="report-end-date"></div>
                         <button onclick="generateReports()" class="btn-sm btn-main" style="width:auto; height:38px; align-self:flex-end;">تحديث</button>
                     </div>
-
                     <div class="report-summary-grid">
-                        <div class="report-card rc-primary">
-                            <h4>إجمالي البلاغات</h4>
-                            <div class="val" id="rep-total">0</div>
-                            <i class="fa-regular fa-clipboard"></i>
-                        </div>
-                        <div class="report-card rc-success">
-                            <h4>تم الإنجاز</h4>
-                            <div class="val" id="rep-done" style="color:var(--success)">0</div>
-                            <i class="fa-solid fa-check-double"></i>
-                        </div>
-                        <div class="report-card rc-warning">
-                            <h4>قيد العمل</h4>
-                            <div class="val" id="rep-active" style="color:var(--warning)">0</div>
-                            <i class="fa-solid fa-clock"></i>
-                        </div>
-                        <div class="report-card rc-error">
-                            <h4>مرفوض/ملغي</h4>
-                            <div class="val" id="rep-rejected" style="color:var(--error)">0</div>
-                            <i class="fa-solid fa-ban"></i>
-                        </div>
+                        <div class="report-card rc-primary"><h4>إجمالي البلاغات</h4><div class="val" id="rep-total">0</div><i class="fa-regular fa-clipboard"></i></div>
+                        <div class="report-card rc-success"><h4>تم الإنجاز</h4><div class="val" id="rep-done" style="color:var(--success)">0</div><i class="fa-solid fa-check-double"></i></div>
+                        <div class="report-card rc-warning"><h4>قيد العمل</h4><div class="val" id="rep-active" style="color:var(--warning)">0</div><i class="fa-solid fa-clock"></i></div>
+                        <div class="report-card rc-error"><h4>مرفوض/ملغي</h4><div class="val" id="rep-rejected" style="color:var(--error)">0</div><i class="fa-solid fa-ban"></i></div>
                     </div>
-
                     <h4 style="margin-bottom:10px;">تحليل الحالة</h4>
-                    <div class="chart-container">
-                        <canvas id="statusChart"></canvas>
-                    </div>
-                    
+                    <div class="chart-container"><canvas id="statusChart"></canvas></div>
                     <h4 style="margin-bottom:10px; margin-top:25px;">تحليل الأهمية</h4>
                     <div style="display:flex; gap:10px; margin-bottom:20px;">
-                        <div style="flex:1; background:#fef2f2; padding:10px; border-radius:12px; text-align:center; border:1px solid var(--error);">
-                            <span style="font-size:10px; color:#991b1b;">عاجل 🔥</span>
-                            <div style="font-weight:900; font-size:18px; color:#991b1b;" id="rep-prio-high">0</div>
-                        </div>
-                        <div style="flex:1; background:#fff7ed; padding:10px; border-radius:12px; text-align:center; border:1px solid var(--warning);">
-                            <span style="font-size:10px; color:#9a3412;">متوسط 😐</span>
-                            <div style="font-weight:900; font-size:18px; color:#9a3412;" id="rep-prio-med">0</div>
-                        </div>
-                        <div style="flex:1; background:#f0fdf4; padding:10px; border-radius:12px; text-align:center; border:1px solid var(--success);">
-                            <span style="font-size:10px; color:#166534;">عادي 🙂</span>
-                            <div style="font-weight:900; font-size:18px; color:#166534;" id="rep-prio-low">0</div>
-                        </div>
+                        <div style="flex:1; background:#fef2f2; padding:10px; border-radius:12px; text-align:center; border:1px solid var(--error);"><span style="font-size:10px; color:#991b1b;">عاجل 🔥</span><div style="font-weight:900; font-size:18px; color:#991b1b;" id="rep-prio-high">0</div></div>
+                        <div style="flex:1; background:#fff7ed; padding:10px; border-radius:12px; text-align:center; border:1px solid var(--warning);"><span style="font-size:10px; color:#9a3412;">متوسط 😐</span><div style="font-weight:900; font-size:18px; color:#9a3412;" id="rep-prio-med">0</div></div>
+                        <div style="flex:1; background:#f0fdf4; padding:10px; border-radius:12px; text-align:center; border:1px solid var(--success);"><span style="font-size:10px; color:#166534;">عادي 🙂</span><div style="font-weight:900; font-size:18px; color:#166534;" id="rep-prio-low">0</div></div>
                     </div>
-
                     <h4 style="margin-bottom:10px; margin-top:25px;">أداء الفنيين</h4>
                     <div class="modern-table-container">
                         <table class="modern-table">
-                            <thead>
-                                <tr>
-                                    <th>الفني</th>
-                                    <th>المكلفة</th>
-                                    <th>المنجزة</th>
-                                    <th>التقييم</th>
-                                </tr>
-                            </thead>
+                            <thead><tr><th>الفني</th><th>المكلفة</th><th>المنجزة</th><th>التقييم</th></tr></thead>
                             <tbody id="tech-performance-body"></tbody>
                         </table>
                     </div>
@@ -521,12 +550,10 @@
                         <span style="font-size:11px; color:var(--text-muted);">أخبار وتعميمات</span>
                     </div>
                 </div>
-
                 <div id="create-post-box" class="glass-card hidden" style="margin-top:0;">
                     <textarea id="new-post-content" rows="3" placeholder="اكتب منشوراً جديداً..." style="margin-bottom:10px;"></textarea>
                     <button onclick="createPost()" class="btn-main btn-sm">نشر <i class="fa-solid fa-paper-plane"></i></button>
                 </div>
-
                 <div id="albayan-feed" style="padding-bottom:100px;">
                     <div style="text-align:center; padding:20px; color:var(--text-muted);">جاري تحميل المنشورات...</div>
                 </div>
@@ -568,7 +595,6 @@
                                  <div class="frame-option f-grad" onclick="selectFrame(this, 'f-grad')"><div class="f-grad-in"></div></div>
                              </div>
                         </div>
-
                         <div style="font-family:monospace; background:var(--surface-light); display:inline-block; padding:10px 25px; border-radius:30px; margin-bottom:30px; color:var(--primary-dark); border:1px solid var(--border);" onclick="copyId()">ID: <span id="edit-id-display">--</span> <i class="fa-regular fa-copy"></i></div>
                         <div style="text-align:right;">
                             <div class="input-group"><label>الاسم الكامل</label><input type="text" id="edit-name"></div>
@@ -592,7 +618,6 @@
                             <button onclick="reqNotifyPerm()" class="btn-sm btn-main" style="width:auto;">تفعيل</button>
                         </div>
                     </div>
-                    
                     <div id="settings-manager-area" class="hidden">
                         <div class="settings-btn-grid">
                             <div class="settings-card-btn" onclick="nav('reports', null)">
@@ -603,9 +628,12 @@
                                 <i class="fa-solid fa-cogs"></i>
                                 <span>إدارة النظام</span>
                             </div>
+                            <div class="settings-card-btn" onclick="nav('inventory', null)">
+                                <i class="fa-solid fa-boxes-stacked"></i>
+                                <span>جرد العهدة</span>
+                            </div>
                         </div>
                     </div>
-
                     <button onclick="document.getElementById('logout-modal').classList.remove('hidden')" class="btn-main btn-danger" style="margin-top:20px;">تسجيل خروج</button>
                 </div>
             </div>
@@ -615,10 +643,7 @@
             <div class="nav-item active" onclick="nav('home', this)"><i class="fa-solid fa-list-check"></i>المهام</div>
             <div class="nav-add-btn" onclick="nav('create', null)"><i class="fa-solid fa-plus"></i></div>
             <div class="nav-item" onclick="nav('team', this)"><i class="fa-solid fa-users"></i>الفريق</div>
-            <div class="nav-item" onclick="nav('albayan', this)">
-                <i class="fa-solid fa-bullhorn"></i>البيان
-                <div id="feed-badge" class="nav-badge"></div>
-            </div>
+            <div class="nav-item" onclick="nav('albayan', this)"><i class="fa-solid fa-bullhorn"></i>البيان<div id="feed-badge" class="nav-badge"></div></div>
             <div class="nav-item" onclick="nav('profile', this)"><i class="fa-solid fa-user"></i>حسابي</div>
             <div class="nav-item" onclick="nav('settings', this)"><i class="fa-solid fa-gear"></i></div>
         </div>
@@ -673,6 +698,16 @@
                     <div class="input-group"><input type="number" id="ext-cost" placeholder="التكلفة (اختياري)"></div>
                 </div>
             </div>
+            
+            <div id="tech-finish-form" class="hidden">
+                 <div class="tech-cost-form">
+                     <p style="font-size:13px; font-weight:bold; color:var(--gold); margin-bottom:10px;">💵 التكلفة والأدوات المستخدمة</p>
+                     <div id="cost-items-container">
+                         </div>
+                     <div class="add-item-btn" onclick="addCostItemRow()">+ إضافة مادة/أداة</div>
+                 </div>
+            </div>
+
             <button onclick="submitAction()" id="act-submit-btn" class="btn-main" style="margin-top:20px;">تنفيذ</button>
         </div>
     </div>
@@ -763,6 +798,7 @@
     // Global Vars for Admin, Reports & Feed
     let systemSpecialties = [];
     let systemLocations = [];
+    let systemFloors = []; // NEW: Floors
     let reportChart = null;
     let postsListener = null;
 
@@ -913,7 +949,7 @@
         }
     }
 
-    // --- Admin: System Data ---
+    // --- Admin: System Data (Updated with Floors) ---
     async function fetchSystemData() {
         try {
             const doc = await db.collection('system_settings').doc('config').get();
@@ -921,12 +957,15 @@
                 const data = doc.data();
                 systemSpecialties = data.specialties || [];
                 systemLocations = data.locations || [];
+                systemFloors = data.floors || []; // NEW
             } else {
                 systemSpecialties = ['كهرباء', 'سباكة', 'نجارة', 'تكييف', 'شبكات (IT)', 'أجهزة طبية'];
                 systemLocations = ['المبنى الإداري', 'كلية الطب', 'كلية الصيدلة', 'كلية الهندسة', 'كلية الأسنان', 'المسجد'];
+                systemFloors = ['الدور الأرضي', 'الدور الأول', 'الدور الثاني', 'الدور الثالث'];
                 await db.collection('system_settings').doc('config').set({
                     specialties: systemSpecialties,
-                    locations: systemLocations
+                    locations: systemLocations,
+                    floors: systemFloors
                 });
             }
             populateDropdowns();
@@ -937,6 +976,7 @@
     function populateDropdowns() {
         const typeSelect = document.getElementById('req-type');
         const locSelect = document.getElementById('req-faculty');
+        const floorSelect = document.getElementById('req-floor'); // NEW
         
         typeSelect.innerHTML = '<option value="">اختر التخصص...</option>';
         systemSpecialties.forEach(spec => {
@@ -948,6 +988,12 @@
             locSelect.innerHTML += `<option value="${loc}">${loc}</option>`;
         });
         locSelect.innerHTML += '<option value="Other">موقع آخر...</option>';
+
+        // Populate Floors
+        floorSelect.innerHTML = '<option value="">اختر الدور...</option>';
+        systemFloors.forEach(f => {
+            floorSelect.innerHTML += `<option value="${f}">${f}</option>`;
+        });
     }
 
     // --- Role UI & Admin Features ---
@@ -976,9 +1022,13 @@
         }
     }
 
-    // --- Admin Panel Logic ---
+    // --- Admin Panel Logic (Updated) ---
     async function addSystemData(type) {
-        let inputId = type === 'specialties' ? 'new-spec-input' : 'new-loc-input';
+        let inputId;
+        if(type === 'specialties') inputId = 'new-spec-input';
+        else if(type === 'locations') inputId = 'new-loc-input';
+        else inputId = 'new-floor-input'; // NEW
+
         let val = document.getElementById(inputId).value.trim();
         if(!val) return;
 
@@ -1006,6 +1056,7 @@
     function renderAdminLists() {
         const specsDiv = document.getElementById('admin-specs-list');
         const locsDiv = document.getElementById('admin-locs-list');
+        const floorsDiv = document.getElementById('admin-floors-list'); // NEW
         
         specsDiv.innerHTML = "";
         systemSpecialties.forEach(item => {
@@ -1024,6 +1075,16 @@
                 <div class="delete-icon" onclick="deleteSystemData('locations', '${item}')"><i class="fa-solid fa-trash"></i></div>
             </div>`;
         });
+
+        // Render Floors
+        floorsDiv.innerHTML = "";
+        systemFloors.forEach(item => {
+            floorsDiv.innerHTML += `
+            <div class="admin-list-item">
+                <span>${item}</span>
+                <div class="delete-icon" onclick="deleteSystemData('floors', '${item}')"><i class="fa-solid fa-trash"></i></div>
+            </div>`;
+        });
     }
 
     // --- Navigation ---
@@ -1032,7 +1093,7 @@
         document.getElementById('page-'+p).classList.remove('hidden'); 
         
         document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active')); 
-        if(p !== 'create' && p !== 'reports' && p !== 'admin-settings') {
+        if(p !== 'create' && p !== 'reports' && p !== 'admin-settings' && p !== 'inventory') {
             if(el) el.classList.add('active'); 
         }
 
@@ -1040,9 +1101,9 @@
         if(p==='reports') generateReports(); 
         if(p==='albayan') {
             loadFeedPosts(); 
-            // Hide badge when opening feed
             document.getElementById('feed-badge').classList.remove('active');
         }
+        if(p==='inventory') loadInventory(); // NEW
     }
     
     function showScreen(id) { 
@@ -1111,21 +1172,15 @@
     }
 
     // =========================================================================
-    // FEED & ROLES
+    // FEED & NOTIFICATIONS (UPDATED WITH SOUNDS)
     // =========================================================================
 
     function loadFeed() {
         let q = db.collection('requests');
-        
-        if(userData.role === 'employee') {
-            q = q.where('userId','==',currentUser.uid);
-        } else if(userData.role === 'supervisor') {
-            q = q.where('supervisorId','==',currentUser.uid);
-        } else if(userData.role === 'engineer') {
-            q = q.where('engineerId','==',currentUser.uid);
-        } else if(userData.role === 'technician') {
-            q = q.where('technicianId','==',currentUser.uid);
-        }
+        if(userData.role === 'employee') q = q.where('userId','==',currentUser.uid);
+        else if(userData.role === 'supervisor') q = q.where('supervisorId','==',currentUser.uid);
+        else if(userData.role === 'engineer') q = q.where('engineerId','==',currentUser.uid);
+        else if(userData.role === 'technician') q = q.where('technicianId','==',currentUser.uid);
 
         q.onSnapshot(snap => {
             const currentIds = requestsCache.map(r => r.id);
@@ -1160,7 +1215,8 @@
         if(userData.role === 'employee' && newRequests.some(r => r.status === 'pending_confirmation')) notify = true;
         
         if (notify) {
-            const audio = document.getElementById('notify-sound');
+            // Updated: Play Distinct Request Sound
+            const audio = document.getElementById('sound-notify-req');
             if(audio) audio.play().catch(e => console.log("Audio play blocked"));
             toast("🔔 إشعار جديد");
             document.querySelector('.bell-badge').style.display = 'block';
@@ -1171,15 +1227,11 @@
         const container = document.getElementById('requests-feed'); container.innerHTML = "";
         let list = requestsCache;
 
-        if(currentTab === 'trash') {
-            list = list.filter(r => r.isDeleted === true);
-        } else {
+        if(currentTab === 'trash') list = list.filter(r => r.isDeleted === true);
+        else {
             list = list.filter(r => r.isDeleted !== true);
-            if(currentTab === 'active') {
-                list = list.filter(r => ['pending','at_engineer','at_tech','working','pending_confirmation'].includes(r.status));
-            } else if(currentTab === 'history') {
-                list = list.filter(r => ['done','rejected'].includes(r.status));
-            }
+            if(currentTab === 'active') list = list.filter(r => ['pending','at_engineer','at_tech','working','pending_confirmation'].includes(r.status));
+            else if(currentTab === 'history') list = list.filter(r => ['done','rejected'].includes(r.status));
         }
 
         if(list.length === 0) { 
@@ -1202,7 +1254,6 @@
                               <button onclick="event.stopPropagation(); hardDelete('${d.id}')" class="btn-ghost btn-sm" style="color:var(--error); border-color:var(--border);">حذف نهائي</button>`;
             }
 
-            // Logic for Buttons based on Role & Status
             if(currentTab === 'active') {
                 if(userData.role === 'supervisor' && d.status === 'pending') {
                     actionBtns = `
@@ -1334,7 +1385,10 @@
             let facText = facSelect.options[facSelect.selectedIndex].text;
             if(facSelect.value === 'Other') facText = "موقع آخر";
             
-            const loc = `${facText} - ${document.getElementById('req-room').value}`;
+            const floorSelect = document.getElementById('req-floor'); // NEW
+            let floorText = floorSelect.value ? ` - ${floorSelect.value}` : '';
+
+            const loc = `${facText}${floorText} - ${document.getElementById('req-room').value}`;
             const uniqueCode = generateUniqueCode();
 
             await db.collection('requests').add({ 
@@ -1370,6 +1424,7 @@
         
         document.getElementById('eng-select-area').classList.add('hidden');
         document.getElementById('tech-select-area').classList.add('hidden');
+        document.getElementById('tech-finish-form').classList.add('hidden'); // NEW
 
         const titles = {
             'sup_approve': 'قبول وتوجيه للمهندس',
@@ -1392,6 +1447,24 @@
             toggleTechType('internal');
             loadTechnicians();
         }
+        else if (type === 'tech_finish') {
+            // NEW: Show Cost Form for Tech
+            document.getElementById('tech-finish-form').classList.remove('hidden');
+            document.getElementById('cost-items-container').innerHTML = ''; // Clear previous
+            addCostItemRow(); // Add one row by default
+        }
+    }
+
+    // NEW: Add Cost Row
+    function addCostItemRow() {
+        const container = document.getElementById('cost-items-container');
+        const div = document.createElement('div');
+        div.className = 'cost-item-row';
+        div.innerHTML = `
+            <input type="text" class="cost-name" placeholder="اسم المادة/الأداة" style="flex:2; font-size:12px;">
+            <input type="number" class="cost-val" placeholder="السعر" style="flex:1; font-size:12px;">
+        `;
+        container.appendChild(div);
     }
 
     async function loadEngineers() {
@@ -1491,6 +1564,22 @@
             else if(type === 'tech_finish') { 
                 updateData.status = 'pending_confirmation';
                 updateData.techFinishedAt = firebase.firestore.FieldValue.serverTimestamp();
+                
+                // NEW: Collect Cost Data
+                let items = [];
+                let totalCost = 0;
+                document.querySelectorAll('.cost-item-row').forEach(row => {
+                    const name = row.querySelector('.cost-name').value.trim();
+                    const val = parseFloat(row.querySelector('.cost-val').value) || 0;
+                    if(name) {
+                        items.push({name, price: val});
+                        totalCost += val;
+                    }
+                });
+                if(items.length > 0) {
+                    updateData.usedMaterials = items;
+                    updateData.totalCost = totalCost;
+                }
             }
             else if(type === 'emp_confirm') { 
                 updateData.status = 'done';
@@ -1608,7 +1697,6 @@
         document.getElementById('request-details-modal').classList.remove('hidden');
         
         let mediaHtml = "";
-        // Open in Lightbox Logic
         if(d.media) {
             d.media.forEach((m, idx) => {
                 if(m.type === 'audio') {
@@ -1619,7 +1707,6 @@
             });
         }
 
-        // Simple Timeline Logic
         let tlHtml = '<div class="timeline">';
         const statusOrder = ['pending', 'at_engineer', 'at_tech', 'working', 'pending_confirmation', 'done'];
         const labels = ['إرسال', 'المهندس', 'الفني', 'التنفيذ', 'المراجعة', 'تم'];
@@ -1634,6 +1721,18 @@
              });
         }
         tlHtml += '</div>';
+        
+        // NEW: Display Materials Cost
+        let costHtml = '';
+        if(d.usedMaterials && d.usedMaterials.length > 0) {
+            costHtml = `<div style="background:#f8fafc; padding:15px; border-radius:12px; margin-top:15px; border:1px dashed var(--border);">
+                <p style="font-weight:bold; color:var(--primary); font-size:12px; margin-bottom:10px;">المواد المستخدمة:</p>
+                <ul style="padding-right:20px; font-size:12px; margin:0;">
+                    ${d.usedMaterials.map(m => `<li>${m.name} (${m.price} ج.م)</li>`).join('')}
+                </ul>
+                <p style="margin-top:10px; font-weight:bold; font-size:13px;">الإجمالي: ${d.totalCost} ج.م</p>
+            </div>`;
+        }
 
         document.getElementById('req-details-content').innerHTML = `
             ${tlHtml}
@@ -1642,28 +1741,21 @@
             <p><strong>الوصف:</strong> ${d.description}</p>
             <p><strong>الموقع:</strong> ${d.location}</p>
             ${d.extTechData ? `<div style="background:#fff7ed;padding:10px;border-radius:10px;margin-top:10px;"><p style="margin:0;font-weight:bold;color:#c2410c;">فني خارجي:</p><p style="margin:0;font-size:12px;">${d.extTechData.name} - ${d.extTechData.phone}</p></div>` : ''}
+            ${costHtml}
             <div class="media-grid">${mediaHtml}</div>
         `;
     }
     
-    // NEW: Media Viewer (Lightbox) Function
     function openMediaViewer(reqId, startIndex) {
         const d = requestsCache.find(r => r.id === reqId);
         if(!d || !d.media) return;
-        
         const content = document.getElementById('media-viewer-content');
         content.innerHTML = "";
-        
         d.media.forEach(m => {
-            if(m.type === 'video') {
-                content.innerHTML += `<video controls src="${m.url}" class="full-media-item" style="margin-bottom:15px;"></video>`;
-            } else if (m.type === 'audio') {
-                content.innerHTML += `<audio controls src="${m.url}" style="width:80%; margin-bottom:15px;"></audio>`;
-            } else {
-                content.innerHTML += `<img src="${m.url}" class="full-media-item" style="margin-bottom:15px;">`;
-            }
+            if(m.type === 'video') { content.innerHTML += `<video controls src="${m.url}" class="full-media-item" style="margin-bottom:15px;"></video>`; }
+            else if (m.type === 'audio') { content.innerHTML += `<audio controls src="${m.url}" style="width:80%; margin-bottom:15px;"></audio>`; }
+            else { content.innerHTML += `<img src="${m.url}" class="full-media-item" style="margin-bottom:15px;">`; }
         });
-        
         document.getElementById('media-viewer-modal').classList.remove('hidden');
     }
 
@@ -1738,7 +1830,7 @@
     }
 
     // =========================================================================
-    // NEW: REPORTS & ANALYTICS LOGIC (WITH PRIORITY)
+    // REPORTS
     // =========================================================================
 
     function generateReports() {
@@ -1758,17 +1850,14 @@
         const rejected = reportData.filter(r => r.status === 'rejected').length;
         const active = total - done - rejected;
 
-        // Priority Stats
         const pHigh = reportData.filter(r => r.priority === 'high').length;
         const pMed = reportData.filter(r => r.priority === 'medium').length;
         const pLow = reportData.filter(r => r.priority === 'low').length;
 
-        // Update UI
         document.getElementById('rep-total').innerText = total;
         document.getElementById('rep-done').innerText = done;
         document.getElementById('rep-rejected').innerText = rejected;
         document.getElementById('rep-active').innerText = active;
-        
         document.getElementById('rep-prio-high').innerText = pHigh;
         document.getElementById('rep-prio-med').innerText = pMed;
         document.getElementById('rep-prio-low').innerText = pLow;
@@ -1782,18 +1871,8 @@
         const ctx = document.getElementById('statusChart').getContext('2d');
         reportChart = new Chart(ctx, {
             type: 'doughnut',
-            data: {
-                labels: ['مكتمل', 'قيد العمل', 'مرفوض'],
-                datasets: [{
-                    data: data,
-                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } }
-            }
+            data: { labels: ['مكتمل', 'قيد العمل', 'مرفوض'], datasets: [{ data: data, backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });
     }
 
@@ -1801,7 +1880,6 @@
         const tbody = document.getElementById('tech-performance-body');
         tbody.innerHTML = "";
         const techs = {};
-        
         data.forEach(r => {
             if(r.technicianName) {
                 const name = r.technicianName;
@@ -1811,21 +1889,12 @@
             }
         });
 
-        if(Object.keys(techs).length === 0) {
-            tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>لا يوجد بيانات فنيين</td></tr>";
-            return;
-        }
+        if(Object.keys(techs).length === 0) { tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>لا يوجد بيانات فنيين</td></tr>"; return; }
 
         for (const [name, stats] of Object.entries(techs)) {
             const efficiency = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
             let badgeColor = efficiency >= 80 ? 'green' : (efficiency >= 50 ? 'orange' : 'red');
-            tbody.innerHTML += `
-            <tr>
-                <td><div class="tech-row"><img src="${stats.pic}"><span>${name}</span></div></td>
-                <td style="text-align:center">${stats.total}</td>
-                <td style="text-align:center; color:var(--success); font-weight:bold;">${stats.done}</td>
-                <td style="text-align:center"><span style="color:${badgeColor}; font-weight:bold;">%${efficiency}</span></td>
-            </tr>`;
+            tbody.innerHTML += `<tr><td><div class="tech-row"><img src="${stats.pic}"><span>${name}</span></div></td><td style="text-align:center">${stats.total}</td><td style="text-align:center; color:var(--success); font-weight:bold;">${stats.done}</td><td style="text-align:center"><span style="color:${badgeColor}; font-weight:bold;">%${efficiency}</span></td></tr>`;
         }
     }
 
@@ -1836,11 +1905,88 @@
     }
 
     // =========================================================================
-    // NEW: AL-BAYAN (SOCIAL FEED) LOGIC - ENHANCED
+    // NEW: INVENTORY (OHDA) LOGIC
+    // =========================================================================
+    
+    function loadInventory() {
+        const body = document.getElementById('inventory-body');
+        body.innerHTML = '<tr><td colspan="4" style="text-align:center;">جاري التحميل...</td></tr>';
+        
+        db.collection('inventory').onSnapshot(snap => {
+            body.innerHTML = "";
+            if(snap.empty) {
+                body.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا يوجد أصناف</td></tr>';
+                return;
+            }
+            
+            snap.forEach(doc => {
+                const item = doc.data();
+                const id = doc.id;
+                // Calculate surplus/deficit implicitly by showing total vs current
+                body.innerHTML += `
+                <tr>
+                    <td style="font-weight:bold;">${item.name}</td>
+                    <td>
+                        <div class="stepper-container">
+                             <div class="stepper-btn" onclick="updateInvStepper('${id}', -1, 'total')">-</div>
+                             <div class="stepper-input">${item.total}</div>
+                             <div class="stepper-btn" onclick="updateInvStepper('${id}', 1, 'total')">+</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="stepper-container">
+                             <div class="stepper-btn" onclick="updateInvStepper('${id}', -1, 'current')">-</div>
+                             <div class="stepper-input" style="color:${item.current < item.total ? 'var(--error)' : 'var(--success)'}">${item.current}</div>
+                             <div class="stepper-btn" onclick="updateInvStepper('${id}', 1, 'current')">+</div>
+                        </div>
+                    </td>
+                    <td style="text-align:center;"><div class="delete-icon" onclick="deleteInventoryItem('${id}')" style="margin:0 auto;"><i class="fa-solid fa-trash"></i></div></td>
+                </tr>`;
+            });
+        });
+    }
+
+    async function addInventoryItem() {
+        const name = document.getElementById('inv-name').value;
+        const total = parseInt(document.getElementById('inv-total').value);
+        const current = parseInt(document.getElementById('inv-current').value);
+        
+        if(!name || isNaN(total) || isNaN(current)) return toast("⚠️ أدخل بيانات صحيحة");
+        
+        await db.collection('inventory').add({
+            name: name,
+            total: total,
+            current: current,
+            updatedBy: userData.fullName
+        });
+        
+        document.getElementById('inv-name').value = "";
+        document.getElementById('inv-total').value = "";
+        document.getElementById('inv-current').value = "";
+        toast("✅ تم إضافة الصنف");
+    }
+
+    async function updateInvStepper(id, change, field) {
+        const doc = await db.collection('inventory').doc(id).get();
+        if(doc.exists) {
+            let newVal = (doc.data()[field] || 0) + change;
+            if(newVal < 0) newVal = 0;
+            await db.collection('inventory').doc(id).update({ [field]: newVal });
+        }
+    }
+
+    async function deleteInventoryItem(id) {
+        if(confirm("حذف الصنف من العهدة؟")) {
+            await db.collection('inventory').doc(id).delete();
+            toast("تم الحذف");
+        }
+    }
+
+    // =========================================================================
+    // AL-BAYAN LOGIC
     // =========================================================================
 
     function checkUnseenNotifications() {
-        // Simple polling for unseen posts to show red dot on app start
         db.collection('posts').orderBy('createdAt', 'desc').limit(5).get().then(snap => {
             let hasUnseen = false;
             snap.forEach(doc => {
@@ -1852,8 +1998,7 @@
     }
 
     function loadFeedPosts() {
-        if(postsListener) return; // Already listening
-        
+        if(postsListener) return; 
         const container = document.getElementById('albayan-feed');
         container.innerHTML = '<div style="text-align:center; padding:20px;">جاري التحميل...</div>';
 
@@ -1863,21 +2008,23 @@
                 if(snap.empty) { container.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">لا يوجد منشورات</div>'; return; }
                 
                 let hasUnseenInStream = false;
+                let isFirstLoadPosts = true; // Simple check to avoid sound on init load if desired, but here we play always on new updates
 
                 snap.forEach(doc => {
                     const p = doc.data();
-                    // Check if current post is unseen by user to update badge state logic
                     if(!p.seenBy || !p.seenBy.includes(currentUser.uid)) {
                         hasUnseenInStream = true;
                     }
                     renderPostItem(doc);
                 });
                 
-                // If user is currently viewing the feed tab, mark them as seen
                 if(!document.getElementById('page-albayan').classList.contains('hidden')) {
                     markPostsAsSeen(snap.docs);
                 } else if (hasUnseenInStream) {
                     document.getElementById('feed-badge').classList.add('active');
+                    // Play Post Sound
+                    const audio = document.getElementById('sound-notify-post');
+                    if(audio) audio.play().catch(e=>console.log("Audio block"));
                 }
             });
     }
@@ -1886,17 +2033,12 @@
         const p = doc.data();
         const pid = doc.id;
         const container = document.getElementById('albayan-feed');
-        
         const isLiked = p.likes && p.likes.includes(currentUser.uid);
         const likeIcon = isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
         const likeClass = isLiked ? 'liked' : '';
         const likeCount = p.likes ? p.likes.length : 0;
         const seenCount = p.seenBy ? p.seenBy.length : 0;
-        
-        // Time formatting
         const date = p.createdAt ? new Date(p.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : 'الآن';
-        
-        // Delete button for author or manager
         let delBtn = '';
         if(p.authorId === currentUser.uid || userData.role === 'manager') {
             delBtn = `<i class="fa-solid fa-trash" onclick="deletePost('${pid}')" style="cursor:pointer; color:var(--text-muted); font-size:12px;"></i>`;
@@ -1917,18 +2059,11 @@
             <div class="post-body">${p.content}</div>
             <div class="post-actions">
                 <div class="action-group">
-                    <button class="act-btn ${likeClass}" onclick="toggleLike('${pid}')">
-                        <i class="${likeIcon}"></i> ${likeCount}
-                    </button>
-                    <button class="act-btn" onclick="toggleComments('${pid}')">
-                        <i class="fa-regular fa-comment"></i> تعليق
-                    </button>
+                    <button class="act-btn ${likeClass}" onclick="toggleLike('${pid}')"><i class="${likeIcon}"></i> ${likeCount}</button>
+                    <button class="act-btn" onclick="toggleComments('${pid}')"><i class="fa-regular fa-comment"></i> تعليق</button>
                 </div>
-                <div class="seen-indicator" onclick="showSeenUsers('${pid}')">
-                    <i class="fa-solid fa-eye"></i> ${seenCount}
-                </div>
+                <div class="seen-indicator" onclick="showSeenUsers('${pid}')"><i class="fa-solid fa-eye"></i> ${seenCount}</div>
             </div>
-            
             <div id="comments-${pid}" class="comments-section">
                 <div id="comments-list-${pid}"></div>
                 <div style="display:flex; gap:10px; margin-top:10px;">
@@ -1937,14 +2072,12 @@
                 </div>
             </div>
         </div>`;
-        
         container.innerHTML += html;
     }
 
     async function createPost() {
         const content = document.getElementById('new-post-content').value.trim();
         if(!content) return;
-        
         try {
             await db.collection('posts').add({
                 content: content,
@@ -1971,21 +2104,15 @@
         const postRef = db.collection('posts').doc(pid);
         const doc = await postRef.get();
         if(!doc.exists) return;
-        
         const likes = doc.data().likes || [];
-        if(likes.includes(currentUser.uid)) {
-            await postRef.update({ likes: firebase.firestore.FieldValue.arrayRemove(currentUser.uid) });
-        } else {
-            await postRef.update({ likes: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) });
-        }
+        if(likes.includes(currentUser.uid)) await postRef.update({ likes: firebase.firestore.FieldValue.arrayRemove(currentUser.uid) });
+        else await postRef.update({ likes: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) });
     }
 
     function toggleComments(pid) {
         const sec = document.getElementById(`comments-${pid}`);
         sec.classList.toggle('show');
-        if(sec.classList.contains('show')) {
-            loadComments(pid);
-        }
+        if(sec.classList.contains('show')) loadComments(pid);
     }
 
     function loadComments(pid) {
@@ -2012,7 +2139,6 @@
         });
     }
 
-    // Prepare reply: puts @Name in input box
     function prepareReply(pid, name) {
         const input = document.getElementById(`comment-input-${pid}`);
         input.value = `@${name} `;
@@ -2023,7 +2149,6 @@
         const inp = document.getElementById(`comment-input-${pid}`);
         const text = inp.value.trim();
         if(!text) return;
-        
         await db.collection('posts').doc(pid).collection('comments').add({
             text: text,
             authorId: currentUser.uid,
@@ -2038,7 +2163,6 @@
         await db.collection('posts').doc(pid).collection('comments').doc(cid).delete();
     }
 
-    // Logic to update seen array
     async function markPostsAsSeen(docs) {
         docs.forEach(doc => {
             const p = doc.data();
@@ -2050,7 +2174,6 @@
         });
     }
 
-    // NEW: Open Modal showing who saw the post
     async function showSeenUsers(pid) {
         const modal = document.getElementById('seen-users-modal');
         const list = document.getElementById('seen-users-list');
@@ -2060,76 +2183,40 @@
         try {
             const postDoc = await db.collection('posts').doc(pid).get();
             const seenIds = postDoc.data().seenBy || [];
-            
-            if(seenIds.length === 0) {
-                list.innerHTML = "<p style='text-align:center;color:#999'>لم يشاهده أحد بعد</p>";
-                return;
-            }
+            if(seenIds.length === 0) { list.innerHTML = "<p style='text-align:center;color:#999'>لم يشاهده أحد بعد</p>"; return; }
 
-            // In real app, batch fetch. For demo, we might fetch users collection and filter client side 
-            // or perform a 'where in' query. Firebase 'in' limits to 10.
-            // For simplicity/robustness in this snippet, we will fetch users who are in the list.
-            
-            // NOTE: To avoid complex queries in this demo, I will fetch all users and filter.
-            // In production with 1000s users, this should be optimized.
             const usersSnap = await db.collection('users').get();
             list.innerHTML = "";
             let found = 0;
-            
             usersSnap.forEach(uDoc => {
                 if(seenIds.includes(uDoc.id)) {
                     const u = uDoc.data();
-                    list.innerHTML += `
-                    <div class="seen-user-item" onclick="viewUserProfile('${uDoc.id}')">
-                        <img src="${u.photoUrl}">
-                        <span>${u.fullName}</span>
-                    </div>`;
+                    list.innerHTML += `<div class="seen-user-item" onclick="viewUserProfile('${uDoc.id}')"><img src="${u.photoUrl}"><span>${u.fullName}</span></div>`;
                     found++;
                 }
             });
             if(found === 0) list.innerHTML = "<p>بيانات غير متوفرة</p>";
-
         } catch(e) { list.innerHTML = "خطأ في التحميل"; }
     }
 
-    // NEW: Generalized View User Profile
     async function viewUserProfile(uid) {
-        // If clicking own profile, go to profile tab
-        if(uid === currentUser.uid) {
-            nav('profile', document.querySelector('.nav-item:nth-child(5)'));
-            return;
-        }
-
+        if(uid === currentUser.uid) { nav('profile', document.querySelector('.nav-item:nth-child(5)')); return; }
         const modal = document.getElementById('friend-profile-modal');
         modal.classList.remove('hidden');
         document.getElementById('fp-name').innerText = "جاري التحميل...";
-        
         const doc = await db.collection('users').doc(uid).get();
         if(doc.exists) {
             const u = doc.data();
             const roleMap = { 'employee': 'موظف', 'supervisor': 'مشرف', 'manager': 'مدير', 'technician': 'فني', 'engineer': 'مهندس' };
-            
             document.getElementById('fp-pic').src = u.photoUrl;
             document.getElementById('fp-name').innerText = u.fullName;
             document.getElementById('fp-role').innerText = roleMap[u.role] || u.role;
-            
-            // Info
             const infoDiv = document.getElementById('fp-info') || document.createElement('div');
             infoDiv.id = 'fp-info';
-            infoDiv.style.marginTop = "15px";
-            infoDiv.style.color = "#666";
-            infoDiv.style.fontSize = "13px";
-            infoDiv.innerHTML = `
-                <p><i class="fa-solid fa-briefcase"></i> ${u.jobTitle || '-'}</p>
-                <p><i class="fa-solid fa-location-dot"></i> ${u.location || '-'}</p>
-            `;
-            // Insert info div after role if not exists (handled by HTML structure in part 1)
-            // But let's make sure we populate the actions div correctly
-            
+            infoDiv.style.marginTop = "15px"; infoDiv.style.color = "#666"; infoDiv.style.fontSize = "13px";
+            infoDiv.innerHTML = `<p><i class="fa-solid fa-briefcase"></i> ${u.jobTitle || '-'}</p><p><i class="fa-solid fa-location-dot"></i> ${u.location || '-'}</p>`;
             const actionsDiv = document.getElementById('fp-actions');
             actionsDiv.innerHTML = "";
-            
-            // Check if friend
             const friendCheck = await db.collection('users').doc(currentUser.uid).collection('friends').where('friendId','==',uid).get();
             if(friendCheck.empty) {
                 actionsDiv.innerHTML = `<button onclick="addFriend('${doc.id}', '${u.fullName}', '${u.photoUrl}')" class="btn-main btn-sm">إضافة صديق +</button>`;
