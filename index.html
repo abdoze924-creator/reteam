@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام الصيانة الذكي - جامعة الريادة (V8.0 - Final Ops)</title>
+    <title>نظام الصيانة الذكي - جامعة الريادة (V8.1 - Fix)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -304,7 +304,7 @@
     <div id="loader">
         <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color:var(--primary);"></i>
         <h2 style="margin-top:20px; color:var(--primary-dark); font-size:18px; font-weight:800;">نظام الصيانة الذكي</h2>
-        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V8.0 Final Ops</p>
+        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V8.1 Final Fix</p>
     </div>
 
     <div id="auth-screen" class="hidden" style="min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:25px;">
@@ -699,11 +699,16 @@
                                 <i class="fa-solid fa-cogs"></i>
                                 <span>إدارة النظام</span>
                             </div>
-                            <div id="btn-inventory-setting" class="settings-card-btn hidden" onclick="nav('inventory', null)">
-                                <i class="fa-solid fa-boxes-stacked"></i>
-                                <span>جرد العهدة</span>
-                            </div>
                         </div>
+                    </div>
+
+                    <div id="settings-staff-area" class="hidden" style="margin-top:15px;">
+                         <div class="settings-btn-grid">
+                             <div class="settings-card-btn" onclick="nav('inventory', null)">
+                                 <i class="fa-solid fa-boxes-stacked"></i>
+                                 <span>جرد العهدة</span>
+                             </div>
+                         </div>
                     </div>
 
                     <button onclick="document.getElementById('logout-modal').classList.remove('hidden')" class="btn-main btn-danger" style="margin-top:20px;">تسجيل خروج</button>
@@ -995,7 +1000,6 @@
                     await db.collection('users').doc(currentUser.uid).update({shortId: Math.random().toString(36).substr(2,6).toUpperCase()});
                 }
                 
-                // 1. Fetch System Data
                 await fetchSystemData();
 
                 renderHeader();
@@ -1007,11 +1011,9 @@
                 loadFriendReqs();
                 loadProfilePageData();
                 
-                // Defaults
                 document.getElementById('req-date').valueAsDate = new Date();
                 document.getElementById('req-time').value = new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
 
-                // Check for unseen posts initially
                 checkUnseenNotifications();
 
                 setTimeout(() => { document.getElementById('loader').classList.add('hidden'); }, 500);
@@ -1079,45 +1081,45 @@
     }
 
     // =========================================================================
-    // V8.0 STRICT ROLE UI SETUP
+    // V8.1 STRICT ROLE UI SETUP (FIXED)
     // =========================================================================
     function setupRoleUI() {
         const r = userData.role;
         const shortcuts = document.getElementById('manager-shortcuts');
+        const staffShortcuts = document.getElementById('staff-shortcuts'); // NEW
         const adminBtn = document.getElementById('btn-admin-panel');
-        const settingsAdminArea = document.getElementById('settings-manager-area');
+        const settingsManagerArea = document.getElementById('settings-manager-area');
+        const settingsStaffArea = document.getElementById('settings-staff-area'); // NEW
         const createPostBox = document.getElementById('create-post-box');
-        const invBtn = document.getElementById('btn-inventory-setting'); // Button in Settings
-        const navCreateBtn = document.getElementById('nav-create-btn'); // Bottom Nav Add Button
+        const navCreateBtn = document.getElementById('nav-create-btn'); 
 
         // 1. CREATE REQUEST BUTTON
         // HIDE for: Manager, Engineer, Technician
         if(r === 'manager' || r === 'engineer' || r === 'technician') {
              navCreateBtn.classList.add('hidden');
-             // Also lock the page content if accessed directly
              document.getElementById('page-create').innerHTML = "<div style='text-align:center; padding:50px; color:#999;'><i class='fa-solid fa-lock fa-2x'></i><p>غير مصرح بإنشاء بلاغات لهذا الحساب.</p></div>";
         }
 
-        // 2. REPORTS & ADMIN PANEL
-        // SHOW ONLY for: Manager, Engineer
+        // 2. REPORTS & ADMIN PANEL (Managers & Engineers)
         if(r === 'manager' || r === 'engineer') {
             shortcuts.classList.remove('hidden');
-            settingsAdminArea.classList.remove('hidden');
+            settingsManagerArea.classList.remove('hidden');
             
-            // Only Manager sees "Admin Panel" inside shortcuts
+            // Only Manager sees "Admin Panel" button
             if(r === 'manager') {
                 adminBtn.classList.remove('hidden');
             }
         }
 
-        // 3. INVENTORY (OHDA)
-        // SHOW ONLY for: Supervisor, Employee
+        // 3. INVENTORY (OHDA) (Supervisors & Employees)
         if(r === 'supervisor' || r === 'employee') {
-            invBtn.classList.remove('hidden');
+            // Show Shortcut in Home
+            staffShortcuts.classList.remove('hidden');
+            // Show Button in Settings
+            settingsStaffArea.classList.remove('hidden');
         }
 
         // 4. POSTING IN AL-BAYAN
-        // SHOW for: Manager, Engineer, Supervisor
         if(r === 'manager' || r === 'engineer' || r === 'supervisor') {
             createPostBox.classList.remove('hidden'); 
         }
@@ -1758,58 +1760,6 @@
     function previewProfilePic(i) { newProfilePicFile = i.files[0]; document.getElementById('edit-current-pic').src = URL.createObjectURL(i.files[0]); }
     function copyId() { navigator.clipboard.writeText(userData.shortId); toast("تم نسخ ID"); }
     function selectFrame(el, c) { document.querySelectorAll('.frame-option').forEach(f=>f.classList.remove('selected')); el.classList.add('selected'); }
-
-    // =========================================================================
-    // REPORTS
-    // =========================================================================
-
-    function generateReports() {
-        let start = document.getElementById('report-start-date').valueAsDate;
-        let end = document.getElementById('report-end-date').valueAsDate;
-        if(!start) start = new Date(0); if(!end) end = new Date(); end.setHours(23, 59, 59);
-
-        const reportData = requestsCache.filter(r => { const rDate = new Date(r.date); return rDate >= start && rDate <= end && r.isDeleted !== true; });
-        const total = reportData.length;
-        const done = reportData.filter(r => r.status === 'done').length;
-        const rejected = reportData.filter(r => r.status === 'rejected').length;
-        const active = total - done - rejected;
-        const pHigh = reportData.filter(r => r.priority === 'high').length;
-        const pMed = reportData.filter(r => r.priority === 'medium').length;
-        const pLow = reportData.filter(r => r.priority === 'low').length;
-
-        document.getElementById('rep-total').innerText = total; document.getElementById('rep-done').innerText = done;
-        document.getElementById('rep-rejected').innerText = rejected; document.getElementById('rep-active').innerText = active;
-        document.getElementById('rep-prio-high').innerText = pHigh; document.getElementById('rep-prio-med').innerText = pMed;
-        document.getElementById('rep-prio-low').innerText = pLow;
-
-        updateChart([done, active, rejected]); renderTechTable(reportData);
-    }
-
-    function updateChart(data) {
-        if(reportChart) reportChart.destroy();
-        const ctx = document.getElementById('statusChart').getContext('2d');
-        reportChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['مكتمل', 'قيد العمل', 'مرفوض'], datasets: [{ data: data, backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
-    }
-
-    function renderTechTable(data) {
-        const tbody = document.getElementById('tech-performance-body'); tbody.innerHTML = "";
-        const techs = {};
-        data.forEach(r => { if(r.technicianName) { const name = r.technicianName; if(!techs[name]) techs[name] = { total: 0, done: 0, pic: 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png' }; techs[name].total++; if(r.status === 'done') techs[name].done++; } });
-
-        if(Object.keys(techs).length === 0) { tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>لا يوجد بيانات فنيين</td></tr>"; return; }
-
-        for (const [name, stats] of Object.entries(techs)) {
-            const efficiency = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
-            let badgeColor = efficiency >= 80 ? 'green' : (efficiency >= 50 ? 'orange' : 'red');
-            tbody.innerHTML += `<tr><td><div class="tech-row"><img src="${stats.pic}"><span>${name}</span></div></td><td style="text-align:center">${stats.total}</td><td style="text-align:center; color:var(--success); font-weight:bold;">${stats.done}</td><td style="text-align:center"><span style="color:${badgeColor}; font-weight:bold;">%${efficiency}</span></td></tr>`;
-        }
-    }
-
-    function exportReportsPDF() {
-        const element = document.getElementById('page-reports');
-        const opt = { margin:0.5, filename:`report_${new Date().toISOString().slice(0,10)}.pdf`, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'in',format:'a4',orientation:'portrait'} };
-        html2pdf().set(opt).from(element).save();
-    }
 
     // =========================================================================
     // NEW: INVENTORY (OHDA) LOGIC (UPDATED WITH LOCATION & REPORT)
