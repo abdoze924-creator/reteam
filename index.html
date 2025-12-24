@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام الصيانة الذكي - جامعة الريادة (V3.0 - Enterprise)</title>
+    <title>نظام الصيانة الذكي - جامعة الريادة (V3.5 - Social Enterprise)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -252,15 +252,15 @@
             position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; 
             background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
             border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-end; 
-            padding: 10px 20px 25px; z-index: 900; border-top-left-radius: 30px; border-top-right-radius: 30px;
+            padding: 10px 10px 25px; z-index: 900; border-top-left-radius: 30px; border-top-right-radius: 30px;
             box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
         }
-        .nav-item { text-align: center; color: #94a3b8; font-size: 10px; cursor: pointer; width: 60px; }
-        .nav-item i { font-size: 20px; margin-bottom: 6px; display: block; }
+        .nav-item { text-align: center; color: #94a3b8; font-size: 10px; cursor: pointer; width: 50px; }
+        .nav-item i { font-size: 18px; margin-bottom: 6px; display: block; }
         .nav-item.active { color: var(--primary); }
         .nav-add-btn {
-            width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px;
+            width: 55px; height: 55px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;
             box-shadow: 0 10px 25px rgba(0, 86, 179, 0.4); transform: translateY(-25px); border: 5px solid var(--dark);
         }
 
@@ -287,7 +287,7 @@
         .tech-select-card img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; border: 2px solid white; }
 
         .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .media-item { aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: #f8fafc; border: 1px solid var(--border); position: relative; }
+        .media-item { aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: #f8fafc; border: 1px solid var(--border); position: relative; cursor: pointer; }
         .media-item img, .media-item video { width: 100%; height: 100%; object-fit: contain; background: #000; }
         .remove-file { position: absolute; top: 4px; right: 4px; background: var(--error); color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 10px; }
 
@@ -348,6 +348,39 @@
         .date-input-mini label { font-size: 10px; margin-bottom: 4px; display: block; color: var(--text-muted); }
         .date-input-mini input { padding: 8px; font-size: 12px; height: 38px; }
 
+        /* ==================== NEW: AL-BAYAN (FEED) STYLES ==================== */
+        .feed-post { background: #fff; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; }
+        .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .post-author { display: flex; align-items: center; gap: 10px; }
+        .post-author img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--surface-light); }
+        .post-meta h4 { margin: 0; font-size: 14px; font-weight: 800; color: var(--text); }
+        .post-meta span { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+        .post-body { font-size: 14px; line-height: 1.6; color: var(--text); margin-bottom: 15px; white-space: pre-wrap; }
+        .post-actions { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid var(--surface-light); }
+        .action-group { display: flex; gap: 15px; }
+        .act-btn { background: none; border: none; font-family: 'Cairo'; font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .act-btn:hover { color: var(--primary); }
+        .act-btn.liked { color: var(--error); }
+        .act-btn.liked i { animation: pop 0.3s ease; }
+        @keyframes pop { 50% { transform: scale(1.3); } }
+        
+        .seen-indicator { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+        
+        .comments-section { background: var(--surface-light); margin: 15px -20px -20px; padding: 15px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; border-top: 1px solid var(--border); display: none; }
+        .comments-section.show { display: block; }
+        .comment-item { display: flex; gap: 10px; margin-bottom: 12px; }
+        .comment-item img { width: 30px; height: 30px; border-radius: 50%; }
+        .comment-box { background: #fff; padding: 10px 15px; border-radius: 12px; border: 1px solid var(--border); flex: 1; position: relative; }
+        .comment-name { font-size: 12px; font-weight: 800; display: block; margin-bottom: 3px; }
+        .comment-text { font-size: 13px; color: #444; }
+        .delete-comment { position: absolute; top: 10px; left: 10px; font-size: 10px; color: var(--error); cursor: pointer; }
+
+        /* Media Gallery Modal */
+        #media-viewer-modal .modal-content { max-width: 90%; background: transparent; box-shadow: none; border: none; padding: 0; height: auto; text-align: center; }
+        .full-media-container { position: relative; display: flex; flex-direction: column; align-items: center; }
+        .full-media-item { max-width: 100%; max-height: 80vh; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .media-close-btn { position: fixed; top: 20px; left: 20px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2002; font-size: 20px; border: 1px solid rgba(255,255,255,0.3); }
+
     </style>
 </head>
 <body>
@@ -358,7 +391,7 @@
     <div id="loader">
         <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color:var(--primary);"></i>
         <h2 style="margin-top:20px; color:var(--primary-dark); font-size:18px; font-weight:800;">نظام الصيانة الذكي</h2>
-        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V3.0 Enterprise</p>
+        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V3.5 Enterprise</p>
     </div>
 
     <div id="auth-screen" class="hidden" style="min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:25px;">
@@ -402,7 +435,7 @@
     <div id="app-container" class="hidden">
         <div class="main-banner">
             <div class="header-top">
-                <div class="user-avatar-container" onclick="nav('profile', document.querySelector('.nav-item:nth-child(4)'))">
+                <div class="user-avatar-container" onclick="nav('profile', document.querySelector('.nav-item:nth-child(5)'))">
                     <img id="banner-img" src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png">
                     <div id="banner-frame" class="frame-overlay"></div>
                 </div>
@@ -556,6 +589,22 @@
                     <div class="chart-container">
                         <canvas id="statusChart"></canvas>
                     </div>
+                    
+                    <h4 style="margin-bottom:10px; margin-top:25px;">تحليل الأهمية</h4>
+                    <div style="display:flex; gap:10px; margin-bottom:20px;">
+                        <div style="flex:1; background:#fef2f2; padding:10px; border-radius:12px; text-align:center; border:1px solid var(--error);">
+                            <span style="font-size:10px; color:#991b1b;">عاجل 🔥</span>
+                            <div style="font-weight:900; font-size:18px; color:#991b1b;" id="rep-prio-high">0</div>
+                        </div>
+                        <div style="flex:1; background:#fff7ed; padding:10px; border-radius:12px; text-align:center; border:1px solid var(--warning);">
+                            <span style="font-size:10px; color:#9a3412;">متوسط 😐</span>
+                            <div style="font-weight:900; font-size:18px; color:#9a3412;" id="rep-prio-med">0</div>
+                        </div>
+                        <div style="flex:1; background:#f0fdf4; padding:10px; border-radius:12px; text-align:center; border:1px solid var(--success);">
+                            <span style="font-size:10px; color:#166534;">عادي 🙂</span>
+                            <div style="font-weight:900; font-size:18px; color:#166534;" id="rep-prio-low">0</div>
+                        </div>
+                    </div>
 
                     <h4 style="margin-bottom:10px; margin-top:25px;">أداء الفنيين</h4>
                     <div class="modern-table-container">
@@ -572,6 +621,24 @@
                                 </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <div id="page-albayan" class="page-section hidden">
+                <div class="glass-card" style="border-top:3px solid var(--primary); margin-bottom:15px; padding-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3><i class="fa-solid fa-bullhorn" style="color:var(--primary);"></i> البيان</h3>
+                        <span style="font-size:11px; color:var(--text-muted);">أخبار وتعميمات</span>
+                    </div>
+                </div>
+
+                <div id="create-post-box" class="glass-card hidden" style="margin-top:0;">
+                    <textarea id="new-post-content" rows="3" placeholder="اكتب منشوراً جديداً..." style="margin-bottom:10px;"></textarea>
+                    <button onclick="createPost()" class="btn-main btn-sm">نشر <i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+
+                <div id="albayan-feed" style="padding-bottom:100px;">
+                    <div style="text-align:center; padding:20px; color:var(--text-muted);">جاري تحميل المنشورات...</div>
                 </div>
             </div>
 
@@ -658,11 +725,20 @@
             <div class="nav-item active" onclick="nav('home', this)"><i class="fa-solid fa-list-check"></i>المهام</div>
             <div class="nav-add-btn" onclick="nav('create', null)"><i class="fa-solid fa-plus"></i></div>
             <div class="nav-item" onclick="nav('team', this)"><i class="fa-solid fa-users"></i>الفريق</div>
+            <div class="nav-item" onclick="nav('albayan', this)"><i class="fa-solid fa-bullhorn"></i>البيان</div>
             <div class="nav-item" onclick="nav('profile', this)"><i class="fa-solid fa-user"></i>حسابي</div>
-            <div class="nav-item" onclick="nav('settings', this)"><i class="fa-solid fa-gear"></i>الإعدادات</div>
+            <div class="nav-item" onclick="nav('settings', this)"><i class="fa-solid fa-gear"></i></div>
         </div>
     </div>
     
+    <div id="media-viewer-modal" class="modal-overlay hidden" style="background: rgba(0,0,0,0.95); z-index:2005;">
+        <div class="media-close-btn" onclick="closeModal('media-viewer-modal')"><i class="fa-solid fa-xmark"></i></div>
+        <div class="modal-content" style="background:transparent; box-shadow:none; border:none; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+            <div id="media-viewer-content" class="full-media-container" style="width:100%;">
+                </div>
+        </div>
+    </div>
+
     <div id="sup-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="close-btn" onclick="closeModal('sup-modal')"><i class="fa-solid fa-xmark"></i></div>
@@ -778,8 +854,8 @@
     let requestsCache = [];
     let uploadQueue = []; 
     let tempActionData = {}; 
-    let selectedTech = null; // Internal
-    let selectedEng = null; // For Supervisor
+    let selectedTech = null; 
+    let selectedEng = null; 
     let newProfilePicFile = null;
     let isFirstLoad = true;
     let mediaRecorder = null;
@@ -787,10 +863,11 @@
     let isRecording = false;
     let isRegistering = false;
     
-    // Global Vars for Reports & Admin
+    // Global Vars for Admin, Reports & Feed
     let systemSpecialties = [];
     let systemLocations = [];
     let reportChart = null;
+    let postsListener = null; // To unsubscribe if needed
 
     // --- Helpers ---
     function generateUniqueCode() {
@@ -907,12 +984,11 @@
             const doc = await db.collection('users').doc(currentUser.uid).get();
             if(doc.exists) {
                 userData = doc.data();
-                // Ensure shortId exists
                 if(!userData.shortId) {
                     await db.collection('users').doc(currentUser.uid).update({shortId: Math.random().toString(36).substr(2,6).toUpperCase()});
                 }
                 
-                // 1. Fetch System Data (Admin Settings)
+                // 1. Fetch System Data
                 await fetchSystemData();
 
                 renderHeader();
@@ -946,7 +1022,6 @@
                 systemSpecialties = data.specialties || [];
                 systemLocations = data.locations || [];
             } else {
-                // Initialize default data if not exists
                 systemSpecialties = ['كهرباء', 'سباكة', 'نجارة', 'تكييف', 'شبكات (IT)', 'أجهزة طبية'];
                 systemLocations = ['المبنى الإداري', 'كلية الطب', 'كلية الصيدلة', 'كلية الهندسة', 'كلية الأسنان', 'المسجد'];
                 await db.collection('system_settings').doc('config').set({
@@ -981,6 +1056,7 @@
         const shortcuts = document.getElementById('manager-shortcuts');
         const adminBtn = document.getElementById('btn-admin-panel');
         const settingsAdminArea = document.getElementById('settings-manager-area');
+        const createPostBox = document.getElementById('create-post-box');
 
         // Show Create features based on role
         if(r === 'technician' || r === 'engineer') {
@@ -989,9 +1065,11 @@
         }
 
         // Show Admin/Report features
-        if(r === 'manager' || r === 'engineer') {
+        if(r === 'manager' || r === 'engineer' || r === 'supervisor') {
             shortcuts.classList.remove('hidden');
             settingsAdminArea.classList.remove('hidden');
+            createPostBox.classList.remove('hidden'); // Allow posting
+            
             if(r === 'manager') {
                 adminBtn.classList.remove('hidden');
             }
@@ -1010,7 +1088,7 @@
             });
             document.getElementById(inputId).value = "";
             toast("✅ تم الإضافة");
-            await fetchSystemData(); // Reload
+            await fetchSystemData();
         } catch(e) { toast("خطأ"); }
     }
 
@@ -1021,7 +1099,7 @@
                 [type]: firebase.firestore.FieldValue.arrayRemove(item)
             });
             toast("🗑️ تم الحذف");
-            await fetchSystemData(); // Reload
+            await fetchSystemData(); 
         } catch(e) { toast("خطأ"); }
     }
 
@@ -1053,14 +1131,14 @@
         document.querySelectorAll('.page-section').forEach(x=>x.classList.add('hidden')); 
         document.getElementById('page-'+p).classList.remove('hidden'); 
         
-        // Handle Bottom Nav Active State
         document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active')); 
         if(p !== 'create' && p !== 'reports' && p !== 'admin-settings') {
             if(el) el.classList.add('active'); 
         }
 
         if(p==='profile') loadProfilePageData(); 
-        if(p==='reports') generateReports(); // Auto load reports when opened
+        if(p==='reports') generateReports(); 
+        if(p==='albayan') loadFeedPosts(); 
     }
     
     function showScreen(id) { 
@@ -1370,7 +1448,7 @@
                 media: mediaLinks,
                 uniqueCode: uniqueCode, 
                 isDeleted: false,
-                createdBy: userData.fullName, // Ensure creator name is stored
+                createdBy: userData.fullName, 
                 createdAt: firebase.firestore.FieldValue.serverTimestamp() 
             }); 
             
@@ -1626,10 +1704,16 @@
         document.getElementById('request-details-modal').classList.remove('hidden');
         
         let mediaHtml = "";
-        if(d.media) d.media.forEach(m => {
-            if(m.type === 'audio') mediaHtml += `<div class="media-item" onclick="openAudioPlayer('${m.url}')" style="background:#e0f2fe;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-play-circle fa-2x"></i></div>`;
-            else mediaHtml += `<div class="media-item"><img src="${m.url}" style="width:100%;height:100%;object-fit:cover;"></div>`;
-        });
+        // NEW: Open in Lightbox Logic
+        if(d.media) {
+            d.media.forEach((m, idx) => {
+                if(m.type === 'audio') {
+                    mediaHtml += `<div class="media-item" onclick="openMediaViewer('${id}', ${idx})" style="background:#e0f2fe;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-play-circle fa-2x"></i></div>`;
+                } else {
+                    mediaHtml += `<div class="media-item" onclick="openMediaViewer('${id}', ${idx})"><img src="${m.url}" style="width:100%;height:100%;object-fit:cover;"></div>`;
+                }
+            });
+        }
 
         // Simple Timeline Logic
         let tlHtml = '<div class="timeline">';
@@ -1658,6 +1742,27 @@
         `;
     }
     
+    // NEW: Media Viewer (Lightbox) Function
+    function openMediaViewer(reqId, startIndex) {
+        const d = requestsCache.find(r => r.id === reqId);
+        if(!d || !d.media) return;
+        
+        const content = document.getElementById('media-viewer-content');
+        content.innerHTML = "";
+        
+        d.media.forEach(m => {
+            if(m.type === 'video') {
+                content.innerHTML += `<video controls src="${m.url}" class="full-media-item" style="margin-bottom:15px;"></video>`;
+            } else if (m.type === 'audio') {
+                content.innerHTML += `<audio controls src="${m.url}" style="width:80%; margin-bottom:15px;"></audio>`;
+            } else {
+                content.innerHTML += `<img src="${m.url}" class="full-media-item" style="margin-bottom:15px;">`;
+            }
+        });
+        
+        document.getElementById('media-viewer-modal').classList.remove('hidden');
+    }
+
     async function softDelete(id) { 
         openConfirmModal("نقل للمهملات؟", async () => { await db.collection('requests').doc(id).update({isDeleted:true}); toast("تم النقل"); }); 
     }
@@ -1729,47 +1834,47 @@
     }
 
     // =========================================================================
-    // NEW: REPORTS & ANALYTICS LOGIC
+    // NEW: REPORTS & ANALYTICS LOGIC (WITH PRIORITY)
     // =========================================================================
 
     function generateReports() {
-        // Defaults if date not set
         let start = document.getElementById('report-start-date').valueAsDate;
         let end = document.getElementById('report-end-date').valueAsDate;
-        if(!start) start = new Date(0); // Epoch
-        if(!end) end = new Date(); // Now
-
-        // Ensure end includes the whole day
+        if(!start) start = new Date(0); 
+        if(!end) end = new Date(); 
         end.setHours(23, 59, 59);
 
-        // Filter Data
         const reportData = requestsCache.filter(r => {
             const rDate = new Date(r.date);
             return rDate >= start && rDate <= end && r.isDeleted !== true;
         });
 
-        // Calculate Stats
         const total = reportData.length;
         const done = reportData.filter(r => r.status === 'done').length;
         const rejected = reportData.filter(r => r.status === 'rejected').length;
         const active = total - done - rejected;
 
-        // Update UI Cards
+        // Priority Stats
+        const pHigh = reportData.filter(r => r.priority === 'high').length;
+        const pMed = reportData.filter(r => r.priority === 'medium').length;
+        const pLow = reportData.filter(r => r.priority === 'low').length;
+
+        // Update UI
         document.getElementById('rep-total').innerText = total;
         document.getElementById('rep-done').innerText = done;
         document.getElementById('rep-rejected').innerText = rejected;
         document.getElementById('rep-active').innerText = active;
+        
+        document.getElementById('rep-prio-high').innerText = pHigh;
+        document.getElementById('rep-prio-med').innerText = pMed;
+        document.getElementById('rep-prio-low').innerText = pLow;
 
-        // Update Chart
         updateChart([done, active, rejected]);
-
-        // Generate Tech Performance Table
         renderTechTable(reportData);
     }
 
     function updateChart(data) {
         if(reportChart) reportChart.destroy();
-        
         const ctx = document.getElementById('statusChart').getContext('2d');
         reportChart = new Chart(ctx, {
             type: 'doughnut',
@@ -1782,11 +1887,8 @@
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
             }
         });
     }
@@ -1794,8 +1896,6 @@
     function renderTechTable(data) {
         const tbody = document.getElementById('tech-performance-body');
         tbody.innerHTML = "";
-        
-        // Group by Technician
         const techs = {};
         
         data.forEach(r => {
@@ -1815,15 +1915,9 @@
         for (const [name, stats] of Object.entries(techs)) {
             const efficiency = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
             let badgeColor = efficiency >= 80 ? 'green' : (efficiency >= 50 ? 'orange' : 'red');
-            
             tbody.innerHTML += `
             <tr>
-                <td>
-                    <div class="tech-row">
-                        <img src="${stats.pic}">
-                        <span>${name}</span>
-                    </div>
-                </td>
+                <td><div class="tech-row"><img src="${stats.pic}"><span>${name}</span></div></td>
                 <td style="text-align:center">${stats.total}</td>
                 <td style="text-align:center; color:var(--success); font-weight:bold;">${stats.done}</td>
                 <td style="text-align:center"><span style="color:${badgeColor}; font-weight:bold;">%${efficiency}</span></td>
@@ -1833,14 +1927,192 @@
 
     function exportReportsPDF() {
         const element = document.getElementById('page-reports');
-        const opt = {
-            margin:       0.5,
-            filename:     `report_${new Date().toISOString().slice(0,10)}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-        };
+        const opt = { margin:0.5, filename:`report_${new Date().toISOString().slice(0,10)}.pdf`, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'in',format:'a4',orientation:'portrait'} };
         html2pdf().set(opt).from(element).save();
+    }
+
+    // =========================================================================
+    // NEW: AL-BAYAN (SOCIAL FEED) LOGIC
+    // =========================================================================
+
+    function loadFeedPosts() {
+        if(postsListener) return; // Already listening
+        
+        const container = document.getElementById('albayan-feed');
+        container.innerHTML = '<div style="text-align:center; padding:20px;">جاري التحميل...</div>';
+
+        postsListener = db.collection('posts').orderBy('createdAt', 'desc').limit(20)
+            .onSnapshot(snap => {
+                container.innerHTML = "";
+                if(snap.empty) { container.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">لا يوجد منشورات</div>'; return; }
+                
+                snap.forEach(doc => {
+                    renderPostItem(doc);
+                });
+                
+                // Mark posts as seen logic (simple implementation: mark latest loaded)
+                markPostsAsSeen(snap.docs);
+            });
+    }
+
+    function renderPostItem(doc) {
+        const p = doc.data();
+        const pid = doc.id;
+        const container = document.getElementById('albayan-feed');
+        
+        const isLiked = p.likes && p.likes.includes(currentUser.uid);
+        const likeIcon = isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+        const likeClass = isLiked ? 'liked' : '';
+        const likeCount = p.likes ? p.likes.length : 0;
+        const seenCount = p.seenBy ? p.seenBy.length : 0;
+        
+        // Time formatting
+        const date = p.createdAt ? new Date(p.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : 'الآن';
+        
+        // Delete button for author or manager
+        let delBtn = '';
+        if(p.authorId === currentUser.uid || userData.role === 'manager') {
+            delBtn = `<i class="fa-solid fa-trash" onclick="deletePost('${pid}')" style="cursor:pointer; color:var(--text-muted); font-size:12px;"></i>`;
+        }
+
+        const html = `
+        <div class="feed-post" id="post-${pid}">
+            <div class="post-header">
+                <div class="post-author">
+                    <img src="${p.authorPic}">
+                    <div class="post-meta">
+                        <h4>${p.authorName} <span style="font-weight:normal; font-size:10px; color:var(--primary);">(${p.role})</span></h4>
+                        <span>${date}</span>
+                    </div>
+                </div>
+                ${delBtn}
+            </div>
+            <div class="post-body">${p.content}</div>
+            <div class="post-actions">
+                <div class="action-group">
+                    <button class="act-btn ${likeClass}" onclick="toggleLike('${pid}')">
+                        <i class="${likeIcon}"></i> ${likeCount}
+                    </button>
+                    <button class="act-btn" onclick="toggleComments('${pid}')">
+                        <i class="fa-regular fa-comment"></i> تعليق
+                    </button>
+                </div>
+                <div class="seen-indicator">
+                    <i class="fa-solid fa-eye"></i> ${seenCount}
+                </div>
+            </div>
+            
+            <div id="comments-${pid}" class="comments-section">
+                <div id="comments-list-${pid}"></div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <input type="text" id="comment-input-${pid}" placeholder="اكتب تعليقاً..." style="padding:8px; border-radius:20px; font-size:12px;">
+                    <button onclick="addComment('${pid}')" class="btn-sm btn-main" style="width:auto;"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>`;
+        
+        container.innerHTML += html;
+    }
+
+    async function createPost() {
+        const content = document.getElementById('new-post-content').value.trim();
+        if(!content) return;
+        
+        try {
+            await db.collection('posts').add({
+                content: content,
+                authorId: currentUser.uid,
+                authorName: userData.fullName,
+                authorPic: userData.photoUrl,
+                role: userData.role,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                likes: [],
+                seenBy: [currentUser.uid]
+            });
+            document.getElementById('new-post-content').value = "";
+            toast("✅ تم النشر");
+        } catch(e) { toast("خطأ في النشر"); }
+    }
+
+    async function deletePost(pid) {
+        if(!confirm("حذف المنشور؟")) return;
+        await db.collection('posts').doc(pid).delete();
+        toast("تم الحذف");
+    }
+
+    async function toggleLike(pid) {
+        const postRef = db.collection('posts').doc(pid);
+        const doc = await postRef.get();
+        if(!doc.exists) return;
+        
+        const likes = doc.data().likes || [];
+        if(likes.includes(currentUser.uid)) {
+            await postRef.update({ likes: firebase.firestore.FieldValue.arrayRemove(currentUser.uid) });
+        } else {
+            await postRef.update({ likes: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) });
+        }
+    }
+
+    function toggleComments(pid) {
+        const sec = document.getElementById(`comments-${pid}`);
+        sec.classList.toggle('show');
+        if(sec.classList.contains('show')) {
+            loadComments(pid);
+        }
+    }
+
+    function loadComments(pid) {
+        const list = document.getElementById(`comments-list-${pid}`);
+        db.collection('posts').doc(pid).collection('comments').orderBy('createdAt', 'asc').onSnapshot(snap => {
+            list.innerHTML = "";
+            snap.forEach(d => {
+                const c = d.data();
+                let del = '';
+                if(c.authorId === currentUser.uid || userData.role === 'manager') {
+                    del = `<i class="fa-solid fa-xmark delete-comment" onclick="deleteComment('${pid}', '${d.id}')"></i>`;
+                }
+                list.innerHTML += `
+                <div class="comment-item">
+                    <img src="${c.authorPic}">
+                    <div class="comment-box">
+                        <span class="comment-name">${c.authorName}</span>
+                        <span class="comment-text">${c.text}</span>
+                        ${del}
+                    </div>
+                </div>`;
+            });
+        });
+    }
+
+    async function addComment(pid) {
+        const inp = document.getElementById(`comment-input-${pid}`);
+        const text = inp.value.trim();
+        if(!text) return;
+        
+        await db.collection('posts').doc(pid).collection('comments').add({
+            text: text,
+            authorId: currentUser.uid,
+            authorName: userData.fullName,
+            authorPic: userData.photoUrl,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        inp.value = "";
+    }
+
+    async function deleteComment(pid, cid) {
+        await db.collection('posts').doc(pid).collection('comments').doc(cid).delete();
+    }
+
+    async function markPostsAsSeen(docs) {
+        // Batch update implies complexity, let's do simple individual check
+        docs.forEach(doc => {
+            const p = doc.data();
+            if(!p.seenBy || !p.seenBy.includes(currentUser.uid)) {
+                db.collection('posts').doc(doc.id).update({
+                    seenBy: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+                });
+            }
+        });
     }
 
 </script>
