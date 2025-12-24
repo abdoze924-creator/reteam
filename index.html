@@ -3,20 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام الصيانة الذكي - جامعة الريادة (V3.0)</title>
+    <title>نظام الصيانة الذكي V2.5 - جامعة الريادة</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* ==================== Core Styling ==================== */
+        /* =========================================================================
+           1. نظام المتغيرات والألوان (Professional Theme System)
+           =========================================================================
+        */
         :root {
             --primary: #0056b3;         
             --primary-dark: #003d80;    
-            --dark: #f8fafc;            
+            --primary-light: #e0f2fe;
+            --accent: #f59e0b;
+            --dark: #0f172a;            
             --surface: #ffffff;        
             --surface-light: #f1f5f9;   
             --border: #e2e8f0;          
@@ -28,147 +34,260 @@
             --warning: #f59e0b;        
             --info: #0ea5e9;            
             --purple: #8b5cf6;
-            --bg-image: url('https://a.top4top.io/p_36115ao3o1.jpg');
             --glass: rgba(255, 255, 255, 0.95);
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1);
+            --bg-image: url('https://a.top4top.io/p_36115ao3o1.jpg');
+            --radius-sm: 12px;
+            --radius-md: 20px;
+            --radius-lg: 32px;
         }
-        
-        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+
+        /* =========================================================================
+           2. التنسيقات العامة (Global Styles)
+           =========================================================================
+        */
+        * { 
+            box-sizing: border-box; 
+            outline: none; 
+            -webkit-tap-highlight-color: transparent; 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
         
         body {
             font-family: 'Cairo', sans-serif; 
-            background-color: var(--dark); 
+            background-color: var(--surface-light); 
             color: var(--text); 
             margin: 0; 
             min-height: 100vh;
-            background-image: linear-gradient(rgba(248,250,252,0.8), rgba(248,250,252,0.8)), var(--bg-image);
+            background-image: linear-gradient(rgba(241, 245, 249, 0.9), rgba(241, 245, 249, 0.9)), var(--bg-image);
             background-size: cover; 
             background-position: center; 
             background-attachment: fixed;
-            position: relative; 
             overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .app-wrapper { 
+            max-width: 650px; 
+            margin: 0 auto; 
+            min-height: 100vh; 
+            position: relative; 
+            padding-bottom: 120px; 
         }
         
-        .app-wrapper { max-width: 600px; margin: 0 auto; min-height: 100vh; position: relative; padding-bottom: 100px; }
         .hidden { display: none !important; }
-        html { scroll-behavior: smooth; }
 
         /* Loader */
         #loader {
-            position: fixed; inset: 0; background-color: var(--dark);
-            background-image: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), var(--bg-image);
-            background-size: cover; z-index: 99999; display: flex; 
+            position: fixed; inset: 0; background: var(--dark);
+            z-index: 99999; display: flex; 
             flex-direction: column; justify-content: center; align-items: center; text-align: center;
         }
+        .loader-ring {
+            width: 80px; height: 80px;
+            border: 8px solid var(--primary-light);
+            border-top: 8px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- Header --- */
+        /* =========================================================================
+           3. التصميم الزجاجي (Glassmorphism UI)
+           =========================================================================
+        */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-md); 
+            padding: 24px; 
+            margin: 16px;
+            box-shadow: var(--shadow-md); 
+            position: relative; 
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--info));
+            opacity: 0.8;
+        }
+
+        /* =========================================================================
+           4. الهيدر والبلاغات (Header & Banner)
+           =========================================================================
+        */
         .main-banner {
-            height: 220px; 
-            background: linear-gradient(to bottom, rgba(0,86,179,0.3), rgba(0, 61, 128, 0.9)), url('https://a.top4top.io/p_36115ao3o1.jpg');
+            height: 240px; 
+            background: linear-gradient(135deg, rgba(0, 86, 179, 0.85), rgba(15, 23, 42, 0.95)), var(--bg-image);
             background-size: cover; background-position: center;
-            display: flex; flex-direction: column; justify-content: flex-end; padding: 25px;
-            border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; 
-            margin-bottom: 25px; box-shadow: 0 10px 40px rgba(0,86,179,0.3); position: relative;
+            display: flex; flex-direction: column; justify-content: flex-end; padding: 30px;
+            border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg); 
+            margin-bottom: 25px; box-shadow: var(--shadow-lg); position: relative;
         }
 
         .header-top {
-            position: absolute; top: 20px; left: 20px; right: 20px;
+            position: absolute; top: 25px; left: 25px; right: 25px;
             display: flex; justify-content: space-between; align-items: center;
         }
 
         .bell-btn {
-            background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(255,255,255,0.15); width: 45px; height: 45px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; 
-            backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.3); position: relative;
+            backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); position: relative;
         }
         .bell-badge {
-            position: absolute; top: 8px; right: 8px; width: 8px; height: 8px;
-            background: var(--error); border-radius: 50%; display: none; border: 1px solid #fff;
+            position: absolute; top: 10px; right: 10px; width: 10px; height: 10px;
+            background: var(--error); border-radius: 50%; display: none; border: 2px solid #fff;
+            animation: pulse 2s infinite;
         }
 
-        .header-content { display: flex; align-items: flex-end; justify-content: space-between; width: 100%; padding-bottom: 10px; }
-
-        /* User Info */
-        .user-minimal { display: flex; flex-direction: column; gap: 6px; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-        .user-minimal h1 { margin: 0; font-size: 26px; font-weight: 900; color: #fff; line-height: 1.1; letter-spacing: -0.5px; }
-        .user-minimal .role-badge { 
-            background: rgba(255, 255, 255, 0.2); color: white; padding: 5px 14px; 
-            border-radius: 20px; font-size: 11px; font-weight: 800; width: fit-content;
-            border: 1px solid rgba(255,255,255,0.4); backdrop-filter: blur(4px);
-        }
-
-        /* --- FIXED AVATAR & FRAMES --- */
         .user-avatar-container { 
-            position: relative; width: 85px; height: 85px; border-radius: 50%; margin-bottom: 5px;
+            position: relative; width: 90px; height: 90px; border-radius: 50%;
         }
         .user-avatar-container img {
             width: 100%; height: 100%; border-radius: 50%;
-            border: 4px solid rgba(255,255,255,0.3); object-fit: cover;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); background: #fff; display: block;
+            border: 4px solid rgba(255,255,255,0.2); object-fit: cover;
+            background: #fff; display: block;
         }
-        .user-avatar-container .frame-overlay {
-            position: absolute; inset: -5px; pointer-events: none; border-radius: 50%; z-index: 2;
+        .frame-overlay { position: absolute; inset: -6px; pointer-events: none; border-radius: 50%; z-index: 2; }
+        .f-gold { border: 6px solid #ffd700; box-shadow: 0 0 15px rgba(255,215,0,0.4); }
+        .f-blue { border: 6px dashed var(--primary); }
+        .f-grad { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding: 5px; }
+
+        /* =========================================================================
+           5. عناصر التحكم والإدخال (Inputs & Buttons)
+           =========================================================================
+        */
+        .input-group { margin-bottom: 20px; }
+        .input-group label { 
+            display: block; font-size: 13px; color: var(--text-muted); 
+            margin-bottom: 8px; font-weight: 700; margin-right: 5px;
         }
-        
-        /* Frame Options & Inputs & Buttons (Standard) */
-        .frame-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
-        .frame-option { width: 100%; aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--border); cursor: pointer; position: relative; overflow: hidden; }
-        .frame-option.selected { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,86,179,0.2); }
-        .f-gold { border: 5px solid #ffd700; box-shadow: inset 0 0 10px #ffd700, 0 0 10px rgba(255, 215, 0, 0.5); }
-        .f-blue { border: 5px dashed var(--primary); }
-        .f-grad { background: linear-gradient(45deg, var(--primary), var(--info)); padding: 4px; }
-        .f-grad-in { background: transparent; width: 100%; height: 100%; border-radius: 50%; }
-        .f-none { border: 1px solid #ccc; background: #eee; display: flex; align-items: center; justify-content: center; color: #777; font-size: 10px; }
+        input, select, textarea {
+            width: 100%; padding: 14px 18px; background: var(--surface-light); 
+            border: 2px solid transparent; border-radius: var(--radius-sm); color: var(--text); 
+            font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 600;
+        }
+        input:focus, select:focus, textarea:focus { 
+            border-color: var(--primary); background: #fff; 
+            box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.05); 
+        }
 
-        .glass-card { background: rgba(255, 255, 255, 0.95); border: 1px solid var(--border); border-radius: 24px; padding: 24px; margin: 15px; box-shadow: var(--shadow); position: relative; overflow: hidden; transition: 0.2s; }
-        .request-card { cursor: pointer; border-right: 4px solid transparent; margin-bottom: 15px; background: rgba(255,255,255,0.95); transition: transform 0.2s; border: 1px solid var(--border); }
-        .request-card:active { transform: scale(0.98); }
-        .req-code { font-family: monospace; font-weight: 900; background: var(--text); color: white; padding: 3px 8px; border-radius: 6px; font-size: 12px; letter-spacing: 1px; display: inline-block; direction: ltr; margin-left: 8px; }
+        .btn-main {
+            width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none; border-radius: var(--radius-sm); color: white; font-weight: 800; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 12px;
+            box-shadow: 0 8px 20px rgba(0, 86, 179, 0.25); font-size: 15px;
+        }
+        .btn-main:active { transform: scale(0.96); }
+        .btn-main:disabled { opacity: 0.7; cursor: not-allowed; }
 
-        .input-group { margin-bottom: 20px; position: relative; }
-        .input-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; }
-        input, select, textarea { width: 100%; padding: 16px; background: var(--surface-light); border: 1px solid var(--border); border-radius: 16px; color: var(--text); font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 600; transition: 0.3s; }
-        input:focus, select:focus, textarea:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.1); }
+        .btn-outline {
+            background: transparent; border: 2px solid var(--border); color: var(--text);
+            padding: 12px; border-radius: var(--radius-sm); font-weight: 700; cursor: pointer;
+        }
 
-        .btn-main { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: none; border-radius: 16px; color: white; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 8px 20px rgba(0, 86, 179, 0.2); font-size: 15px; font-family: 'Cairo', sans-serif; transition: 0.1s; }
-        .btn-main:active { transform: scale(0.97); }
-        .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); border-radius: 14px; font-family: 'Cairo', sans-serif; cursor: pointer; padding: 10px; }
-        .btn-danger { background: linear-gradient(135deg, var(--error), #b91c1c); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.2); color: white; }
-        .btn-sm { padding: 8px 16px; font-size: 12px; width: auto; margin: 0; border-radius: 10px; min-height: 35px; }
+        /* =========================================================================
+           6. شاشة التقارير ولوحة المدير (Reporting & Admin UI)
+           =========================================================================
+        */
+        .report-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .stat-card {
+            background: white; padding: 20px; border-radius: var(--radius-sm);
+            text-align: center; border: 1px solid var(--border);
+        }
+        .stat-card i { font-size: 24px; color: var(--primary); margin-bottom: 10px; }
+        .stat-card h4 { margin: 0; font-size: 12px; color: var(--text-muted); }
+        .stat-card p { margin: 5px 0 0; font-size: 22px; font-weight: 900; color: var(--text); }
 
-        /* Status & Tabs */
-        .status-pill { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px; width: fit-content; }
-        .st-pending { background: #e0f2fe; color: var(--info); border: 1px solid #bae6fd; }
-        .st-at_engineer { background: #f3e8ff; color: var(--purple); border: 1px solid #d8b4fe; }
-        .st-at_tech { background: #fff7ed; color: var(--gold); border: 1px solid #fdba74; }
-        .st-working { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
-        .st-pending_confirmation { background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; }
-        .st-done { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
-        .st-rejected { background: #fef2f2; color: var(--error); border: 1px solid #fecaca; }
+        .tech-report-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; border-bottom: 1px solid var(--border);
+        }
+        .tech-report-item:last-child { border-bottom: none; }
 
-        .tabs-container { display: flex; margin: 15px; background: #fff; padding: 6px; border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); }
-        .tab-btn { flex: 1; padding: 12px; color: var(--text-muted); font-size: 13px; font-weight: 700; cursor: pointer; border-radius: 14px; background: transparent; border: none; font-family: 'Cairo', sans-serif; transition: 0.3s; }
-        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(0, 86, 179, 0.2); }
+        .admin-data-tag {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--primary-light); color: var(--primary);
+            padding: 6px 14px; border-radius: 50px; margin: 4px; font-size: 12px; font-weight: 700;
+        }
+        .admin-data-tag i { cursor: pointer; color: var(--error); }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-end; padding: 10px 20px 25px; z-index: 900; border-top-left-radius: 30px; border-top-right-radius: 30px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); }
-        .nav-item { text-align: center; color: #94a3b8; font-size: 10px; cursor: pointer; width: 60px; }
-        .nav-item i { font-size: 20px; margin-bottom: 6px; display: block; }
+        /* =========================================================================
+           7. التنقل السفلي (Bottom Navigation)
+           =========================================================================
+        */
+        .bottom-nav { 
+            position: fixed; bottom: 0; left: 0; right: 0; max-width: 650px; margin: 0 auto; 
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
+            border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-end; 
+            padding: 12px 25px 30px; z-index: 900; border-top-left-radius: var(--radius-lg); border-top-right-radius: var(--radius-lg);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.08);
+        }
+        .nav-item { text-align: center; color: #94a3b8; font-size: 11px; cursor: pointer; width: 60px; font-weight: 700; }
+        .nav-item i { font-size: 22px; margin-bottom: 6px; display: block; transition: 0.3s; }
         .nav-item.active { color: var(--primary); }
-        .nav-add-btn { width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; box-shadow: 0 10px 25px rgba(0, 86, 179, 0.4); transform: translateY(-25px); border: 5px solid var(--dark); }
+        .nav-item.active i { transform: translateY(-5px); color: var(--primary); }
 
-        /* Modals */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
-        .modal-content { width: 100%; max-width: 450px; background: #fff; border: 1px solid var(--border); border-radius: 30px; padding: 30px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.15); }
-        .close-btn { position: absolute; top: 20px; left: 20px; background: #f1f5f9; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); }
+        .nav-add-btn {
+            width: 65px; height: 65px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px;
+            box-shadow: 0 10px 25px rgba(0, 86, 179, 0.4); transform: translateY(-30px); border: 6px solid var(--surface-light);
+        }
 
-        /* --- NEW: Tech Report Cards & Admin Tags --- */
-        .tech-report-card { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
-        .tech-stat-box { text-align: center; padding: 5px 10px; border-radius: 8px; background: var(--surface-light); font-size: 11px; }
-        .tech-stat-num { font-weight: 900; font-size: 14px; display: block; color: var(--primary); }
+        /* =========================================================================
+           8. تصميم البلاغ (Request Card)
+           =========================================================================
+        */
+        .request-card {
+            border-right: 5px solid var(--border);
+            cursor: pointer;
+        }
+        .request-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+        .status-pill {
+            padding: 6px 14px; border-radius: 50px; font-size: 11px; font-weight: 800;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .st-pending { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+        .st-at_engineer { background: #f3e8ff; color: #7e22ce; border: 1px solid #f3e8ff; }
+        .st-done { background: #f0fdf4; color: #15803d; border: 1px solid #dcfce7; }
         
-        .admin-tag { display: inline-flex; align-items: center; gap: 5px; background: #e0f2fe; color: var(--primary); padding: 5px 10px; border-radius: 15px; font-size: 12px; margin: 3px; font-weight: bold; }
-        .admin-tag i { cursor: pointer; color: var(--error); opacity: 0.7; }
-        .admin-tag i:hover { opacity: 1; }
+        .req-code-badge {
+            font-family: 'JetBrains Mono', monospace; background: var(--dark); color: white;
+            padding: 2px 8px; border-radius: 6px; font-size: 11px;
+        }
+
+        /* =========================================================================
+           9. ميديا (Media)
+           =========================================================================
+        */
+        .media-preview-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;
+        }
+        .media-preview-item {
+            aspect-ratio: 1; border-radius: 12px; overflow: hidden; position: relative;
+            background: var(--surface-light); border: 1px solid var(--border);
+        }
+        .media-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+        .remove-media {
+            position: absolute; top: 5px; right: 5px; background: var(--error);
+            color: white; width: 20px; height: 20px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
     </style>
 </head>
 <body>
@@ -177,44 +296,49 @@
     <audio id="notify-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div id="loader">
-        <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color:var(--primary);"></i>
-        <h2 style="margin-top:20px; color:var(--primary-dark); font-size:18px; font-weight:800;">نظام الصيانة الذكي</h2>
-        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V3.0</p>
+        <div class="loader-ring"></div>
+        <h2 style="margin-top:25px; color:white; font-size:22px; font-weight:900; letter-spacing:1px;">جامعة الريادة</h2>
+        <p style="color:var(--text-muted); font-size:14px; margin-top:5px;">جاري تحضير الأنظمة الذكية...</p>
     </div>
 
-    <div id="auth-screen" class="hidden" style="min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:25px;">
-        <div class="glass-card" style="text-align:center; padding: 40px 25px;">
-            <img src="https://a.top4top.io/p_36115ao3o1.jpg" class="auth-logo-modern">
-            <h2 style="margin:0 0 5px; font-weight:900; font-size: 22px; color:var(--primary-dark);">نظام الصيانة الذكي</h2>
-            <p style="color:var(--text-muted); font-size:13px; margin-bottom:35px; line-height:1.6;">جامعة الريادة للعلوم والتكنولوجيا</p>
+    <div id="auth-screen" class="hidden" style="min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:20px;">
+        <div class="glass-card" style="text-align:center; padding: 45px 30px;">
+            <img src="https://a.top4top.io/p_36115ao3o1.jpg" style="width:100px; height:100px; border-radius:24px; margin-bottom:20px; box-shadow: var(--shadow-lg);">
+            <h2 style="margin:0; font-weight:900; font-size: 26px; color:var(--primary-dark);">مرحباً بك</h2>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:40px;">نظام إدارة الصيانة والخدمات المتكامل</p>
 
             <div id="reg-fields" class="hidden">
-                <p class="auth-section-label">اختر النوع:</p>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-                    <label style="cursor:pointer;"><input type="radio" name="auth-gender" value="male" checked> ذكر</label>
-                    <label style="cursor:pointer;"><input type="radio" name="auth-gender" value="female"> أنثى</label>
+                <div class="input-group">
+                    <label>النوع</label>
+                    <div style="display:flex; gap:10px;">
+                        <label style="flex:1;"><input type="radio" name="auth-gender" value="male" checked style="width:auto;"> ذكر</label>
+                        <label style="flex:1;"><input type="radio" name="auth-gender" value="female" style="width:auto;"> أنثى</label>
+                    </div>
                 </div>
-                <div class="input-group"><input type="text" id="reg-name" placeholder="الاسم الكامل"></div>
-                <div class="input-group"><input type="tel" id="reg-phone" placeholder="01xxxxxxxxx"></div>
+                <div class="input-group"><input type="text" id="reg-name" placeholder="الاسم الرباعي الكامل"></div>
+                <div class="input-group"><input type="tel" id="reg-phone" placeholder="رقم الهاتف (واتساب)"></div>
                 
-                <p class="auth-section-label">الوظيفة:</p>
-                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:15px;">
-                    <label><input type="radio" name="auth-role" value="employee" checked> موظف</label>
-                    <label><input type="radio" name="auth-role" value="supervisor"> مشرف</label>
-                    <label><input type="radio" name="auth-role" value="engineer"> مهندس</label>
-                    <label><input type="radio" name="auth-role" value="technician"> فني</label>
-                    <label><input type="radio" name="auth-role" value="manager"> مدير</label>
+                <div class="input-group">
+                    <label>الفئة الوظيفية</label>
+                    <select id="reg-role">
+                        <option value="employee">موظف (مقدم بلاغات)</option>
+                        <option value="supervisor">مشرف صيانة</option>
+                        <option value="engineer">مهندس مختص</option>
+                        <option value="technician">فني صيانة</option>
+                        <option value="manager">مدير النظام</option>
+                    </select>
                 </div>
-                <div class="input-group"><input type="text" id="reg-job" placeholder="المسمى الوظيفي"></div>
-                <div class="input-group"><input type="text" id="reg-loc" placeholder="مقر العمل"></div>
+                <div class="input-group"><input type="text" id="reg-job" placeholder="المسمى الوظيفي الدقيق"></div>
+                <div class="input-group"><input type="text" id="reg-loc" placeholder="المكتب / مقر العمل الرئيسي"></div>
             </div>
 
             <div class="input-group"><input type="email" id="email" placeholder="البريد الإلكتروني الجامعي"></div>
             <div class="input-group"><input type="password" id="password" placeholder="كلمة المرور"></div>
             <div id="confirm-pass-field" class="hidden input-group"><input type="password" id="confirm-password" placeholder="تأكيد كلمة المرور"></div>
             
-            <button onclick="handleAuth()" id="auth-btn" class="btn-main" style="margin-top:25px;">تسجيل الدخول</button>
-            <div onclick="toggleAuth()" style="margin-top:25px; font-size:13px; cursor:pointer; color:var(--text-muted);">
+            <button onclick="handleAuth()" id="auth-btn" class="btn-main" style="margin-top:10px;">تسجيل الدخول</button>
+            
+            <div onclick="toggleAuth()" style="margin-top:30px; font-size:14px; cursor:pointer; color:var(--text-muted);">
                 <span id="auth-switch-text">ليس لديك حساب؟ <b style="color:var(--primary)">إنشاء حساب جديد</b></span>
             </div>
         </div>
@@ -224,281 +348,306 @@
         <div class="main-banner">
             <div class="header-top">
                 <div class="user-avatar-container" onclick="nav('profile', document.querySelector('.nav-item:nth-child(4)'))">
-                    <img id="banner-img" src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png">
+                    <img id="banner-img" src="">
                     <div id="banner-frame" class="frame-overlay"></div>
                 </div>
-                <div class="bell-btn" onclick="toast('لا توجد إشعارات جديدة')">
+                <div class="bell-btn" onclick="toggleNotifications()">
                     <i class="fa-regular fa-bell"></i>
                     <div class="bell-badge"></div>
                 </div>
             </div>
-            <div class="header-content">
-                <div class="user-minimal">
-                    <span id="banner-role" class="role-badge">User</span>
-                    <h1 id="banner-name">Guest</h1>
-                    <span id="banner-id" style="color:rgba(255,255,255,0.8); font-family:monospace; font-size:12px;">ID: --</span>
+            <div class="header-content" style="color:white; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+                <span id="banner-role" style="background:rgba(255,255,255,0.2); padding:4px 12px; border-radius:50px; font-size:11px; font-weight:800; border:1px solid rgba(255,255,255,0.3);">User</span>
+                <h1 id="banner-name" style="margin:8px 0 2px; font-size:24px; font-weight:900;">Guest User</h1>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span id="banner-id" style="font-family:'JetBrains Mono'; font-size:12px; opacity:0.8;">ID: ------</span>
+                    <i class="fa-regular fa-copy" onclick="copyId()" style="cursor:pointer; font-size:12px;"></i>
                 </div>
             </div>
         </div>
-        
-        <div id="main-content">
-            <div id="page-home" class="page-section">
-                <div class="tabs-container">
-                    <button class="tab-btn active" onclick="switchTab('active', this)">المهام الجارية</button>
-                    <button class="tab-btn" onclick="switchTab('history', this)">الأرشيف</button>
-                    <button class="tab-btn" onclick="switchTab('trash', this)" style="color:var(--error);">المحذوفات</button>
-                </div>
-                <div id="requests-feed" style="padding-bottom:100px;"></div>
-            </div>
+
+        <main id="main-content">
             
+            <div id="page-home" class="page-section">
+                <div style="display:flex; margin:0 16px 15px; background:white; padding:6px; border-radius:18px; border:1px solid var(--border);">
+                    <button class="tab-btn active" onclick="switchTab('active', this)" style="flex:1; padding:10px; border:none; border-radius:12px; font-family:'Cairo'; font-weight:800; font-size:13px; cursor:pointer;">النشطة</button>
+                    <button class="tab-btn" onclick="switchTab('history', this)" style="flex:1; padding:10px; border:none; border-radius:12px; font-family:'Cairo'; font-weight:800; font-size:13px; cursor:pointer; background:transparent; color:var(--text-muted);">الأرشيف</button>
+                    <button id="mgr-trash-tab" class="tab-btn hidden" onclick="switchTab('trash', this)" style="flex:1; padding:10px; border:none; border-radius:12px; font-family:'Cairo'; font-weight:800; font-size:13px; cursor:pointer; background:transparent; color:var(--error);">المحذوفات</button>
+                </div>
+                <div id="requests-feed" style="padding-bottom:20px;"></div>
+            </div>
+
             <div id="page-create" class="page-section hidden">
                 <div class="glass-card" style="margin-top:0;">
-                    <h3 style="margin:0 0 20px; color:var(--primary-dark); border-right:4px solid var(--primary); padding-right:15px;">بلاغ جديد</h3>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:15px;">
-                        <div class="input-group"><label>التاريخ</label><input type="date" id="req-date"></div>
-                        <div class="input-group"><label>الوقت</label><input type="time" id="req-time"></div>
-                    </div>
+                    <h3 style="margin:0 0 20px; font-weight:900; color:var(--primary-dark); border-right:5px solid var(--primary); padding-right:15px;">تقديم بلاغ صيانة</h3>
                     
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                        <div class="input-group"><label>تاريخ العطل</label><input type="date" id="req-date"></div>
+                        <div class="input-group"><label>وقت الملاحظة</label><input type="time" id="req-time"></div>
+                    </div>
+
                     <div class="input-group">
-                        <label>نوع العطل</label>
+                        <label>نوع التخصص المطلوب</label>
                         <select id="req-type">
-                            <option value="">اختر التخصص...</option>
                             </select>
                     </div>
 
                     <div class="input-group">
-                        <label>الأهمية</label>
+                        <label>درجة الاستعجال</label>
                         <div style="display:flex; gap:10px;">
-                            <label style="flex:1;"><input type="radio" name="prio" value="low" checked> عادي</label>
-                            <label style="flex:1;"><input type="radio" name="prio" value="medium"> متوسط</label>
-                            <label style="flex:1;"><input type="radio" name="prio" value="high"> عاجل</label>
+                            <label style="flex:1; text-align:center; padding:12px; border:1px solid var(--border); border-radius:12px; cursor:pointer;" class="prio-box">
+                                <input type="radio" name="prio" value="low" checked style="display:none;">
+                                <i class="fa-regular fa-circle-check" style="display:block; margin-bottom:5px; color:var(--success);"></i>
+                                <span style="font-size:12px; font-weight:bold;">عادي</span>
+                            </label>
+                            <label style="flex:1; text-align:center; padding:12px; border:1px solid var(--border); border-radius:12px; cursor:pointer;" class="prio-box">
+                                <input type="radio" name="prio" value="medium" style="display:none;">
+                                <i class="fa-solid fa-circle-exclamation" style="display:block; margin-bottom:5px; color:var(--warning);"></i>
+                                <span style="font-size:12px; font-weight:bold;">متوسط</span>
+                            </label>
+                            <label style="flex:1; text-align:center; padding:12px; border:1px solid var(--border); border-radius:12px; cursor:pointer;" class="prio-box">
+                                <input type="radio" name="prio" value="high" style="display:none;">
+                                <i class="fa-solid fa-fire-flame-curved" style="display:block; margin-bottom:5px; color:var(--error);"></i>
+                                <span style="font-size:12px; font-weight:bold;">عاجل جداً</span>
+                            </label>
                         </div>
                     </div>
 
                     <div class="input-group">
-                        <label>الموقع</label>
+                        <label>موقع العطل (المبنى / المكان)</label>
                         <select id="req-faculty" style="margin-bottom:12px;">
-                            <option value="">اختر المبنى/الكلية...</option>
                             </select>
-                        <input type="text" id="req-room" placeholder="رقم الغرفة / القاعة">
+                        <input type="text" id="req-room" placeholder="رقم الغرفة أو تفاصيل المكان الدقيقة (مثلاً: الدور الثالث - غرفة 305)">
                     </div>
 
-                    <div class="input-group"><label>وصف البلاغ</label><textarea id="req-desc" rows="4" placeholder="تفاصيل المشكلة..."></textarea></div>
-                    
-                    <div style="display:flex; gap:10px; margin-bottom:20px;">
-                        <div style="flex:1; background:var(--surface-light); padding:15px; border-radius:10px; text-align:center; cursor:pointer;" onclick="document.getElementById('req-files').click()">
-                            <i class="fa-solid fa-cloud-arrow-up"></i> صور/فيديو
+                    <div class="input-group">
+                        <label>وصف المشكلة</label>
+                        <textarea id="req-desc" rows="4" placeholder="يرجى كتابة تفاصيل العطل بوضوح للمساعدة في التشخيص السريع..."></textarea>
+                    </div>
+
+                    <div style="display:flex; gap:12px; margin-bottom:25px;">
+                        <button class="btn-outline" style="flex:1; display:flex; flex-direction:column; align-items:center; height:auto; padding:15px;" onclick="document.getElementById('req-files').click()">
+                            <i class="fa-solid fa-camera fa-lg" style="margin-bottom:8px; color:var(--primary);"></i>
+                            <span style="font-size:12px;">إرفاق صور/فيديو</span>
                             <input type="file" id="req-files" hidden multiple accept="image/*,video/*" onchange="handleFiles(this)">
-                        </div>
-                        <div id="mic-trigger" class="mic-btn" onclick="toggleRecording()"><i class="fa-solid fa-microphone"></i></div>
-                    </div>
-                    
-                    <div id="preview-grid" class="media-grid" style="margin-bottom:20px;"></div>
-                    <button onclick="openSupModal()" class="btn-main">التالي: اختيار المشرف</button>
-                </div>
-            </div>
-
-            <div id="page-team" class="page-section hidden">
-                <div class="glass-card">
-                    <h3 style="margin-bottom:20px;">فريق العمل</h3>
-                    <div style="display:flex; gap:10px; margin-bottom:20px;">
-                        <input type="text" id="search-query" placeholder="بحث بالـ ID ...">
-                        <button onclick="searchUser()" class="btn-main" style="width:auto;"><i class="fa-solid fa-search"></i></button>
-                    </div>
-                    <div id="search-results" class="hidden"></div>
-                    <div id="friend-reqs" class="hidden" style="background:#fff7ed; padding:10px; border-radius:10px; margin-bottom:15px;">
-                        <h5 style="margin:0 0 10px; color:var(--gold);">طلبات صداقة:</h5>
-                        <div id="reqs-list"></div>
-                    </div>
-                    <h5 style="color:var(--text-muted);">الأصدقاء:</h5>
-                    <div id="team-list"></div>
-                </div>
-            </div>
-
-            <div id="page-profile" class="page-section hidden">
-                <div class="glass-card" style="margin-top:20px; text-align:center;">
-                    <div class="user-avatar-container" style="margin: 0 auto 25px;">
-                        <img id="edit-current-pic" src="">
-                        <div id="edit-frame-overlay" class="frame-overlay"></div>
-                        <div onclick="document.getElementById('edit-profile-file').click()" style="position:absolute; bottom:-5px; right:-5px; background:var(--primary); width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid #fff; z-index:3;"><i class="fa-solid fa-camera" style="color:white; font-size:14px;"></i></div>
-                    </div>
-                    <input type="file" id="edit-profile-file" hidden accept="image/*" onchange="previewProfilePic(this)">
-                    
-                    <div style="margin-bottom:20px;">
-                         <div class="frame-grid">
-                             <div class="frame-option f-none selected" onclick="selectFrame(this, '')">بدون</div>
-                             <div class="frame-option f-gold" onclick="selectFrame(this, 'f-gold')"></div>
-                             <div class="frame-option f-blue" onclick="selectFrame(this, 'f-blue')"></div>
-                             <div class="frame-option f-grad" onclick="selectFrame(this, 'f-grad')"></div>
-                         </div>
-                    </div>
-
-                    <div style="font-family:monospace; background:var(--surface-light); display:inline-block; padding:10px 25px; border-radius:30px; margin-bottom:30px;" onclick="copyId()">ID: <span id="edit-id-display">--</span></div>
-                    <div style="text-align:right;">
-                        <div class="input-group"><label>الاسم</label><input type="text" id="edit-name"></div>
-                        <div class="input-group"><label>الوظيفة</label><input type="text" id="edit-job"></div>
-                        <div class="input-group"><label>المكان</label><input type="text" id="edit-loc"></div>
-                    </div>
-                    <button onclick="saveProfile()" class="btn-main" id="save-profile-btn">حفظ التعديلات</button>
-                </div>
-            </div>
-
-            <div id="page-settings" class="page-section hidden">
-                <div class="glass-card">
-                    <h3 style="margin-bottom:25px;">الإعدادات</h3>
-                    
-                    <div id="reports-section" class="hidden" style="margin-bottom:20px;">
-                        <button onclick="openReportsModal()" class="btn-main" style="background:var(--purple); box-shadow:0 5px 15px rgba(139, 92, 246, 0.3);">
-                            <i class="fa-solid fa-chart-pie"></i> عرض التقارير والإحصائيات
+                        </button>
+                        <button id="mic-trigger" class="btn-outline" style="flex:1; display:flex; flex-direction:column; align-items:center; height:auto; padding:15px;" onclick="toggleRecording()">
+                            <i class="fa-solid fa-microphone fa-lg" style="margin-bottom:8px; color:var(--error);"></i>
+                            <span style="font-size:12px;">تسجيل صوتي</span>
                         </button>
                     </div>
 
-                    <div id="admin-data-settings" class="hidden" style="margin-bottom:20px; border-top:1px dashed var(--border); padding-top:15px;">
-                        <h4 style="color:var(--primary-dark); margin-bottom:10px;">إدخال البيانات (للمدير)</h4>
-                        
-                        <div class="input-group">
-                            <label>إضافة موقع (مبنى/كلية)</label>
-                            <div style="display:flex; gap:5px;">
-                                <input type="text" id="new-location-input" placeholder="اسم المبنى...">
-                                <button onclick="addSystemData('locations')" class="btn-sm btn-main" style="width:auto;">+</button>
-                            </div>
-                            <div id="locations-tags" style="margin-top:5px;"></div>
-                        </div>
+                    <div id="preview-grid" class="media-preview-grid" style="margin-bottom:20px;"></div>
 
-                        <div class="input-group">
-                            <label>إضافة تخصص (نوع عطل)</label>
-                            <div style="display:flex; gap:5px;">
-                                <input type="text" id="new-type-input" placeholder="نوع العطل...">
-                                <button onclick="addSystemData('types')" class="btn-sm btn-main" style="width:auto;">+</button>
-                            </div>
-                            <div id="types-tags" style="margin-top:5px;"></div>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label>الإشعارات</label>
-                        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-light); padding:15px; border-radius:16px;">
-                            <span>تفعيل التنبيهات الصوتية</span>
-                            <button onclick="reqNotifyPerm()" class="btn-sm btn-main" style="width:auto;">تفعيل</button>
-                        </div>
-                    </div>
-
-                    <div id="admin-controls" class="hidden" style="margin-top:20px; padding-top:20px; border-top:1px dashed var(--border);">
-                        <h4 style="color:var(--primary-dark);">تغيير صلاحيات</h4>
-                        <input type="email" id="admin-target-email" placeholder="البريد الإلكتروني..." style="margin-bottom:10px;">
-                        <select id="admin-new-role" style="margin-bottom:10px;">
-                            <option value="engineer">مهندس</option>
-                            <option value="technician">فني</option>
-                            <option value="supervisor">مشرف</option>
-                            <option value="manager">مدير</option>
-                        </select>
-                        <button onclick="changeUserRole(this)" class="btn-main btn-sm">تحديث</button>
-                    </div>
-
-                    <button onclick="document.getElementById('logout-modal').classList.remove('hidden')" class="btn-main btn-danger" style="margin-top:20px;">تسجيل خروج</button>
+                    <button onclick="openSupModal()" class="btn-main">الخطوة التالية: اختيار المشرف <i class="fa-solid fa-chevron-left"></i></button>
                 </div>
             </div>
-        </div>
+
+            <div id="page-admin" class="page-section hidden">
+                <div class="glass-card" style="border-top: 4px solid var(--purple);">
+                    <h3 style="margin-bottom:20px;"><i class="fa-solid fa-chart-line"></i> مركز التقارير الذكي</h3>
+                    <div class="report-stat-grid">
+                        <div class="stat-card">
+                            <i class="fa-solid fa-list-check"></i>
+                            <h4>إجمالي البلاغات</h4>
+                            <p id="stat-total">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fa-solid fa-check-double" style="color:var(--success);"></i>
+                            <h4>بلاغات مكتملة</h4>
+                            <p id="stat-done">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fa-solid fa-hourglass-half" style="color:var(--warning);"></i>
+                            <h4>قيد التنفيذ</h4>
+                            <p id="stat-working">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fa-solid fa-user-slash" style="color:var(--error);"></i>
+                            <h4>بلاغات مرفوضة</h4>
+                            <p id="stat-rejected">0</p>
+                        </div>
+                    </div>
+                    <button onclick="generateFullReport()" class="btn-main" style="background:var(--dark);"><i class="fa-solid fa-file-pdf"></i> استخراج تقرير الأداء الشامل (PDF)</button>
+                </div>
+
+                <div class="glass-card" style="border-top: 4px solid var(--accent);">
+                    <h3><i class="fa-solid fa-gears"></i> إعدادات النظام الأساسية</h3>
+                    
+                    <div style="margin-top:20px;">
+                        <label style="font-weight:800; font-size:14px; display:block; margin-bottom:10px;">إدارة التخصصات (Types):</label>
+                        <div style="display:flex; gap:10px; margin-bottom:15px;">
+                            <input type="text" id="new-specialty" placeholder="أضف تخصص جديد (مثال: تبريد وتكييف)" style="margin:0;">
+                            <button onclick="addSystemData('specialties', 'new-specialty')" class="btn-main" style="width:auto; margin:0;"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div id="specialties-list" style="background:var(--surface-light); padding:10px; border-radius:12px; min-height:50px;"></div>
+                    </div>
+
+                    <div style="margin-top:25px;">
+                        <label style="font-weight:800; font-size:14px; display:block; margin-bottom:10px;">إدارة الأماكن والمباني (Locations):</label>
+                        <div style="display:flex; gap:10px; margin-bottom:15px;">
+                            <input type="text" id="new-location" placeholder="أضف مكان جديد (مثال: مبنى المدرجات)" style="margin:0;">
+                            <button onclick="addSystemData('locations', 'new-location')" class="btn-main" style="width:auto; margin:0;"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div id="locations-list" style="background:var(--surface-light); padding:10px; border-radius:12px; min-height:50px;"></div>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="border-top: 4px solid var(--success);">
+                    <h3><i class="fa-solid fa-user-gear"></i> تقرير إنجاز الفنيين</h3>
+                    <div id="technicians-performance-list" style="margin-top:15px;">
+                        <p style="text-align:center; color:var(--text-muted); font-size:12px;">جاري تحليل البيانات...</p>
+                    </div>
+                </div>
+            </div>
+
+            </main>
 
         <div class="bottom-nav">
-            <div class="nav-item active" onclick="nav('home', this)"><i class="fa-solid fa-list-check"></i>المهام</div>
+            <div class="nav-item active" onclick="nav('home', this)"><i class="fa-solid fa-house-chimney"></i>الرئيسية</div>
+            <div id="nav-admin-btn" class="nav-item hidden" onclick="nav('admin', this)"><i class="fa-solid fa-chart-pie"></i>الإدارة</div>
             <div class="nav-add-btn" onclick="nav('create', null)"><i class="fa-solid fa-plus"></i></div>
-            <div class="nav-item" onclick="nav('team', this)"><i class="fa-solid fa-users"></i>الفريق</div>
-            <div class="nav-item" onclick="nav('profile', this)"><i class="fa-solid fa-user"></i>حسابي</div>
-            <div class="nav-item" onclick="nav('settings', this)"><i class="fa-solid fa-gear"></i>الإعدادات</div>
+            <div class="nav-item" onclick="nav('team', this)"><i class="fa-solid fa-user-group"></i>الفريق</div>
+            <div class="nav-item" onclick="nav('profile', this)"><i class="fa-solid fa-circle-user"></i>حسابي</div>
         </div>
     </div>
-    
-    <div id="sup-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="close-btn" onclick="closeModal('sup-modal')"><i class="fa-solid fa-xmark"></i></div>
-            <h3>اختر المشرف</h3>
-            <div id="sup-list" style="max-height:300px; overflow-y:auto;"></div>
-            <button onclick="sendRequestFinal()" class="btn-main" id="confirm-send-btn" style="margin-top:15px;">إرسال</button>
-        </div>
+</div>
+
+<div id="report-template" class="hidden" style="padding:40px; font-family:'Cairo'; direction:rtl;">
+    <div style="text-align:center; border-bottom:3px solid #000; padding-bottom:20px; margin-bottom:30px;">
+        <h1 style="margin:0;">جامعة الريادة للعلوم والتكنولوجيا</h1>
+        <h2 style="margin:5px 0; color:#444;">تقرير أداء منظومة الصيانة الدوري</h2>
+        <p id="report-date-print"></p>
     </div>
-
-    <div id="reports-modal" class="modal-overlay hidden">
-        <div class="modal-content" style="max-width:500px; max-height:90vh;">
-            <div class="close-btn" onclick="closeModal('reports-modal')"><i class="fa-solid fa-xmark"></i></div>
-            <h3 style="text-align:center; color:var(--primary-dark); margin-bottom:20px;">التقارير والإحصائيات</h3>
-            
-            <div style="display:flex; gap:10px; margin-bottom:20px;">
-                <button onclick="generatePDFReport('full')" class="btn-main btn-sm">تقرير شامل PDF</button>
-                <button onclick="generatePDFReport('tech')" class="btn-main btn-sm" style="background:var(--gold);">تقرير الفنيين PDF</button>
-            </div>
-
-            <div id="reports-content" style="overflow-y:auto; max-height:60vh;">
+    <div id="report-content-print"></div>
+    <div style="margin-top:50px; display:flex; justify-content:space-between;">
+        <div style="text-align:center;"><p>ختم الإدارة</p><br>__________</div>
+        <div style="text-align:center;"><p>توقيع مدير النظام</p><br>__________</div>
+    </div>
+</div>
+<div id="page-team" class="page-section hidden">
+            <div class="glass-card" style="border-top: 3px solid var(--gold);">
+                <h3 style="margin-bottom:20px;"><i class="fa-solid fa-users-viewfinder"></i> البحث عن الكوادر</h3>
+                <div style="display:flex; gap:10px; margin-bottom:25px;">
+                    <div style="position:relative; flex:1;">
+                        <i class="fa-solid fa-search" style="position:absolute; right:15px; top:18px; color:var(--text-muted);"></i>
+                        <input type="text" id="search-query" placeholder="ابحث بالـ ID أو البريد..." style="padding-right:45px;">
+                    </div>
+                    <button onclick="searchUser()" class="btn-main" style="width:auto; padding:0 20px;"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
+                
+                <div id="search-results" class="hidden" style="margin-bottom:30px; animation: fadeIn 0.4s;"></div>
+
+                <div id="friend-reqs" class="hidden" style="background:var(--primary-light); padding:20px; border-radius:20px; margin-bottom:25px; border:1px dashed var(--primary);">
+                    <h5 style="margin:0 0 15px; color:var(--primary-dark); font-weight:800;"><i class="fa-solid fa-user-plus"></i> طلبات الربط الوظيفي:</h5>
+                    <div id="reqs-list"></div>
+                </div>
+
+                <h5 style="color:var(--text-muted); font-weight:800; border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:15px;">زملائي في الفريق:</h5>
+                <div id="team-list" style="display:grid; grid-template-columns: 1fr; gap:12px;"></div>
+            </div>
+        </div>
+
+        <div id="page-profile" class="page-section hidden">
+            <div class="glass-card" style="margin-top:10px;">
+                <div style="text-align:center;">
+                    <div class="user-avatar-container" style="margin: 0 auto 25px; width:120px; height:120px;">
+                        <img id="edit-current-pic" src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png" style="border:6px solid white;">
+                        <div id="edit-frame-overlay" class="frame-overlay"></div>
+                        <div onclick="document.getElementById('edit-profile-file').click()" style="position:absolute; bottom:5px; left:5px; background:var(--primary); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:3px solid #fff; box-shadow:var(--shadow-md); z-index:10;">
+                            <i class="fa-solid fa-camera-retro" style="color:white; font-size:16px;"></i>
+                        </div>
+                    </div>
+                    <input type="file" id="edit-profile-file" hidden accept="image/*" onchange="previewProfilePic(this)">
+                    
+                    <div style="margin-bottom:30px;">
+                         <p style="font-size:13px; font-weight:800; margin-bottom:15px; color:var(--text-muted);">تخصيص إطار التميز الوظيفي:</p>
+                         <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px;">
+                             <div class="frame-option selected" style="border:1px solid #ccc; height:50px; border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:10px;" onclick="selectFrame(this, '')">بدون</div>
+                             <div class="frame-option f-gold" style="height:50px; border-radius:10px; cursor:pointer;" onclick="selectFrame(this, 'f-gold')"></div>
+                             <div class="frame-option f-blue" style="height:50px; border-radius:10px; cursor:pointer;" onclick="selectFrame(this, 'f-blue')"></div>
+                             <div class="frame-option f-grad" style="height:50px; border-radius:10px; cursor:pointer;" onclick="selectFrame(this, 'f-grad')"></div>
+                         </div>
+                    </div>
+
+                    <div style="background:var(--dark); color:white; padding:12px 25px; border-radius:50px; display:inline-flex; align-items:center; gap:12px; margin-bottom:30px; cursor:pointer;" onclick="copyId()">
+                        <span style="font-family:'JetBrains Mono'; font-weight:700;">ID: <span id="edit-id-display">------</span></span>
+                        <i class="fa-regular fa-copy"></i>
+                    </div>
+
+                    <div style="text-align:right;">
+                        <div class="input-group"><label>الاسم الرباعي</label><input type="text" id="edit-name"></div>
+                        <div class="input-group"><label>الجنس</label><select id="edit-gender"><option value="male">ذكر</option><option value="female">أنثى</option></select></div>
+                        <div class="input-group"><label>المسمى الوظيفي</label><input type="text" id="edit-job"></div>
+                        <div class="input-group"><label>موقع العمل</label><input type="text" id="edit-loc"></div>
+                    </div>
+                    
+                    <button onclick="saveProfile()" class="btn-main" id="save-profile-btn" style="margin-top:20px;">حفظ وتحديث البيانات <i class="fa-solid fa-cloud-arrow-up"></i></button>
+                    <button onclick="document.getElementById('logout-modal').classList.remove('hidden')" class="btn-outline" style="margin-top:15px; width:100%; border-color:var(--error); color:var(--error);"><i class="fa-solid fa-power-off"></i> تسجيل الخروج من النظام</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sup-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:450px;">
+            <div class="close-btn" onclick="closeModal('sup-modal')"><i class="fa-solid fa-x"></i></div>
+            <h3 style="margin-bottom:20px; font-weight:900; color:var(--primary); border-bottom:2px solid var(--primary-light); padding-bottom:10px;">توجيه البلاغ للمشرف</h3>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">اختر المشرف المسؤول عن منطقتك لضمان سرعة الاستجابة:</p>
+            <div id="sup-list" style="max-height:350px; overflow-y:auto; padding:5px;"></div>
+            <button onclick="sendRequestFinal()" class="btn-main" id="confirm-send-btn" style="margin-top:20px;">إرسال الآن <i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
 
     <div id="action-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="close-btn" onclick="closeModal('action-modal')"><i class="fa-solid fa-xmark"></i></div>
-            <h3 id="act-title">إجراء</h3>
-            <textarea id="act-comment" rows="3" placeholder="ملاحظات..."></textarea>
+            <h3 id="act-title" style="margin-bottom:20px; font-weight:900; color:var(--dark);">تنفيذ إجراء</h3>
+            <textarea id="act-comment" rows="4" placeholder="أضف ملاحظات فنية أو إدارية هنا..."></textarea>
             
-            <div id="eng-select-area" class="hidden" style="margin-top:15px;">
-                <p style="font-size:12px; font-weight:bold;">اختر المهندس:</p>
-                <div id="eng-list-action" class="tech-select-grid" style="max-height:150px; overflow-y:auto;"></div>
+            <div id="eng-select-area" class="hidden" style="margin-top:20px;">
+                <p style="font-size:13px; font-weight:800; color:var(--text-muted); margin-bottom:10px;">تعيين المهندس المختص:</p>
+                <div id="eng-list-action" class="tech-select-grid"></div>
             </div>
 
-            <div id="tech-select-area" class="hidden" style="margin-top:15px;">
-                <p style="font-size:12px; font-weight:bold;">تعيين الفني:</p>
-                <div style="display:flex; gap:10px; margin-bottom:10px;">
-                    <label style="flex:1;"><input type="radio" name="tech-type" value="internal" checked onchange="toggleTechType(this.value)"> داخلي</label>
-                    <label style="flex:1;"><input type="radio" name="tech-type" value="external" onchange="toggleTechType(this.value)"> خارجي</label>
+            <div id="tech-select-area" class="hidden" style="margin-top:20px;">
+                <p style="font-size:13px; font-weight:800; color:var(--text-muted); margin-bottom:10px;">إسناد المهمة لفني:</p>
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <label style="flex:1; cursor:pointer;"><input type="radio" name="tech-type" value="internal" checked onchange="toggleTechType(this.value)"> فني جامعي</label>
+                    <label style="flex:1; cursor:pointer;"><input type="radio" name="tech-type" value="external" onchange="toggleTechType(this.value)"> فني خارجي</label>
                 </div>
-                <div id="tech-list-action" class="tech-select-grid"></div>
-                <div id="ext-tech-form" class="ext-tech-form hidden">
-                    <input type="text" id="ext-name" placeholder="الاسم"><br><br>
-                    <input type="tel" id="ext-phone" placeholder="الهاتف">
+                <div id="tech-list-action" class="tech-select-grid" style="max-height:200px; overflow-y:auto;"></div>
+                <div id="ext-tech-form" class="hidden" style="background:var(--surface-light); padding:15px; border-radius:15px; border:1px dashed var(--border);">
+                    <input type="text" id="ext-name" placeholder="اسم الفني أو الشركة" style="margin-bottom:10px;">
+                    <input type="tel" id="ext-phone" placeholder="رقم التواصل">
                 </div>
             </div>
-            <button onclick="submitAction()" id="act-submit-btn" class="btn-main" style="margin-top:15px;">تنفيذ</button>
+
+            <button onclick="submitAction()" id="act-submit-btn" class="btn-main" style="margin-top:25px;">تأكيد الإجراء <i class="fa-solid fa-check-double"></i></button>
         </div>
     </div>
 
     <div id="request-details-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="close-btn" onclick="closeModal('request-details-modal')"><i class="fa-solid fa-xmark"></i></div>
-            <h3 style="text-align:center;">تفاصيل البلاغ</h3>
+        <div class="modal-content" style="max-width:550px; background:#fff;">
+            <div class="close-btn" onclick="closeModal('request-details-modal')"><i class="fa-solid fa-times"></i></div>
             <div id="req-details-content"></div>
+            <div id="action-buttons-detail" style="margin-top:25px; display:grid; grid-template-columns: 1fr 1fr; gap:12px;"></div>
         </div>
     </div>
 
-    <div id="audio-player-modal" class="modal-overlay hidden">
-        <div class="modal-content" style="text-align:center;">
-            <div class="close-btn" onclick="closeAudioPlayer()"><i class="fa-solid fa-xmark"></i></div>
-            <audio id="modal-audio-player" controls style="width:100%; margin-top:20px;"></audio>
-        </div>
-    </div>
-    <div id="media-viewer" class="modal-overlay hidden" style="background:rgba(0,0,0,0.9);" onclick="this.classList.add('hidden')">
-        <div id="media-content-container" style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;"></div>
-    </div>
-
-    <div id="confirm-modal" class="modal-overlay hidden">
-         <div class="modal-content" style="text-align:center; max-width:300px;">
-              <h3>تأكيد</h3>
-              <p id="confirm-modal-msg"></p>
-              <div style="display:flex; gap:10px; margin-top:15px;">
-                  <button id="confirm-yes-btn" class="btn-main btn-danger">نعم</button>
-                  <button onclick="closeModal('confirm-modal')" class="btn-ghost">إلغاء</button>
-              </div>
-         </div>
-    </div>
     <div id="logout-modal" class="modal-overlay hidden">
-        <div class="modal-content" style="text-align:center;">
-            <h3>تأكيد الخروج؟</h3>
-            <div style="display:flex; gap:10px; margin-top:15px;">
-                <button onclick="logout()" class="btn-main btn-danger">خروج</button>
-                <button onclick="closeModal('logout-modal')" class="btn-ghost">إلغاء</button>
+        <div class="modal-content" style="text-align:center; max-width:320px;">
+            <i class="fa-solid fa-triangle-exclamation fa-3x" style="color:var(--error); margin-bottom:15px;"></i>
+            <h3 style="margin-bottom:10px;">تسجيل الخروج؟</h3>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:25px;">هل أنت متأكد من رغبتك في إغلاق الجلسة الحالية؟</p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="logout()" class="btn-main" style="background:var(--error);">نعم، خروج</button>
+                <button onclick="closeModal('logout-modal')" class="btn-outline" style="flex:1;">إلغاء</button>
             </div>
         </div>
     </div>
 
-    <div id="toast" style="position:fixed; top:30px; left:50%; transform:translateX(-50%); background:rgba(15, 23, 42, 0.95); color:white; padding:12px 30px; border-radius:50px; z-index:9999; display:none; font-size:13px; font-weight:bold;"></div>
+    <div id="toast" style="position:fixed; bottom:110px; left:50%; transform:translateX(-50%); background:var(--dark); color:white; padding:12px 25px; border-radius:50px; z-index:10000; display:none; font-size:13px; font-weight:700; box-shadow:var(--shadow-lg); text-align:center; min-width:200px; animation: slideUp 0.3s ease-out;"></div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -506,7 +655,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
 <script>
-    // ================= CONFIGURATION =================
+    // 1. الإعدادات والتهيئات الأساسية
     const firebaseConfig = {
         apiKey: "AIzaSyABwJfEkkbNB8GurZkyj67R8ksVNEXZ11I",
         authDomain: "ryadanur1-375a8.firebaseapp.com",
@@ -515,6 +664,7 @@
         messagingSenderId: "858244114090",
         appId: "1:858244114090:web:42cee8e98e3984164392d3"
     };
+
     const CLOUD_NAME = "djzfruh22"; 
     const CLOUD_PRESET = "udyvggup";
 
@@ -522,655 +672,650 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // --- Global State ---
+    // متغيرات الحالة العالمية (Global State)
     let currentUser = null;
     let userData = null;
     let isLoginMode = true;
-    let selectedSup = null;
-    let currentTab = 'active'; 
     let requestsCache = [];
-    let uploadQueue = []; 
-    let tempActionData = {}; 
-    let selectedTech = null;
-    let selectedEng = null;
-    let newProfilePicFile = null;
-    let isFirstLoad = true;
+    let uploadQueue = [];
+    let isRecording = false;
     let mediaRecorder = null;
     let audioChunks = [];
-    let isRecording = false;
+    let selectedSup = null;
+    let currentTab = 'active';
+    let isFirstLoad = true;
     let isRegistering = false;
-    
-    // Cache for dynamic data
+    let systemSpecialties = [];
     let systemLocations = [];
-    let systemTypes = [];
 
-    // --- Helpers ---
-    function generateUniqueCode() {
-        const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-        let res = ''; for(let i=0; i<4; i++) res += chars.charAt(Math.floor(Math.random()*chars.length)); return res;
-    }
+    /* =========================================================================
+       2. منطق الحماية والدخول (Auth Logic) - تم حل مشكلة خطأ التحميل هنا
+       =========================================================================
+    */
 
-    // --- Auth Logic (With Retry for User Data) ---
-    auth.onAuthStateChanged(async u => {
-        if(isRegistering) return; // Wait if registering
-        if(u) {
-            if(!u.emailVerified) {
-                document.getElementById('loader').classList.add('hidden');
-                toast("⚠️ يجب تفعيل البريد الإلكتروني"); auth.signOut(); showScreen('auth-screen'); return;
+    auth.onAuthStateChanged(async (user) => {
+        if (isRegistering) return; // منع التداخل أثناء إنشاء حساب جديد
+
+        if (user) {
+            if (!user.emailVerified) {
+                toast("⚠️ يرجى تفعيل حسابك من البريد الإلكتروني");
+                auth.signOut();
+                return;
             }
-            currentUser = u;
-            await retryLoadUser(u.uid); // Use retry logic
+            currentUser = user;
+            await initializeAppData();
         } else {
             document.getElementById('loader').classList.add('hidden');
             showScreen('auth-screen');
         }
     });
 
-    // Retry Logic for Race Condition (Bug Fix #3)
-    async function retryLoadUser(uid, attempts = 0) {
+    async function initializeAppData() {
         try {
-            const doc = await db.collection('users').doc(uid).get();
-            if(doc.exists) {
-                userData = doc.data();
-                if(!userData.shortId) await db.collection('users').doc(uid).update({shortId: Math.random().toString(36).substr(2,6).toUpperCase()});
-                
-                renderHeader();
-                showScreen('app-container');
-                setupRoleUI();
-                loadSystemData(); // Load Locations/Types
-                loadFeed();
-                loadTeam(); 
-                loadFriendReqs();
-                loadProfilePageData();
-                
-                // Defaults
-                document.getElementById('req-date').valueAsDate = new Date();
-                document.getElementById('req-time').value = new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
-                setTimeout(() => { document.getElementById('loader').classList.add('hidden'); }, 500);
-            } else {
-                if(attempts < 3) {
-                    // Wait 1 second and try again
-                    setTimeout(() => retryLoadUser(uid, attempts + 1), 1000);
-                } else {
-                    document.getElementById('loader').classList.add('hidden');
-                    toast("⚠️ خطأ: بيانات المستخدم غير موجودة. اتصل بالدعم.");
-                }
+            // محاولة جلب البيانات مع "تكرار" بسيط لتجنب Race Condition عند التسجيل
+            let doc = await db.collection('users').doc(currentUser.uid).get();
+            
+            if (!doc.exists) {
+                // انتظار ثانية واحدة والمحاولة مرة أخرى (خاصة للمستخدمين الجدد)
+                await new Promise(r => setTimeout(r, 1500));
+                doc = await db.collection('users').doc(currentUser.uid).get();
             }
-        } catch(e) { console.error(e); }
-    }
-    
-    function toggleAuth() { 
-        isLoginMode = !isLoginMode; 
-        document.getElementById('reg-fields').classList.toggle('hidden');
-        document.getElementById('confirm-pass-field').classList.toggle('hidden');
-        document.getElementById('auth-btn').innerText = isLoginMode ? "تسجيل الدخول" : "إنشاء حساب";
-        document.getElementById('auth-switch-text').innerHTML = isLoginMode ? "ليس لديك حساب؟ <b style='color:var(--primary)'>إنشاء حساب جديد</b>" : "لديك حساب بالفعل؟ <b style='color:var(--primary)'>تسجيل الدخول</b>";
+
+            if (doc.exists) {
+                userData = doc.data();
+                renderHeader();
+                setupPermissions();
+                loadSystemSettings(); // جلب التخصصات والأماكن
+                loadFeed();
+                loadTeam();
+                loadFriendReqs();
+                showScreen('app-container');
+            } else {
+                throw new Error("لم يتم العثور على وثيقة المستخدم");
+            }
+        } catch (error) {
+            console.error(error);
+            toast("⚠️ فشل في تحميل البيانات، جاري إعادة المحاولة...");
+            setTimeout(() => location.reload(), 3000);
+        } finally {
+            document.getElementById('loader').classList.add('hidden');
+        }
     }
 
     async function handleAuth() {
-        const email = document.getElementById('email').value; 
+        const email = document.getElementById('email').value.trim();
         const pass = document.getElementById('password').value;
-        const btn = document.getElementById('auth-btn'); 
-        btn.disabled=true; btn.innerText = "جاري المعالجة...";
-        
+        const btn = document.getElementById('auth-btn');
+
+        if (!email || !pass) return toast("❌ أكمل البيانات");
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري التحقق...';
+
         try {
-            if(isLoginMode) {
+            if (isLoginMode) {
                 await auth.signInWithEmailAndPassword(email, pass);
             } else {
-                if(pass !== document.getElementById('confirm-password').value) throw new Error("كلمة المرور غير متطابقة");
                 isRegistering = true;
-                const role = document.querySelector('input[name="auth-role"]:checked').value;
-                if(role === 'manager') {
-                      const mSnap = await db.collection('users').where('role', '==', 'manager').get();
-                      if(mSnap.size >= 4) throw new Error("⛔ تم اكتمال عدد المديرين (4).");
-                }
-                const cred = await auth.createUserWithEmailAndPassword(email, pass);
+                const role = document.getElementById('reg-role').value;
+                const name = document.getElementById('reg-name').value.trim();
+                const phone = document.getElementById('reg-phone').value.trim();
                 const gender = document.querySelector('input[name="auth-gender"]:checked').value;
-                const defPic = gender==='male'?'https://cdn-icons-png.flaticon.com/512/4140/4140048.png':'https://cdn-icons-png.flaticon.com/512/4140/4140047.png';
+                const job = document.getElementById('reg-job').value;
+                const loc = document.getElementById('reg-loc').value;
+
+                if (!name || !phone) throw new Error("جميع الحقول مطلوبة");
+
+                const cred = await auth.createUserWithEmailAndPassword(email, pass);
                 
+                // حفظ البيانات فوراً في Firestore
                 await db.collection('users').doc(cred.user.uid).set({
-                    email, role, gender, photoUrl:defPic,
-                    fullName: document.getElementById('reg-name').value,
-                    jobTitle: document.getElementById('reg-job').value,
-                    location: document.getElementById('reg-loc').value,
-                    phone: document.getElementById('reg-phone').value,
-                    shortId: Math.random().toString(36).substr(2,6).toUpperCase(),
+                    uid: cred.user.uid,
+                    fullName: name,
+                    email: email,
+                    role: role,
+                    gender: gender,
+                    phone: phone,
+                    jobTitle: job,
+                    location: loc,
+                    shortId: Math.random().toString(36).substr(2, 6).toUpperCase(),
+                    photoUrl: gender === 'male' ? 'https://cdn-icons-png.flaticon.com/512/4140/4140048.png' : 'https://cdn-icons-png.flaticon.com/512/4140/4140047.png',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
+
                 await cred.user.sendEmailVerification();
-                toast("✅ تم الإنشاء. راجع بريدك للتفعيل.");
-                isRegistering = false; toggleAuth();
+                toast("✅ تم التسجيل! فعل حسابك من البريد الإلكتروني");
+                isRegistering = false;
+                toggleAuth(); // العودة لوضع الدخول
             }
-        } catch(e) { toast(e.message); isRegistering = false; }
-        finally { btn.disabled=false; btn.innerText = isLoginMode?"تسجيل الدخول":"إنشاء حساب"; }
-    }
-    // ==========================================
-    // 1. DATA MANAGEMENT & ROLES
-    // ==========================================
-
-    function setupRoleUI() {
-        const r = userData.role;
-        // Hide Create button for Tech/Eng
-        if(r === 'technician' || r === 'engineer') {
-             document.querySelector('.nav-add-btn').classList.add('hidden');
-             document.getElementById('page-create').innerHTML = "<div style='text-align:center; padding:50px; color:#999;'><i class='fa-solid fa-lock fa-2x'></i><p>حسابك مخصص لاستقبال وتنفيذ المهام فقط.</p></div>";
-        }
-        // Show Admin Panels
-        if (r === 'manager') {
-            document.getElementById('admin-controls').classList.remove('hidden');
-            document.getElementById('admin-data-settings').classList.remove('hidden');
-        }
-        // Show Reports for Manager & Engineer
-        if (['manager', 'engineer'].includes(r)) {
-            document.getElementById('reports-section').classList.remove('hidden');
+        } catch (e) {
+            toast("❌ " + e.message);
+            isRegistering = false;
+        } finally {
+            btn.disabled = false;
+            btn.innerText = isLoginMode ? "تسجيل الدخول" : "إنشاء الحساب";
         }
     }
 
-    // --- Dynamic System Data (Locations & Types) ---
-    async function loadSystemData() {
-        // Fetch Locations
-        const locSnap = await db.collection('system_data').doc('locations').get();
-        if(locSnap.exists) systemLocations = locSnap.data().list || [];
-        else systemLocations = ['المبني الاداري', 'كلية التمريض', 'الحاسبات', 'العلاج الطبيعي', 'الصيدلة', 'الاسنان', 'ادارة اعمال']; // Defaults
+    /* =========================================================================
+       3. إدارة بيانات النظام (Manager Features)
+       =========================================================================
+    */
 
-        // Fetch Types
-        const typeSnap = await db.collection('system_data').doc('types').get();
-        if(typeSnap.exists) systemTypes = typeSnap.data().list || [];
-        else systemTypes = ['كهرباء', 'سباكة', 'نجارة', 'تكييف', 'IT']; // Defaults
-
-        populateDropdowns();
-        renderAdminTags();
-    }
-
-    function populateDropdowns() {
-        const locSelect = document.getElementById('req-faculty');
-        const typeSelect = document.getElementById('req-type');
-        
-        // Keep first option
-        locSelect.innerHTML = '<option value="">اختر المبنى/الكلية...</option>';
-        systemLocations.forEach(l => locSelect.innerHTML += `<option value="${l}">${l}</option>`);
-        
-        typeSelect.innerHTML = '<option value="">اختر التخصص...</option>';
-        systemTypes.forEach(t => typeSelect.innerHTML += `<option value="${t}">${t}</option>`);
-    }
-
-    function renderAdminTags() {
-        if(userData.role !== 'manager') return;
-        const lDiv = document.getElementById('locations-tags');
-        const tDiv = document.getElementById('types-tags');
-        
-        lDiv.innerHTML = systemLocations.map(l => `<span class="admin-tag">${l} <i class="fa-solid fa-xmark" onclick="removeSystemData('locations','${l}')"></i></span>`).join('');
-        tDiv.innerHTML = systemTypes.map(t => `<span class="admin-tag">${t} <i class="fa-solid fa-xmark" onclick="removeSystemData('types','${t}')"></i></span>`).join('');
-    }
-
-    async function addSystemData(docName) {
-        const inputId = docName === 'locations' ? 'new-location-input' : 'new-type-input';
-        const val = document.getElementById(inputId).value.trim();
-        if(!val) return;
-        
-        let list = docName === 'locations' ? systemLocations : systemTypes;
-        if(!list.includes(val)) {
-            list.push(val);
-            await db.collection('system_data').doc(docName).set({ list: list }, {merge: true});
-            document.getElementById(inputId).value = '';
-            loadSystemData(); // Refresh UI
-            toast("✅ تم الإضافة");
-        }
-    }
-
-    async function removeSystemData(docName, val) {
-        if(!confirm("حذف " + val + "؟")) return;
-        let list = docName === 'locations' ? systemLocations : systemTypes;
-        list = list.filter(i => i !== val);
-        await db.collection('system_data').doc(docName).set({ list: list });
-        
-        // Update local state immediately for UI response
-        if(docName === 'locations') systemLocations = list; else systemTypes = list;
-        loadSystemData();
-        toast("تم الحذف");
-    }
-
-    // ==========================================
-    // 2. REPORTS LOGIC (New Feature)
-    // ==========================================
-    
-    function openReportsModal() {
-        document.getElementById('reports-modal').classList.remove('hidden');
-        renderTechStats(); // Default view
-    }
-
-    function renderTechStats() {
-        const container = document.getElementById('reports-content');
-        container.innerHTML = '<p style="text-align:center">جاري تحليل البيانات...</p>';
-        
-        // Group data by technician
-        const techStats = {};
-        
-        requestsCache.forEach(req => {
-            if(!req.technicianName) return; // Skip if no tech assigned
-            const name = req.technicianName.split('(')[0].trim(); // Clean name
-            
-            if(!techStats[name]) techStats[name] = { total:0, done:0, working:0, rejected:0 };
-            
-            techStats[name].total++;
-            if(req.status === 'done') techStats[name].done++;
-            else if(['working', 'at_tech', 'pending_confirmation'].includes(req.status)) techStats[name].working++;
-            else if(req.status === 'rejected') techStats[name].rejected++;
+    async function loadSystemSettings() {
+        // جلب التخصصات
+        db.collection('settings').doc('specialties').onSnapshot(doc => {
+            if (doc.exists) {
+                systemSpecialties = doc.data().list || [];
+                renderSystemDataList('specialties-list', systemSpecialties, 'specialties');
+                updateDropdown('req-type', systemSpecialties, "اختر التخصص...");
+            }
         });
 
-        let html = '<h4 style="margin:15px 0; color:#555;">أداء الفنيين</h4>';
-        if(Object.keys(techStats).length === 0) html += '<p style="text-align:center;color:#999">لا توجد بيانات كافية</p>';
-
-        for (const [name, stats] of Object.entries(techStats)) {
-            html += `
-            <div class="tech-report-card">
-                <div>
-                    <b style="font-size:13px;">${name}</b>
-                    <div style="font-size:10px; color:#777;">إجمالي المهام: ${stats.total}</div>
-                </div>
-                <div style="display:flex; gap:8px;">
-                    <div class="tech-stat-box"><span class="tech-stat-num" style="color:var(--success)">${stats.done}</span>مكتمل</div>
-                    <div class="tech-stat-box"><span class="tech-stat-num" style="color:var(--warning)">${stats.working}</span>جاري</div>
-                    <div class="tech-stat-box"><span class="tech-stat-num" style="color:var(--error)">${stats.rejected}</span>مرفوض</div>
-                </div>
-            </div>`;
-        }
-        container.innerHTML = html;
+        // جلب الأماكن
+        db.collection('settings').doc('locations').onSnapshot(doc => {
+            if (doc.exists) {
+                systemLocations = doc.data().list || [];
+                renderSystemDataList('locations-list', systemLocations, 'locations');
+                updateDropdown('req-faculty', systemLocations, "اختر المبنى...");
+            }
+        });
     }
 
-    function generatePDFReport(type) {
-        toast("جاري إنشاء PDF...");
-        const element = document.createElement('div');
-        element.style.direction = 'rtl';
-        element.style.fontFamily = 'Cairo, sans-serif';
-        element.style.padding = '20px';
+    async function addSystemData(type, inputId) {
+        const val = document.getElementById(inputId).value.trim();
+        if (!val) return;
+        
+        const currentList = type === 'specialties' ? systemSpecialties : systemLocations;
+        if (currentList.includes(val)) return toast("المعطى موجود بالفعل");
 
-        let content = `<h2 style="text-align:center; color:#0056b3;">تقرير ${type==='full'?'شامل':'أداء الفنيين'}</h2>`;
-        content += `<p style="text-align:center; font-size:12px;">تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}</p><hr>`;
+        await db.collection('settings').doc(type).set({
+            list: [...currentList, val]
+        }, { merge: true });
 
-        if(type === 'full') {
-            content += `<table style="width:100%; border-collapse:collapse; font-size:10px; margin-top:20px;">
-                <tr style="background:#f1f5f9;">
-                    <th style="border:1px solid #ccc; padding:5px;">الكود</th>
-                    <th style="border:1px solid #ccc; padding:5px;">التاريخ</th>
-                    <th style="border:1px solid #ccc; padding:5px;">الموقع</th>
-                    <th style="border:1px solid #ccc; padding:5px;">الوصف</th>
-                    <th style="border:1px solid #ccc; padding:5px;">منشئ البلاغ</th>
-                    <th style="border:1px solid #ccc; padding:5px;">الحالة</th>
-                </tr>`;
-            requestsCache.forEach(r => {
-                content += `<tr>
-                    <td style="border:1px solid #ccc; padding:5px;">${r.uniqueCode||'-'}</td>
-                    <td style="border:1px solid #ccc; padding:5px;">${r.date}</td>
-                    <td style="border:1px solid #ccc; padding:5px;">${r.location}</td>
-                    <td style="border:1px solid #ccc; padding:5px;">${r.description.substring(0,30)}</td>
-                    <td style="border:1px solid #ccc; padding:5px;">${r.userData.fullName}</td>
-                    <td style="border:1px solid #ccc; padding:5px;">${getStatusLabel(r.status)}</td>
-                </tr>`;
+        document.getElementById(inputId).value = "";
+        toast("✅ تم الإضافة بنجاح");
+    }
+
+    async function deleteSystemData(type, val) {
+        const currentList = type === 'specialties' ? systemSpecialties : systemLocations;
+        const newList = currentList.filter(i => i !== val);
+        await db.collection('settings').doc(type).set({ list: newList });
+        toast("🗑️ تم الحذف");
+    }
+
+    function renderSystemDataList(containerId, list, type) {
+        const div = document.getElementById(containerId);
+        div.innerHTML = list.map(item => `
+            <span class="admin-data-tag">
+                ${item} <i class="fa-solid fa-circle-xmark" onclick="deleteSystemData('${type}', '${item}')"></i>
+            </span>
+        `).join('');
+    }
+
+    function updateDropdown(id, list, placeholder) {
+        const select = document.getElementById(id);
+        if (!select) return;
+        let html = `<option value="">${placeholder}</option>`;
+        list.forEach(item => {
+            html += `<option value="${item}">${item}</option>`;
+        });
+        select.innerHTML = html;
+    }
+
+    /* =========================================================================
+       4. نظام التقارير المتقدم (Reporting Dashboard)
+       =========================================================================
+    */
+
+    async function generateFullReport() {
+        const reportBtn = event.currentTarget;
+        reportBtn.disabled = true;
+        reportBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري معالجة البيانات...';
+
+        const stats = calcStats();
+        const techPerf = await getTechPerformance();
+
+        const printArea = document.getElementById('report-content-print');
+        document.getElementById('report-date-print').innerText = "تاريخ التقرير: " + new Date().toLocaleString('ar-EG');
+
+        let html = `
+            <div style="margin-bottom:30px;">
+                <h3 style="background:#eee; padding:10px;">أولاً: إحصائيات عامة</h3>
+                <table style="width:100%; border-collapse:collapse; text-align:right;">
+                    <tr><td style="border:1px solid #ddd; padding:10px;">إجمالي البلاغات المستلمة</td><td style="border:1px solid #ddd; padding:10px; font-weight:bold;">${stats.total}</td></tr>
+                    <tr><td style="border:1px solid #ddd; padding:10px;">بلاغات تم إصلاحها</td><td style="border:1px solid #ddd; padding:10px; color:green;">${stats.done}</td></tr>
+                    <tr><td style="border:1px solid #ddd; padding:10px;">بلاغات قيد المعالجة</td><td style="border:1px solid #ddd; padding:10px; color:orange;">${stats.working}</td></tr>
+                    <tr><td style="border:1px solid #ddd; padding:10px;">نسبة الإنجاز الكلية</td><td style="border:1px solid #ddd; padding:10px; font-weight:bold;">${((stats.done/stats.total)*100 || 0).toFixed(1)}%</td></tr>
+                </table>
+            </div>
+
+            <div style="margin-bottom:30px;">
+                <h3 style="background:#eee; padding:10px;">ثانياً: أداء الفريق الفني</h3>
+                <table style="width:100%; border-collapse:collapse; text-align:right;">
+                    <thead>
+                        <tr style="background:#f9f9f9;">
+                            <th style="border:1px solid #ddd; padding:10px;">اسم الفني</th>
+                            <th style="border:1px solid #ddd; padding:10px;">المهام المكتملة</th>
+                            <th style="border:1px solid #ddd; padding:10px;">المهام الحالية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${techPerf.map(t => `
+                            <tr>
+                                <td style="border:1px solid #ddd; padding:10px;">${t.name}</td>
+                                <td style="border:1px solid #ddd; padding:10px;">${t.doneTasks}</td>
+                                <td style="border:1px solid #ddd; padding:10px;">${t.activeTasks}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        printArea.innerHTML = html;
+
+        const opt = {
+            margin: 10,
+            filename: `Maintenance_Report_${new Date().toLocaleDateString()}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().from(document.getElementById('report-template')).set(opt).save().then(() => {
+            reportBtn.disabled = false;
+            reportBtn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> استخراج تقرير الأداء الشامل (PDF)';
+            toast("✅ تم تحميل التقرير بنجاح");
+        });
+    }
+
+    function calcStats() {
+        const total = requestsCache.length;
+        const done = requestsCache.filter(r => r.status === 'done').length;
+        const working = requestsCache.filter(r => ['at_engineer','at_tech','working'].includes(r.status)).length;
+        const rejected = requestsCache.filter(r => r.status === 'rejected').length;
+        
+        // تحديث أرقام الشاشة
+        if(userData.role === 'manager' || userData.role === 'engineer') {
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-done').innerText = done;
+            document.getElementById('stat-working').innerText = working;
+            document.getElementById('stat-rejected').innerText = rejected;
+        }
+        return { total, done, working, rejected };
+    }
+
+    async function getTechPerformance() {
+        const techSnap = await db.collection('users').where('role','==','technician').get();
+        let performance = [];
+        
+        techSnap.forEach(doc => {
+            const tech = doc.data();
+            const doneTasks = requestsCache.filter(r => r.technicianId === doc.id && r.status === 'done').length;
+            const activeTasks = requestsCache.filter(r => r.technicianId === doc.id && r.status === 'at_tech').length;
+            performance.push({ name: tech.fullName, doneTasks, activeTasks });
+        });
+
+        // تحديث القائمة في صفحة المدير
+        const perfList = document.getElementById('technicians-performance-list');
+        if(perfList) {
+            perfList.innerHTML = performance.map(t => `
+                <div class="tech-report-item">
+                    <div>
+                        <b style="font-size:14px; display:block;">${t.name}</b>
+                        <small style="color:var(--text-muted);">فني صيانة معتمد</small>
+                    </div>
+                    <div style="text-align:left;">
+                        <span style="color:var(--success); font-weight:900;">${t.doneTasks} مكتمل</span><br>
+                        <span style="color:var(--warning); font-size:11px;">${t.activeTasks} جاري</span>
+                    </div>
+                </div>
+            `).join('') || '<p style="text-align:center; font-size:12px;">لا يوجد بيانات فنيين حالياً</p>';
+        }
+        return performance;
+    }
+
+    /* =========================================================================
+       5. وظائف إرسال ومعالجة البلاغات (Core Actions)
+       =========================================================================
+    */
+
+    async function openSupModal() {
+        const desc = document.getElementById('req-desc').value;
+        const type = document.getElementById('req-type').value;
+        const faculty = document.getElementById('req-faculty').value;
+
+        if(!desc || !type || !faculty) return toast("⚠️ أكمل بيانات البلاغ أولاً");
+
+        document.getElementById('sup-modal').classList.remove('hidden');
+        const listDiv = document.getElementById('sup-list');
+        listDiv.innerHTML = '<p style="text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري جلب المشرفين المتاحين...</p>';
+
+        const supSnap = await db.collection('users').where('role','==','supervisor').get();
+        listDiv.innerHTML = "";
+        
+        if(supSnap.empty) {
+            listDiv.innerHTML = '<p style="text-align:center; color:red;">لا يوجد مشرفين مسجلين حالياً</p>';
+            return;
+        }
+
+        supSnap.forEach(doc => {
+            const u = doc.data();
+            listDiv.innerHTML += `
+                <div class="friend-item" onclick="selectSup(this, '${doc.id}')" style="margin-bottom:10px; border:2px solid transparent;">
+                    <img src="${u.photoUrl}" style="width:45px; height:45px; border-radius:50%;">
+                    <div style="flex:1;">
+                        <b style="font-size:14px; display:block;">${u.fullName}</b>
+                        <small style="color:var(--primary); font-weight:700;">${u.jobTitle || 'مشرف صيانة'}</small>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function selectSup(el, id) {
+        document.querySelectorAll('#sup-list .friend-item').forEach(item => {
+            item.style.borderColor = 'transparent';
+            item.style.background = 'white';
+        });
+        el.style.borderColor = 'var(--primary)';
+        el.style.background = 'var(--primary-light)';
+        selectedSup = id;
+    }
+
+    async function sendRequestFinal() {
+        if(!selectedSup) return toast("❌ يرجى اختيار المشرف");
+        
+        const btn = document.getElementById('confirm-send-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane fa-spin"></i> جاري الإرسال والأرشفة...';
+
+        try {
+            // 1. رفع الملفات إلى Cloudinary
+            let mediaLinks = [];
+            for (const file of uploadQueue) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', CLOUD_PRESET);
+                
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                mediaLinks.push({ 
+                    url: data.secure_url, 
+                    type: file.type.startsWith('image') ? 'image' : (file.type.startsWith('audio') ? 'audio' : 'video') 
+                });
+            }
+
+            const uniqueCode = Math.random().toString(36).substr(2, 4).toUpperCase();
+            
+            // 2. إنشاء وثيقة البلاغ
+            await db.collection('requests').add({
+                userId: currentUser.uid,
+                requesterName: userData.fullName, // تم الربط كما طلبت
+                requesterPic: userData.photoUrl,
+                supervisorId: selectedSup,
+                status: 'pending',
+                type: document.getElementById('req-type').value,
+                priority: document.querySelector('input[name="prio"]:checked').value,
+                description: document.getElementById('req-desc').value,
+                location: document.getElementById('req-faculty').value + " - " + document.getElementById('req-room').value,
+                date: document.getElementById('req-date').value,
+                time: document.getElementById('req-time').value,
+                media: mediaLinks,
+                uniqueCode: uniqueCode,
+                isDeleted: false,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            content += `</table>`;
-        } else {
-            // Tech Report layout
-            content += document.getElementById('reports-content').innerHTML;
+
+            toast(`✅ تم إرسال البلاغ بنجاح! كود التتبع: ${uniqueCode}`);
+            closeModal('sup-modal');
+            uploadQueue = [];
+            document.getElementById('preview-grid').innerHTML = "";
+            document.getElementById('req-desc').value = "";
+            nav('home', document.querySelector('.nav-item:first-child'));
+        } catch (e) {
+            console.error(e);
+            toast("❌ خطأ في الإرسال");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "إرسال الآن";
         }
-
-        element.innerHTML = content;
-        html2pdf().from(element).save(`Report_${type}_${Date.now()}.pdf`);
     }
-
-    // ==========================================
-    // 3. CORE & CRUD
-    // ==========================================
 
     function loadFeed() {
-        let q = db.collection('requests');
-        if(userData.role === 'employee') q = q.where('userId','==',currentUser.uid);
-        else if(userData.role === 'supervisor') q = q.where('supervisorId','==',currentUser.uid);
-        else if(userData.role === 'engineer') q = q.where('engineerId','==',currentUser.uid);
-        else if(userData.role === 'technician') q = q.where('technicianId','==',currentUser.uid);
-        
-        q.onSnapshot(snap => {
-            const currentIds = requestsCache.map(r => r.id);
-            let newItems = [];
-            let updated = [];
-            snap.forEach(doc => {
-                const d = {id:doc.id, ...doc.data()};
-                updated.push(d);
-                if(!isFirstLoad && !currentIds.includes(doc.id)) newItems.push(d);
-            });
-            requestsCache = updated.sort((a,b) => (b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-            if(newItems.length>0) checkAndPlaySound(newItems);
+        let query = db.collection('requests');
+
+        // فلترة البيانات بناءً على الرتبة
+        if (userData.role === 'employee') {
+            query = query.where('userId', '==', currentUser.uid);
+        } else if (userData.role === 'supervisor') {
+            query = query.where('supervisorId', '==', currentUser.uid);
+        } else if (userData.role === 'engineer') {
+            query = query.where('engineerId', '==', currentUser.uid);
+        } else if (userData.role === 'technician') {
+            query = query.where('technicianId', '==', currentUser.uid);
+        }
+
+        query.onSnapshot(snapshot => {
+            requestsCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            requestsCache.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+            
+            if(!isFirstLoad) {
+                // منطق التنبيه الصوتي للبلاغات الجديدة
+                const newReq = requestsCache[0];
+                if(newReq && newReq.createdAt?.seconds > (Date.now()/1000 - 10)) {
+                    document.getElementById('notify-sound').play().catch(e => {});
+                    toast("🔔 بلاغ جديد في القائمة");
+                }
+            }
             isFirstLoad = false;
+            calcStats();
             renderFeed();
         });
     }
 
-    function checkAndPlaySound(newItems) {
-        let notify = false;
-        if(userData.role === 'supervisor' && newItems.some(r => r.status === 'pending')) notify = true;
-        if(userData.role === 'engineer' && newItems.some(r => r.status === 'at_engineer')) notify = true;
-        if(userData.role === 'technician' && newItems.some(r => r.status === 'at_tech')) notify = true;
-        
-        if(notify) {
-            const audio = document.getElementById('notify-sound');
-            if(audio) audio.play().catch(e=>{});
-            toast("🔔 إشعار جديد");
-            document.querySelector('.bell-badge').style.display = 'block';
-        }
-    }
-
     function renderFeed() {
-        const container = document.getElementById('requests-feed'); container.innerHTML = "";
+        const container = document.getElementById('requests-feed');
+        container.innerHTML = "";
+
         let list = requestsCache;
-        
-        if(currentTab === 'trash') list = list.filter(r => r.isDeleted);
-        else {
-            list = list.filter(r => !r.isDeleted);
-            if(currentTab === 'active') list = list.filter(r => !['done','rejected'].includes(r.status));
-            else list = list.filter(r => ['done','rejected'].includes(r.status));
+
+        // تطبيق الفلاتر (تبويبات)
+        if (currentTab === 'trash') {
+            list = list.filter(r => r.isDeleted === true);
+        } else {
+            list = list.filter(r => r.isDeleted !== true);
+            if (currentTab === 'active') {
+                list = list.filter(r => !['done', 'rejected'].includes(r.status));
+            } else {
+                list = list.filter(r => ['done', 'rejected'].includes(r.status));
+            }
         }
 
-        if(list.length === 0) { container.innerHTML = `<div style="text-align:center; padding:50px; color:#999;">لا يوجد بيانات</div>`; return; }
+        if (list.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:60px 20px; color:var(--text-muted);">
+                    <i class="fa-solid fa-folder-open fa-3x" style="opacity:0.2; margin-bottom:15px;"></i>
+                    <p>لا توجد بلاغات في هذا القسم حالياً</p>
+                </div>
+            `;
+            return;
+        }
 
-        list.forEach(d => {
-            // Fix #2: Use d.userData.fullName to show original creator name
+        list.forEach(req => {
+            const prioColor = req.priority === 'high' ? 'var(--error)' : (req.priority === 'medium' ? 'var(--warning)' : 'var(--success)');
+            
             container.innerHTML += `
-            <div class="glass-card request-card" onclick="openRequestDetails('${d.id}')" style="border-right:4px solid ${d.priority==='high'?'var(--error)':'var(--success)'}">
-                <div style="display:flex; justify-content:space-between;">
-                    <div style="display:flex; gap:10px;">
-                        <img src="${d.userData.photoUrl}" style="width:40px;height:40px;border-radius:50%;">
-                        <div>
-                            <b style="font-size:13px; display:block;">${d.userData.fullName} <span class="req-code">#${d.uniqueCode||'-'}</span></b>
-                            <span style="font-size:10px; color:#777;">${d.date}</span>
+                <div class="glass-card request-card" onclick="openRequestDetails('${req.id}')" style="border-right-color: ${prioColor};">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <img src="${req.requesterPic}" style="width:45px; height:45px; border-radius:50%; border:2px solid white; box-shadow:var(--shadow-sm);">
+                            <div>
+                                <b style="font-size:14px; display:block;">${req.requesterName} <span class="req-code-badge">#${req.uniqueCode}</span></b>
+                                <span style="font-size:10px; color:var(--text-muted); font-weight:700;"><i class="fa-regular fa-clock"></i> ${req.date} | ${req.time}</span>
+                            </div>
                         </div>
+                        <span class="status-pill st-${req.status}">${getStatusText(req.status)}</span>
                     </div>
-                    <span class="status-pill st-${d.status}">${getStatusLabel(d.status)}</span>
+                    
+                    <div style="font-size:14px; font-weight:700; color:var(--dark); margin-bottom:8px;">
+                        <span style="color:var(--primary);">[${req.type}]</span> ${req.description}
+                    </div>
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-muted);">
+                        <span><i class="fa-solid fa-location-dot"></i> ${req.location}</span>
+                        ${req.technicianName ? `<span style="background:var(--primary-light); color:var(--primary); padding:2px 8px; border-radius:4px; font-weight:800;">الفني: ${req.technicianName}</span>` : ''}
+                    </div>
                 </div>
-                <div style="margin:10px 0; font-size:14px;">[${d.type}] ${d.description}</div>
-                <div style="font-size:11px; color:#777;"><i class="fa-solid fa-location-dot"></i> ${d.location}</div>
-            </div>`;
+            `;
         });
     }
 
-    // --- Create Request ---
-    async function sendRequestFinal() { 
-        if(!selectedSup) return toast("⚠️ اختر مشرف");
-        const btn=document.getElementById('confirm-send-btn'); btn.disabled=true; btn.innerText="جاري الإرسال...";
-        
-        try { 
-            let mediaLinks = [];
-            for(const file of uploadQueue) {
-                const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', CLOUD_PRESET);
-                if(file.type.startsWith('audio')) fd.append('resource_type', 'video'); 
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, {method:'POST', body:fd});
-                const d = await res.json();
-                let type = file.type.startsWith('video') ? 'video' : (file.type.startsWith('audio') ? 'audio' : 'image');
-                mediaLinks.push({url: d.secure_url, type: type});
-            }
-            
-            const loc = `${document.getElementById('req-faculty').value} - ${document.getElementById('req-room').value}`;
-            
-            await db.collection('requests').add({ 
-                userId:currentUser.uid, 
-                // Fix #2: Store User Name Snapshot Here
-                userData:{ fullName:userData.fullName, photoUrl:userData.photoUrl }, 
-                supervisorId:selectedSup, 
-                status:'pending', 
-                type: document.getElementById('req-type').value,
-                priority: document.querySelector('input[name="prio"]:checked').value,
-                time: document.getElementById('req-time').value, 
-                date: document.getElementById('req-date').value, 
-                description: document.getElementById('req-desc').value, 
-                location: loc, 
-                media: mediaLinks,
-                uniqueCode: generateUniqueCode(), 
-                isDeleted: false,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp() 
-            }); 
-            
-            toast("✅ تم الإرسال"); closeModal('sup-modal'); 
-            nav('home', document.querySelector('.nav-item:first-child'));
-            uploadQueue=[]; document.getElementById('preview-grid').innerHTML=""; document.getElementById('req-desc').value="";
-        } catch(e){ toast("❌ خطأ"); console.error(e); } finally{ btn.disabled=false; btn.innerText="إرسال"; } 
+    function getStatusText(status) {
+        const statuses = {
+            'pending': 'عند المشرف',
+            'at_engineer': 'عند المهندس',
+            'at_tech': 'عند الفني',
+            'working': 'قيد التنفيذ',
+            'pending_confirmation': 'بانتظار تأكيدك',
+            'done': 'مكتمل ✅',
+            'rejected': 'مرفوض ❌'
+        };
+        return statuses[status] || status;
     }
 
-    // --- Standard Action/Workflow Functions ---
-    async function openSupModal() {
-        if(!document.getElementById('req-desc').value) return toast("⚠️ الوصف مطلوب");
-        document.getElementById('sup-modal').classList.remove('hidden');
-        const l=document.getElementById('sup-list'); l.innerHTML="تحميل...";
-        
-        // Load friend supervisors
-        const friendsSnap = await db.collection('users').doc(currentUser.uid).collection('friends').get();
-        if(friendsSnap.empty) { l.innerHTML="<p style='text-align:center'>لا يوجد أصدقاء. أضف المشرف كصديق أولاً.</p>"; return; }
-        const friendIds = friendsSnap.docs.map(d=>d.data().friendId);
-        
-        const snap = await db.collection('users').where('role','==','supervisor').get();
-        l.innerHTML="";
-        snap.forEach(d => {
-            if(friendIds.includes(d.id)) {
-                l.innerHTML += `<div onclick="selectedSup='${d.id}'; this.style.background='#e0f2fe'" style="padding:10px; border:1px solid #eee; margin:5px; cursor:pointer; display:flex; align-items:center; gap:10px;">
-                    <img src="${d.data().photoUrl}" style="width:30px;height:30px;border-radius:50%;"> ${d.data().fullName}
-                </div>`;
-            }
-        });
-    }
+    /* =========================================================================
+       6. وظائف مساعدة وتحسينات (Helper Functions)
+       =========================================================================
+    */
 
-    // --- Media & Utils ---
-    function handleFiles(input) { Array.from(input.files).forEach(f=>uploadQueue.push(f)); renderPreview(); }
-    function renderPreview() { 
-        document.getElementById('preview-grid').innerHTML = uploadQueue.map(f => 
-            `<div class="media-item"><div style="width:100%;height:100%;background:#eee;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-file"></i></div></div>`
-        ).join('');
-    }
-    
-    // --- Utils ---
-    function getStatusLabel(s) { const m={'pending':'انتظار','at_engineer':'مهندس','at_tech':'فني','working':'تنفيذ','pending_confirmation':'مراجعة','done':'تم','rejected':'مرفوض'}; return m[s]||s; }
-    function renderHeader() {
-        document.getElementById('banner-name').innerText = userData.fullName;
-        document.getElementById('banner-role').innerText = userData.role;
-        document.getElementById('banner-id').innerText = "ID: " + userData.shortId;
-        document.getElementById('banner-img').src = userData.photoUrl;
-    }
-    function nav(p, el) { 
-        document.querySelectorAll('.page-section').forEach(x=>x.classList.add('hidden'));
-        document.getElementById('page-'+p).classList.remove('hidden');
-        if(p!=='create') { document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active')); if(el) el.classList.add('active'); }
-        if(p==='profile') loadProfilePageData();
-    }
-    function showScreen(id) { ['auth-screen','app-container'].forEach(x=>document.getElementById(x).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-    function toast(m) { const t=document.getElementById('toast'); t.innerText=m; t.style.display='block'; setTimeout(()=>t.style.display='none',3000); }
-    function logout() { auth.signOut(); location.reload(); }
-    
-    // --- Admin Change Role ---
-    async function changeUserRole(btn) {
-        if(userData.role !== 'manager') return;
-        const email = document.getElementById('admin-target-email').value;
-        const role = document.getElementById('admin-new-role').value;
-        if(!email) return;
+    function setupPermissions() {
+        const role = userData.role;
         
-        btn.disabled=true;
-        const snap = await db.collection('users').where('email','==',email).get();
-        if(snap.empty) toast("المستخدم غير موجود");
-        else {
-            snap.forEach(d => d.ref.update({role: role}));
-            toast("تم التحديث");
+        // إظهار لوحة المدير
+        if (role === 'manager') {
+            document.getElementById('nav-admin-btn').classList.remove('hidden');
+            document.getElementById('mgr-trash-tab').classList.remove('hidden');
         }
-        btn.disabled=false;
+
+        // إخفاء زر الإضافة للفني والمهندس (استقبال فقط)
+        if (role === 'technician' || role === 'engineer') {
+            document.querySelector('.nav-add-btn').style.display = 'none';
+        }
     }
 
-    // --- Details & Actions ---
-    function openRequestDetails(id) {
-        const d = requestsCache.find(r=>r.id===id);
-        document.getElementById('request-details-modal').classList.remove('hidden');
-        document.getElementById('req-details-content').innerHTML = `
-            <div style="text-align:center;margin-bottom:10px;"><b class="req-code">#${d.uniqueCode}</b></div>
-            <p><b>المنشئ:</b> ${d.userData.fullName}</p>
-            <p><b>الوصف:</b> ${d.description}</p>
-            <p><b>المكان:</b> ${d.location}</p>
-            <div style="margin-top:10px;">${d.media?.map(m=>`<a href="${m.url}" target="_blank">ملف مرفق</a>`).join(' ')||''}</div>
-            ${['supervisor','engineer','technician','employee'].includes(userData.role) && currentTab==='active' ? `<button onclick="openAction('${d.id}','${getNextAction(d.status)}')" class="btn-main btn-sm" style="margin-top:15px;">إجراء</button>` : ''}
-        `;
+    function showScreen(id) {
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('app-container').classList.add('hidden');
+        document.getElementById(id).classList.remove('hidden');
     }
-    
-    function getNextAction(s) {
-        if(userData.role==='supervisor' && s==='pending') return 'sup_approve';
-        if(userData.role==='engineer' && s==='at_engineer') return 'eng_assign';
-        if(userData.role==='technician' && s==='at_tech') return 'tech_start';
-        if(userData.role==='technician' && s==='working') return 'tech_finish';
-        if(userData.role==='employee' && s==='pending_confirmation') return 'emp_confirm';
-        return '';
+
+    function toggleAuth() {
+        isLoginMode = !isLoginMode;
+        document.getElementById('reg-fields').classList.toggle('hidden');
+        document.getElementById('confirm-pass-field').classList.toggle('hidden');
+        document.getElementById('auth-btn').innerText = isLoginMode ? "تسجيل الدخول" : "إنشاء الحساب";
+        document.getElementById('auth-switch-text').innerHTML = isLoginMode ? 'ليس لديك حساب؟ <b style="color:var(--primary)">إنشاء حساب جديد</b>' : 'لديك حساب بالفعل؟ <b style="color:var(--primary)">تسجيل الدخول</b>';
     }
-    
-    async function openAction(id, type) { 
-        tempActionData={id, type}; 
-        document.getElementById('action-modal').classList.remove('hidden'); 
-        document.getElementById('eng-select-area').classList.add('hidden');
-        document.getElementById('tech-select-area').classList.add('hidden');
-        if(type==='sup_approve') { document.getElementById('eng-select-area').classList.remove('hidden'); loadEngineers(); }
-        if(type==='eng_assign') { document.getElementById('tech-select-area').classList.remove('hidden'); loadTechnicians(); }
-    }
-    
-    async function submitAction() {
-        const {id, type} = tempActionData;
-        let up = {lastUpdate: firebase.firestore.FieldValue.serverTimestamp()};
+
+    function nav(page, el) {
+        document.querySelectorAll('.page-section').forEach(p => p.classList.add('hidden'));
+        document.getElementById('page-' + page).classList.remove('hidden');
         
-        if(type==='sup_approve') { up.status='at_engineer'; up.engineerId=selectedEng.id; } 
-        if(type==='eng_assign') { up.status='at_tech'; up.technicianId=selectedTech.id; up.technicianName=selectedTech.name; } 
-        if(type==='tech_start') up.status='working';
-        if(type==='tech_finish') up.status='pending_confirmation';
-        if(type==='emp_confirm') up.status='done';
-        
-        await db.collection('requests').doc(id).update(up);
-        closeModal('action-modal'); toast("تم");
-    }
-    
-    // Load lists for modals
-    async function loadEngineers() { 
-        const d = document.getElementById('eng-list-action'); d.innerHTML='';
-        const s = await db.collection('users').where('role','==','engineer').get();
-        s.forEach(u=> d.innerHTML += `<div onclick="selectedEng={id:'${u.id}',name:'${u.data().fullName}'};this.style.background='#eee'" style="padding:5px;border:1px solid #ccc;margin:2px;">${u.data().fullName}</div>`);
-    }
-    async function loadTechnicians() {
-        const d = document.getElementById('tech-list-action'); d.innerHTML='';
-        const s = await db.collection('users').where('role','==','technician').get();
-        s.forEach(u=> d.innerHTML += `<div onclick="selectedTech={id:'${u.id}',name:'${u.data().fullName}'};this.style.background='#eee'" style="padding:5px;border:1px solid #ccc;margin:2px;">${u.data().fullName}</div>`);
+        if (el) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        if (page === 'admin') getTechPerformance();
+        if (page === 'profile') loadProfilePageData();
     }
 
-    // Search and Friends Logic (Missing in previous snippet, ensuring completion)
-    async function searchUser() {
-        const q = document.getElementById('search-query').value.trim();
-        const resDiv = document.getElementById('search-results');
-        if(!q) return;
-        resDiv.classList.remove('hidden'); resDiv.innerHTML = 'جاري البحث...';
-        
-        let users = [];
-        let s1 = await db.collection('users').where('shortId','==',q).get();
-        let s2 = await db.collection('users').where('email','==',q).get();
-        s1.forEach(d=>users.push({id:d.id, ...d.data()}));
-        s2.forEach(d=> { if(!users.find(u=>u.id===d.id)) users.push({id:d.id, ...d.data()}); });
-        
-        resDiv.innerHTML = "";
-        if(users.length === 0) { resDiv.innerHTML = '<p style="text-align:center; color:#999; font-size:12px;">غير موجود</p>'; return; }
-        
-        users.forEach(u => {
-            if(u.id === currentUser.uid) return;
-            resDiv.innerHTML += `
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; background:var(--surface-light); border-radius:10px; margin-bottom:5px; border:1px solid var(--border);">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <img src="${u.photoUrl}" style="width:35px; height:35px; border-radius:50%;">
-                    <div><b style="font-size:12px;">${u.fullName}</b><br><span style="font-size:10px;">${u.role}</span></div>
-                </div>
-                <button onclick="addFriend('${u.id}', '${u.fullName}', '${u.photoUrl}')" class="btn-main btn-sm">إضافة +</button>
-            </div>`;
-        });
-    }
-
-    async function addFriend(tid, tname, tpic) {
-        await db.collection('friend_requests').add({
-            fromId: currentUser.uid, toId: tid, status: 'pending',
-            fromData: { name: userData.fullName, pic: userData.photoUrl },
-            toData: { name: tname, pic: tpic }
-        });
-        toast("✅ تم إرسال الطلب");
-    }
-
-    async function loadTeam() {
-        const list = document.getElementById('team-list'); list.innerHTML = "";
-        const snap = await db.collection('users').doc(currentUser.uid).collection('friends').get();
-        if(snap.empty) { list.innerHTML = "<p style='text-align:center; color:#999; font-size:12px;'>لا يوجد أصدقاء</p>"; return; }
-        snap.forEach(d => {
-            const f = d.data();
-            list.innerHTML += `<div class="friend-item"><img src="${f.pic}" style="width:40px;height:40px;border-radius:50%;"><b>${f.name}</b></div>`;
-        });
-    }
-
-    async function loadFriendReqs() {
-        const div = document.getElementById('friend-reqs');
-        const list = document.getElementById('reqs-list');
-        const snap = await db.collection('friend_requests').where('toId','==',currentUser.uid).where('status','==','pending').get();
-        if(snap.empty) { div.classList.add('hidden'); return; }
-        
-        div.classList.remove('hidden'); list.innerHTML = "";
-        snap.forEach(d => {
-            const r = d.data();
-            list.innerHTML += `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:10px; border-radius:10px; margin-bottom:5px;">
-                <div style="display:flex; align-items:center; gap:10px;"><img src="${r.fromData.pic}" style="width:30px;height:30px;border-radius:50%;"><span>${r.fromData.name}</span></div>
-                <div>
-                    <button onclick="acceptFriend('${d.id}', '${r.fromId}', '${r.fromData.name}', '${r.fromData.pic}')" class="btn-main btn-sm" style="background:var(--success);">قبول</button>
-                </div>
-            </div>`;
-        });
-    }
-
-    async function acceptFriend(reqId, fid, fname, fpic) {
-        await db.collection('users').doc(currentUser.uid).collection('friends').add({ friendId: fid, name: fname, pic: fpic });
-        await db.collection('users').doc(fid).collection('friends').add({ friendId: currentUser.uid, name: userData.fullName, pic: userData.photoUrl });
-        await db.collection('friend_requests').doc(reqId).delete();
-        toast("✅ تم قبول الصداقة"); loadFriendReqs(); loadTeam();
-    }
-
-    // --- Profile & Media Handlers ---
     function loadProfilePageData() {
-        document.getElementById('edit-current-pic').src = userData.photoUrl;
         document.getElementById('edit-id-display').innerText = userData.shortId;
         document.getElementById('edit-name').value = userData.fullName;
-        document.getElementById('edit-job').value = userData.jobTitle;
-        document.getElementById('edit-loc').value = userData.location;
+        document.getElementById('edit-job').value = userData.jobTitle || '';
+        document.getElementById('edit-loc').value = userData.location || '';
+        document.getElementById('edit-gender').value = userData.gender;
+        document.getElementById('edit-current-pic').src = userData.photoUrl;
     }
-    
+
     async function saveProfile() {
-        const newName = document.getElementById('edit-name').value;
-        let picUrl = userData.photoUrl;
-        if(newProfilePicFile) {
-             const fd = new FormData(); fd.append('file', newProfilePicFile); fd.append('upload_preset', CLOUD_PRESET);
-             const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, {method:'POST', body:fd});
-             const d = await res.json();
-             picUrl = d.secure_url;
+        const btn = document.getElementById('save-profile-btn');
+        btn.disabled = true;
+        btn.innerText = "جاري الحفظ...";
+
+        try {
+            let picUrl = userData.photoUrl;
+            if (document.getElementById('edit-profile-file').files[0]) {
+                const formData = new FormData();
+                formData.append('file', document.getElementById('edit-profile-file').files[0]);
+                formData.append('upload_preset', CLOUD_PRESET);
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, { method: 'POST', body: formData });
+                const d = await res.json();
+                picUrl = d.secure_url;
+            }
+
+            const frame = document.querySelector('.frame-option.selected').classList.contains('f-gold') ? 'f-gold' : 
+                          (document.querySelector('.frame-option.selected').classList.contains('f-blue') ? 'f-blue' : 
+                          (document.querySelector('.frame-option.selected').classList.contains('f-grad') ? 'f-grad' : ''));
+
+            await db.collection('users').doc(currentUser.uid).update({
+                fullName: document.getElementById('edit-name').value,
+                jobTitle: document.getElementById('edit-job').value,
+                location: document.getElementById('edit-loc').value,
+                gender: document.getElementById('edit-gender').value,
+                photoUrl: picUrl,
+                frame: frame
+            });
+
+            toast("✅ تم تحديث بياناتك بنجاح");
+            location.reload();
+        } catch (e) {
+            toast("❌ فشل التحديث");
         }
-        await db.collection('users').doc(currentUser.uid).update({ fullName: newName, photoUrl: picUrl });
-        toast("✅ تم التحديث"); location.reload(); 
     }
 
-    function previewProfilePic(i) { 
-        newProfilePicFile = i.files[0];
-        document.getElementById('edit-current-pic').src = URL.createObjectURL(i.files[0]); 
+    function previewProfilePic(input) {
+        if (input.files && input.files[0]) {
+            document.getElementById('edit-current-pic').src = URL.createObjectURL(input.files[0]);
+        }
     }
-    function copyId() { navigator.clipboard.writeText(userData.shortId); toast("تم نسخ ID"); }
-    function selectFrame(el, c) { document.querySelectorAll('.frame-option').forEach(f=>f.classList.remove('selected')); el.classList.add('selected'); }
 
-    // Media Handlers
-    function openAudioPlayer(url) {
-        const modal = document.getElementById('audio-player-modal');
-        const audio = document.getElementById('modal-audio-player');
-        audio.src = url; modal.classList.remove('hidden'); audio.play();
+    function selectFrame(el, frameClass) {
+        document.querySelectorAll('.frame-option').forEach(f => f.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('edit-frame-overlay').className = 'frame-overlay ' + frameClass;
     }
-    function closeAudioPlayer() {
-        document.getElementById('audio-player-modal').classList.add('hidden');
-        document.getElementById('modal-audio-player').pause();
+
+    function copyId() {
+        navigator.clipboard.writeText(userData.shortId);
+        toast("📋 تم نسخ الـ ID بنجاح");
     }
+
+    function toast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 3500);
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+    }
+
+    function logout() {
+        auth.signOut().then(() => location.reload());
+    }
+
+    // تهيئة البيانات عند التحميل
+    window.onload = () => {
+        // أي منطق تهيئة إضافي
+    };
 
 </script>
 </body>
