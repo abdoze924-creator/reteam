@@ -644,7 +644,6 @@
         } catch(e) { toast(e.message); isRegistering = false; }
         finally { btn.disabled=false; btn.innerText = isLoginMode?"تسجيل الدخول":"إنشاء حساب"; }
     }
-// ... تابع الجزء الثاني ...
     // ==========================================
     // 1. DATA MANAGEMENT & ROLES
     // ==========================================
@@ -687,6 +686,7 @@
         const locSelect = document.getElementById('req-faculty');
         const typeSelect = document.getElementById('req-type');
         
+        // Keep first option
         locSelect.innerHTML = '<option value="">اختر المبنى/الكلية...</option>';
         systemLocations.forEach(l => locSelect.innerHTML += `<option value="${l}">${l}</option>`);
         
@@ -723,6 +723,7 @@
         let list = docName === 'locations' ? systemLocations : systemTypes;
         list = list.filter(i => i !== val);
         await db.collection('system_data').doc(docName).set({ list: list });
+        
         // Update local state immediately for UI response
         if(docName === 'locations') systemLocations = list; else systemTypes = list;
         loadSystemData();
@@ -790,12 +791,12 @@
         if(type === 'full') {
             content += `<table style="width:100%; border-collapse:collapse; font-size:10px; margin-top:20px;">
                 <tr style="background:#f1f5f9;">
-                    <th style="border:1px solid #ccc; p:5px;">الكود</th>
-                    <th style="border:1px solid #ccc; p:5px;">التاريخ</th>
-                    <th style="border:1px solid #ccc; p:5px;">الموقع</th>
-                    <th style="border:1px solid #ccc; p:5px;">الوصف</th>
-                    <th style="border:1px solid #ccc; p:5px;">منشئ البلاغ</th>
-                    <th style="border:1px solid #ccc; p:5px;">الحالة</th>
+                    <th style="border:1px solid #ccc; padding:5px;">الكود</th>
+                    <th style="border:1px solid #ccc; padding:5px;">التاريخ</th>
+                    <th style="border:1px solid #ccc; padding:5px;">الموقع</th>
+                    <th style="border:1px solid #ccc; padding:5px;">الوصف</th>
+                    <th style="border:1px solid #ccc; padding:5px;">منشئ البلاغ</th>
+                    <th style="border:1px solid #ccc; padding:5px;">الحالة</th>
                 </tr>`;
             requestsCache.forEach(r => {
                 content += `<tr>
@@ -845,11 +846,17 @@
     }
 
     function checkAndPlaySound(newItems) {
-        // ... (Same logic as before) ...
-        const audio = document.getElementById('notify-sound');
-        if(audio) audio.play().catch(e=>{});
-        toast("🔔 إشعار جديد");
-        document.querySelector('.bell-badge').style.display = 'block';
+        let notify = false;
+        if(userData.role === 'supervisor' && newItems.some(r => r.status === 'pending')) notify = true;
+        if(userData.role === 'engineer' && newItems.some(r => r.status === 'at_engineer')) notify = true;
+        if(userData.role === 'technician' && newItems.some(r => r.status === 'at_tech')) notify = true;
+        
+        if(notify) {
+            const audio = document.getElementById('notify-sound');
+            if(audio) audio.play().catch(e=>{});
+            toast("🔔 إشعار جديد");
+            document.querySelector('.bell-badge').style.display = 'block';
+        }
     }
 
     function renderFeed() {
@@ -866,7 +873,7 @@
         if(list.length === 0) { container.innerHTML = `<div style="text-align:center; padding:50px; color:#999;">لا يوجد بيانات</div>`; return; }
 
         list.forEach(d => {
-            // Note: d.userData.fullName ensures the original creator name is shown
+            // Fix #2: Use d.userData.fullName to show original creator name
             container.innerHTML += `
             <div class="glass-card request-card" onclick="openRequestDetails('${d.id}')" style="border-right:4px solid ${d.priority==='high'?'var(--error)':'var(--success)'}">
                 <div style="display:flex; justify-content:space-between;">
@@ -905,7 +912,7 @@
             
             await db.collection('requests').add({ 
                 userId:currentUser.uid, 
-                // Store User Name Snapshot Here (Fix #2)
+                // Fix #2: Store User Name Snapshot Here
                 userData:{ fullName:userData.fullName, photoUrl:userData.photoUrl }, 
                 supervisorId:selectedSup, 
                 status:'pending', 
@@ -927,7 +934,7 @@
         } catch(e){ toast("❌ خطأ"); console.error(e); } finally{ btn.disabled=false; btn.innerText="إرسال"; } 
     }
 
-    // --- Standard Action/Workflow Functions (Same as previous versions) ---
+    // --- Standard Action/Workflow Functions ---
     async function openSupModal() {
         if(!document.getElementById('req-desc').value) return toast("⚠️ الوصف مطلوب");
         document.getElementById('sup-modal').classList.remove('hidden');
@@ -956,8 +963,8 @@
             `<div class="media-item"><div style="width:100%;height:100%;background:#eee;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-file"></i></div></div>`
         ).join('');
     }
-    async function toggleRecording() { /* ... Same recording logic ... */ toast("تم التسجيل (محاكاة)"); }
     
+    // --- Utils ---
     function getStatusLabel(s) { const m={'pending':'انتظار','at_engineer':'مهندس','at_tech':'فني','working':'تنفيذ','pending_confirmation':'مراجعة','done':'تم','rejected':'مرفوض'}; return m[s]||s; }
     function renderHeader() {
         document.getElementById('banner-name').innerText = userData.fullName;
@@ -969,6 +976,7 @@
         document.querySelectorAll('.page-section').forEach(x=>x.classList.add('hidden'));
         document.getElementById('page-'+p).classList.remove('hidden');
         if(p!=='create') { document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active')); if(el) el.classList.add('active'); }
+        if(p==='profile') loadProfilePageData();
     }
     function showScreen(id) { ['auth-screen','app-container'].forEach(x=>document.getElementById(x).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -1015,11 +1023,9 @@
         return '';
     }
     
-    // Stub for openAction/submitAction (Use previous full logic here)
     async function openAction(id, type) { 
         tempActionData={id, type}; 
         document.getElementById('action-modal').classList.remove('hidden'); 
-        // ... (Show/Hide Eng/Tech Selectors based on type - same as V2.0)
         document.getElementById('eng-select-area').classList.add('hidden');
         document.getElementById('tech-select-area').classList.add('hidden');
         if(type==='sup_approve') { document.getElementById('eng-select-area').classList.remove('hidden'); loadEngineers(); }
@@ -1027,12 +1033,11 @@
     }
     
     async function submitAction() {
-        // ... (Implement full workflow update logic from previous code here) ...
         const {id, type} = tempActionData;
         let up = {lastUpdate: firebase.firestore.FieldValue.serverTimestamp()};
         
-        if(type==='sup_approve') { up.status='at_engineer'; up.engineerId=selectedEng.id; } // Needs selectedEng
-        if(type==='eng_assign') { up.status='at_tech'; up.technicianId=selectedTech.id; up.technicianName=selectedTech.name; } // Needs selectedTech
+        if(type==='sup_approve') { up.status='at_engineer'; up.engineerId=selectedEng.id; } 
+        if(type==='eng_assign') { up.status='at_tech'; up.technicianId=selectedTech.id; up.technicianName=selectedTech.name; } 
         if(type==='tech_start') up.status='working';
         if(type==='tech_finish') up.status='pending_confirmation';
         if(type==='emp_confirm') up.status='done';
@@ -1051,6 +1056,120 @@
         const d = document.getElementById('tech-list-action'); d.innerHTML='';
         const s = await db.collection('users').where('role','==','technician').get();
         s.forEach(u=> d.innerHTML += `<div onclick="selectedTech={id:'${u.id}',name:'${u.data().fullName}'};this.style.background='#eee'" style="padding:5px;border:1px solid #ccc;margin:2px;">${u.data().fullName}</div>`);
+    }
+
+    // Search and Friends Logic (Missing in previous snippet, ensuring completion)
+    async function searchUser() {
+        const q = document.getElementById('search-query').value.trim();
+        const resDiv = document.getElementById('search-results');
+        if(!q) return;
+        resDiv.classList.remove('hidden'); resDiv.innerHTML = 'جاري البحث...';
+        
+        let users = [];
+        let s1 = await db.collection('users').where('shortId','==',q).get();
+        let s2 = await db.collection('users').where('email','==',q).get();
+        s1.forEach(d=>users.push({id:d.id, ...d.data()}));
+        s2.forEach(d=> { if(!users.find(u=>u.id===d.id)) users.push({id:d.id, ...d.data()}); });
+        
+        resDiv.innerHTML = "";
+        if(users.length === 0) { resDiv.innerHTML = '<p style="text-align:center; color:#999; font-size:12px;">غير موجود</p>'; return; }
+        
+        users.forEach(u => {
+            if(u.id === currentUser.uid) return;
+            resDiv.innerHTML += `
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; background:var(--surface-light); border-radius:10px; margin-bottom:5px; border:1px solid var(--border);">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <img src="${u.photoUrl}" style="width:35px; height:35px; border-radius:50%;">
+                    <div><b style="font-size:12px;">${u.fullName}</b><br><span style="font-size:10px;">${u.role}</span></div>
+                </div>
+                <button onclick="addFriend('${u.id}', '${u.fullName}', '${u.photoUrl}')" class="btn-main btn-sm">إضافة +</button>
+            </div>`;
+        });
+    }
+
+    async function addFriend(tid, tname, tpic) {
+        await db.collection('friend_requests').add({
+            fromId: currentUser.uid, toId: tid, status: 'pending',
+            fromData: { name: userData.fullName, pic: userData.photoUrl },
+            toData: { name: tname, pic: tpic }
+        });
+        toast("✅ تم إرسال الطلب");
+    }
+
+    async function loadTeam() {
+        const list = document.getElementById('team-list'); list.innerHTML = "";
+        const snap = await db.collection('users').doc(currentUser.uid).collection('friends').get();
+        if(snap.empty) { list.innerHTML = "<p style='text-align:center; color:#999; font-size:12px;'>لا يوجد أصدقاء</p>"; return; }
+        snap.forEach(d => {
+            const f = d.data();
+            list.innerHTML += `<div class="friend-item"><img src="${f.pic}" style="width:40px;height:40px;border-radius:50%;"><b>${f.name}</b></div>`;
+        });
+    }
+
+    async function loadFriendReqs() {
+        const div = document.getElementById('friend-reqs');
+        const list = document.getElementById('reqs-list');
+        const snap = await db.collection('friend_requests').where('toId','==',currentUser.uid).where('status','==','pending').get();
+        if(snap.empty) { div.classList.add('hidden'); return; }
+        
+        div.classList.remove('hidden'); list.innerHTML = "";
+        snap.forEach(d => {
+            const r = d.data();
+            list.innerHTML += `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:10px; border-radius:10px; margin-bottom:5px;">
+                <div style="display:flex; align-items:center; gap:10px;"><img src="${r.fromData.pic}" style="width:30px;height:30px;border-radius:50%;"><span>${r.fromData.name}</span></div>
+                <div>
+                    <button onclick="acceptFriend('${d.id}', '${r.fromId}', '${r.fromData.name}', '${r.fromData.pic}')" class="btn-main btn-sm" style="background:var(--success);">قبول</button>
+                </div>
+            </div>`;
+        });
+    }
+
+    async function acceptFriend(reqId, fid, fname, fpic) {
+        await db.collection('users').doc(currentUser.uid).collection('friends').add({ friendId: fid, name: fname, pic: fpic });
+        await db.collection('users').doc(fid).collection('friends').add({ friendId: currentUser.uid, name: userData.fullName, pic: userData.photoUrl });
+        await db.collection('friend_requests').doc(reqId).delete();
+        toast("✅ تم قبول الصداقة"); loadFriendReqs(); loadTeam();
+    }
+
+    // --- Profile & Media Handlers ---
+    function loadProfilePageData() {
+        document.getElementById('edit-current-pic').src = userData.photoUrl;
+        document.getElementById('edit-id-display').innerText = userData.shortId;
+        document.getElementById('edit-name').value = userData.fullName;
+        document.getElementById('edit-job').value = userData.jobTitle;
+        document.getElementById('edit-loc').value = userData.location;
+    }
+    
+    async function saveProfile() {
+        const newName = document.getElementById('edit-name').value;
+        let picUrl = userData.photoUrl;
+        if(newProfilePicFile) {
+             const fd = new FormData(); fd.append('file', newProfilePicFile); fd.append('upload_preset', CLOUD_PRESET);
+             const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, {method:'POST', body:fd});
+             const d = await res.json();
+             picUrl = d.secure_url;
+        }
+        await db.collection('users').doc(currentUser.uid).update({ fullName: newName, photoUrl: picUrl });
+        toast("✅ تم التحديث"); location.reload(); 
+    }
+
+    function previewProfilePic(i) { 
+        newProfilePicFile = i.files[0];
+        document.getElementById('edit-current-pic').src = URL.createObjectURL(i.files[0]); 
+    }
+    function copyId() { navigator.clipboard.writeText(userData.shortId); toast("تم نسخ ID"); }
+    function selectFrame(el, c) { document.querySelectorAll('.frame-option').forEach(f=>f.classList.remove('selected')); el.classList.add('selected'); }
+
+    // Media Handlers
+    function openAudioPlayer(url) {
+        const modal = document.getElementById('audio-player-modal');
+        const audio = document.getElementById('modal-audio-player');
+        audio.src = url; modal.classList.remove('hidden'); audio.play();
+    }
+    function closeAudioPlayer() {
+        document.getElementById('audio-player-modal').classList.add('hidden');
+        document.getElementById('modal-audio-player').pause();
     }
 
 </script>
