@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام الصيانة الذكي - جامعة الريادة (V3.5 - Social Enterprise)</title>
+    <title>نظام الصيانة الذكي - جامعة الريادة (V4.0 - Social Plus)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* ==================== Core Styling (تنسيقات أساسية) ==================== */
+        /* ==================== Core Styling (الأساسيات) ==================== */
         :root {
             --primary: #0056b3;          
             --primary-dark: #003d80;     
@@ -33,7 +33,6 @@
             --glass: rgba(255, 255, 255, 0.95);
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             
-            /* ألوان التقارير */
             --chart-bg-1: rgba(0, 86, 179, 0.1);
             --chart-border-1: #0056b3;
             --chart-bg-2: rgba(16, 185, 129, 0.1);
@@ -104,34 +103,17 @@
             border: 1px solid rgba(255,255,255,0.4); backdrop-filter: blur(4px);
         }
 
-        /* --- FIXED AVATAR & FRAMES --- */
-        .user-avatar-container { 
-            position: relative; 
-            width: 85px; 
-            height: 85px; 
-            border-radius: 50%;
-            margin-bottom: 5px;
-        }
+        /* --- AVATAR & FRAMES --- */
+        .user-avatar-container { position: relative; width: 85px; height: 85px; border-radius: 50%; margin-bottom: 5px; }
         .user-avatar-container img {
             width: 100%; height: 100%; border-radius: 50%;
             border: 4px solid rgba(255,255,255,0.3); object-fit: cover;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); background: #fff;
-            display: block;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); background: #fff; display: block;
         }
-        .user-avatar-container .frame-overlay {
-            position: absolute; 
-            inset: -5px; 
-            pointer-events: none; 
-            border-radius: 50%; 
-            z-index: 2;
-        }
+        .user-avatar-container .frame-overlay { position: absolute; inset: -5px; pointer-events: none; border-radius: 50%; z-index: 2; }
         
-        /* Frame Options */
         .frame-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
-        .frame-option { 
-            width: 100%; aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--border); 
-            cursor: pointer; position: relative; overflow: hidden;
-        }
+        .frame-option { width: 100%; aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--border); cursor: pointer; position: relative; overflow: hidden; }
         .frame-option.selected { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,86,179,0.2); }
         .f-gold { border: 5px solid #ffd700; box-shadow: inset 0 0 10px #ffd700, 0 0 10px rgba(255, 215, 0, 0.5); }
         .f-blue { border: 5px dashed var(--primary); }
@@ -139,219 +121,118 @@
         .f-grad-in { background: transparent; width: 100%; height: 100%; border-radius: 50%; }
         .f-none { border: 1px solid #ccc; background: #eee; display: flex; align-items: center; justify-content: center; color: #777; font-size: 10px; }
 
-        /* --- Cards --- */
+        /* --- Cards & General --- */
         .glass-card {
-            background: var(--surface); border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.95); border: 1px solid var(--border);
             border-radius: 24px; padding: 24px; margin: 15px;
             box-shadow: var(--shadow); position: relative; overflow: hidden; transition: 0.2s;
-            background: rgba(255, 255, 255, 0.95); 
         }
         .glass-card h2, .glass-card h3 { color: var(--primary-dark); }
-        
         .request-card { cursor: pointer; border-right: 4px solid transparent; margin-bottom: 15px; background: rgba(255,255,255,0.95); transition: transform 0.2s; border: 1px solid var(--border); }
         .request-card:active { transform: scale(0.98); }
-        .req-new { border-left: 3px solid var(--info); }
-        .req-done { border-left: 3px solid var(--success); background: #f0fdf4; }
-        .req-rejected { border-left: 3px solid var(--error); background: #fef2f2; }
-
-        /* Unique Code Badge */
-        .req-code {
-            font-family: monospace; font-weight: 900; background: var(--text); color: white;
-            padding: 3px 8px; border-radius: 6px; font-size: 12px; letter-spacing: 1px;
-            display: inline-block; direction: ltr; margin-left: 8px;
-        }
+        .req-code { font-family: monospace; font-weight: 900; background: var(--text); color: white; padding: 3px 8px; border-radius: 6px; font-size: 12px; letter-spacing: 1px; display: inline-block; direction: ltr; margin-left: 8px; }
 
         /* --- Inputs --- */
         .input-group { margin-bottom: 20px; position: relative; }
         .input-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; }
-        input, select, textarea {
-            width: 100%; padding: 16px; background: var(--surface-light); 
-            border: 1px solid var(--border); border-radius: 16px; color: var(--text); 
-            font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 600; transition: 0.3s;
-        }
+        input, select, textarea { width: 100%; padding: 16px; background: var(--surface-light); border: 1px solid var(--border); border-radius: 16px; color: var(--text); font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 600; transition: 0.3s; }
         input:focus, select:focus, textarea:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.1); }
 
-        /* --- Auth Styling --- */
-        .auth-logo-modern {
-            width: 90px; height: 90px; border-radius: 20px; 
-            margin-bottom: 15px; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        }
-        .auth-section-label {
-            text-align: right; font-size: 12px; color: var(--text-muted); 
-            margin-bottom: 8px; margin-top: 15px; display: block; font-weight: 700;
-        }
+        /* --- Auth --- */
+        .auth-logo-modern { width: 90px; height: 90px; border-radius: 20px; margin-bottom: 15px; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .auth-section-label { text-align: right; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; margin-top: 15px; display: block; font-weight: 700; }
         .auth-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
         .auth-card-input { display: none; }
-        .auth-card {
-            background: var(--surface-light); border: 1px solid var(--border);
-            padding: 15px 5px; border-radius: 14px; text-align: center; cursor: pointer; transition: 0.2s;
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
-        }
+        .auth-card { background: var(--surface-light); border: 1px solid var(--border); padding: 15px 5px; border-radius: 14px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .auth-card-input:checked + .auth-card { background: rgba(0, 86, 179, 0.1); border-color: var(--primary); }
         .auth-card-input:checked + .auth-card i { color: var(--primary); }
 
         /* Priority Grid */
         .priority-grid { display: flex; gap: 10px; }
-        .prio-card {
-            flex: 1; padding: 15px 5px; background: var(--surface-light); border: 1px solid var(--border);
-            border-radius: 16px; text-align: center; cursor: pointer; transition: 0.3s; 
-            display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-muted);
-        }
+        .prio-card { flex: 1; padding: 15px 5px; background: var(--surface-light); border: 1px solid var(--border); border-radius: 16px; text-align: center; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-muted); }
         .prio-radio:checked + .prio-card.p-low { background: #ecfdf5; border-color: var(--success); color: var(--success); }
         .prio-radio:checked + .prio-card.p-med { background: #fff7ed; border-color: var(--warning); color: var(--warning); }
         .prio-radio:checked + .prio-card.p-high { background: #fef2f2; border-color: var(--error); color: var(--error); }
 
-        /* Buttons */
-        .btn-main {
-            width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border: none; border-radius: 16px; color: white; font-weight: 700; cursor: pointer;
-            display: flex; justify-content: center; align-items: center; gap: 10px;
-            box-shadow: 0 8px 20px rgba(0, 86, 179, 0.2); font-size: 15px; font-family: 'Cairo', sans-serif; transition: 0.1s;
-        }
+        /* Buttons & Mic */
+        .btn-main { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: none; border-radius: 16px; color: white; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 8px 20px rgba(0, 86, 179, 0.2); font-size: 15px; font-family: 'Cairo', sans-serif; transition: 0.1s; }
         .btn-main:active { transform: scale(0.97); }
         .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); border-radius: 14px; font-family: 'Cairo', sans-serif; cursor: pointer; padding: 10px; }
         .btn-danger { background: linear-gradient(135deg, var(--error), #b91c1c); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.2); color: white; }
         .btn-sm { padding: 8px 16px; font-size: 12px; width: auto; margin: 0; border-radius: 10px; min-height: 35px; }
-        
-        .mic-btn {
-            background: var(--surface-light); border: 2px solid var(--border); color: var(--text-muted);
-            width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.3s; font-size: 20px;
-        }
-        .mic-btn.recording {
-            background: #fef2f2; border-color: var(--error); color: var(--error);
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
+        .mic-btn { background: var(--surface-light); border: 2px solid var(--border); color: var(--text-muted); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; font-size: 20px; }
+        .mic-btn.recording { background: #fef2f2; border-color: var(--error); color: var(--error); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-        /* Timeline */
+        /* Timeline & Tabs & Nav */
         .timeline { margin: 20px 0; padding: 0 10px; }
         .timeline-item { display: flex; gap: 15px; padding-bottom: 25px; position: relative; }
         .timeline-item::before { content: ''; position: absolute; right: 14px; top: 30px; bottom: 0; width: 2px; background: var(--border); }
         .timeline-item:last-child::before { display: none; }
-        .tl-icon {
-            width: 30px; height: 30px; border-radius: 50%; background: var(--surface-light); 
-            border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
-            font-size: 12px; color: var(--text-muted); z-index: 2; flex-shrink: 0;
-        }
-        .tl-content h4 { margin: 0 0 5px; font-size: 14px; font-weight: 700; color: var(--text); }
-        .tl-content p { margin: 0; font-size: 12px; color: var(--text-muted); }
+        .tl-icon { width: 30px; height: 30px; border-radius: 50%; background: var(--surface-light); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-muted); z-index: 2; flex-shrink: 0; }
         .timeline-item.active .tl-icon { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 0 15px rgba(0, 86, 179, 0.3); }
         .timeline-item.rejected .tl-icon { background: var(--error); border-color: var(--error); color: white; }
-
-        /* Tabs & Nav */
+        
         .tabs-container { display: flex; margin: 15px; background: #fff; padding: 6px; border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); }
         .tab-btn { flex: 1; padding: 12px; color: var(--text-muted); font-size: 13px; font-weight: 700; cursor: pointer; border-radius: 14px; background: transparent; border: none; font-family: 'Cairo', sans-serif; transition: 0.3s; }
         .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(0, 86, 179, 0.2); }
 
-        .bottom-nav { 
-            position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; 
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
-            border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-end; 
-            padding: 10px 10px 25px; z-index: 900; border-top-left-radius: 30px; border-top-right-radius: 30px;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
-        }
-        .nav-item { text-align: center; color: #94a3b8; font-size: 10px; cursor: pointer; width: 50px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-end; padding: 10px 10px 25px; z-index: 900; border-top-left-radius: 30px; border-top-right-radius: 30px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); }
+        .nav-item { text-align: center; color: #94a3b8; font-size: 10px; cursor: pointer; width: 50px; position: relative; }
         .nav-item i { font-size: 18px; margin-bottom: 6px; display: block; }
         .nav-item.active { color: var(--primary); }
-        .nav-add-btn {
-            width: 55px; height: 55px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;
-            box-shadow: 0 10px 25px rgba(0, 86, 179, 0.4); transform: translateY(-25px); border: 5px solid var(--dark);
-        }
-
-        /* --- Modals & Friends --- */
-        .friend-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #fff; border-radius: 18px; margin-bottom: 10px; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; }
-        .friend-item:hover { border-color: var(--primary); background: #f8fafc; }
+        .nav-add-btn { width: 55px; height: 55px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 10px 25px rgba(0, 86, 179, 0.4); transform: translateY(-25px); border: 5px solid var(--dark); }
         
+        /* NEW: Notification Badge on Nav Item */
+        .nav-badge { position: absolute; top: -5px; right: 8px; width: 10px; height: 10px; background: var(--error); border-radius: 50%; border: 2px solid #fff; display: none; }
+        .nav-badge.active { display: block; animation: pulse 2s infinite; }
+
+        /* Modals & Tech Select */
+        .friend-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #fff; border-radius: 18px; margin-bottom: 10px; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
         .modal-content { width: 100%; max-width: 450px; background: #fff; border: 1px solid var(--border); border-radius: 30px; padding: 30px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.15); }
         .close-btn { position: absolute; top: 20px; left: 20px; background: #f1f5f9; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); }
-
         .status-pill { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px; width: fit-content; }
-        .st-pending { background: #e0f2fe; color: var(--info); border: 1px solid #bae6fd; } /* عند المشرف */
-        .st-at_engineer { background: #f3e8ff; color: var(--purple); border: 1px solid #d8b4fe; } /* عند المهندس */
-        .st-at_tech { background: #fff7ed; color: var(--gold); border: 1px solid #fdba74; } /* عند الفني */
-        .st-working { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; } /* قيد التنفيذ */
-        .st-pending_confirmation { background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; } /* بانتظار التأكيد */
-        .st-done { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; } /* مكتمل */
-        .st-rejected { background: #fef2f2; color: var(--error); border: 1px solid #fecaca; }
-
+        /* Status colors omitted for brevity, same as before */
+        .st-pending { background: #e0f2fe; color: var(--info); border: 1px solid #bae6fd; } .st-at_engineer { background: #f3e8ff; color: var(--purple); border: 1px solid #d8b4fe; } .st-at_tech { background: #fff7ed; color: var(--gold); border: 1px solid #fdba74; } .st-working { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; } .st-pending_confirmation { background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; } .st-done { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; } .st-rejected { background: #fef2f2; color: var(--error); border: 1px solid #fecaca; }
         .tech-select-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .tech-select-card { border: 1px solid var(--border); border-radius: 16px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; background: var(--surface-light); }
         .tech-select-card.selected { border-color: var(--primary); background: #eff6ff; box-shadow: 0 4px 12px rgba(0,86,179,0.1); }
         .tech-select-card img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; border: 2px solid white; }
-
+        
+        /* Media & Reports Styles */
         .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
         .media-item { aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: #f8fafc; border: 1px solid var(--border); position: relative; cursor: pointer; }
         .media-item img, .media-item video { width: 100%; height: 100%; object-fit: contain; background: #000; }
         .remove-file { position: absolute; top: 4px; right: 4px; background: var(--error); color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 10px; }
-
-        /* External Tech Form */
         .ext-tech-form { background: #fff; padding: 15px; border: 1px dashed var(--border); border-radius: 16px; margin-top: 15px; }
-
-        /* ==================== NEW STYLES: REPORTS & ADMIN ==================== */
         
-        /* Stats Cards in Reports */
+        /* Reports Specifics */
         .report-summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
-        .report-card { 
-            background: #fff; border-radius: 20px; padding: 20px; border: 1px solid var(--border); 
-            box-shadow: var(--shadow); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;
-        }
+        .report-card { background: #fff; border-radius: 20px; padding: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
         .report-card h4 { margin: 0; color: var(--text-muted); font-size: 12px; font-weight: 700; z-index: 2; }
         .report-card .val { font-size: 28px; font-weight: 900; color: var(--text); margin-top: 5px; z-index: 2; line-height: 1; }
         .report-card i { position: absolute; bottom: -10px; left: -10px; font-size: 70px; opacity: 0.05; color: var(--text); z-index: 1; transform: rotate(15deg); }
-        .rc-primary { border-bottom: 4px solid var(--primary); }
-        .rc-success { border-bottom: 4px solid var(--success); }
-        .rc-warning { border-bottom: 4px solid var(--warning); }
-        .rc-error { border-bottom: 4px solid var(--error); }
-
-        /* Modern Table for Techs */
+        .rc-primary { border-bottom: 4px solid var(--primary); } .rc-success { border-bottom: 4px solid var(--success); } .rc-warning { border-bottom: 4px solid var(--warning); } .rc-error { border-bottom: 4px solid var(--error); }
         .modern-table-container { overflow-x: auto; background: #fff; border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); }
         .modern-table { width: 100%; border-collapse: collapse; min-width: 500px; }
         .modern-table th { text-align: right; padding: 15px; font-size: 12px; color: var(--text-muted); border-bottom: 2px solid var(--surface-light); font-weight: 700; }
         .modern-table td { padding: 15px; border-bottom: 1px solid var(--surface-light); font-size: 13px; color: var(--text); vertical-align: middle; }
-        .modern-table tr:last-child td { border-bottom: none; }
         .tech-row { display: flex; align-items: center; gap: 10px; }
         .tech-row img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-        
-        /* Charts Container */
         .chart-container { background: #fff; border-radius: 20px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; position: relative; height: 300px; }
-
-        /* Admin Management Lists */
-        .admin-list-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px 15px; background: var(--surface-light); border-radius: 12px; 
-            margin-bottom: 8px; border: 1px solid var(--border); transition: 0.2s;
-        }
-        .admin-list-item:hover { background: #fff; border-color: var(--primary); }
+        .admin-list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: var(--surface-light); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border); transition: 0.2s; }
         .delete-icon { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: var(--error); background: rgba(239,68,68,0.1); border-radius: 50%; cursor: pointer; transition: 0.2s; }
-        .delete-icon:hover { background: var(--error); color: white; }
-
-        /* Settings Section Button */
         .settings-btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-        .settings-card-btn { 
-            background: #fff; border: 1px solid var(--border); padding: 20px; border-radius: 16px; 
-            text-align: center; cursor: pointer; transition: 0.2s; color: var(--text);
-        }
-        .settings-card-btn:active { transform: scale(0.98); }
+        .settings-card-btn { background: #fff; border: 1px solid var(--border); padding: 20px; border-radius: 16px; text-align: center; cursor: pointer; transition: 0.2s; color: var(--text); }
         .settings-card-btn i { font-size: 24px; margin-bottom: 10px; display: block; color: var(--primary); }
-        .settings-card-btn span { font-size: 13px; font-weight: 700; }
-
-        /* Date Range Picker for Reports */
         .date-range-container { display: flex; gap: 10px; background: #fff; padding: 15px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; }
         .date-input-mini { flex: 1; min-width: 120px; }
-        .date-input-mini label { font-size: 10px; margin-bottom: 4px; display: block; color: var(--text-muted); }
-        .date-input-mini input { padding: 8px; font-size: 12px; height: 38px; }
-
-        /* ==================== NEW: AL-BAYAN (FEED) STYLES ==================== */
+        
+        /* ==================== NEW: AL-BAYAN (SOCIAL FEED) STYLES ==================== */
         .feed-post { background: #fff; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; }
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .post-author { display: flex; align-items: center; gap: 10px; }
+        .post-author { display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .post-author img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--surface-light); }
         .post-meta h4 { margin: 0; font-size: 14px; font-weight: 800; color: var(--text); }
         .post-meta span { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
@@ -364,22 +245,32 @@
         .act-btn.liked i { animation: pop 0.3s ease; }
         @keyframes pop { 50% { transform: scale(1.3); } }
         
-        .seen-indicator { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+        /* Seen By Indicator */
+        .seen-indicator { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 5px; border-radius: 10px; transition: 0.2s; }
+        .seen-indicator:hover { background: var(--surface-light); color: var(--primary); }
         
+        /* Comments */
         .comments-section { background: var(--surface-light); margin: 15px -20px -20px; padding: 15px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; border-top: 1px solid var(--border); display: none; }
         .comments-section.show { display: block; }
-        .comment-item { display: flex; gap: 10px; margin-bottom: 12px; }
-        .comment-item img { width: 30px; height: 30px; border-radius: 50%; }
+        .comment-item { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
+        .comment-item img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid white; cursor: pointer; }
         .comment-box { background: #fff; padding: 10px 15px; border-radius: 12px; border: 1px solid var(--border); flex: 1; position: relative; }
-        .comment-name { font-size: 12px; font-weight: 800; display: block; margin-bottom: 3px; }
-        .comment-text { font-size: 13px; color: #444; }
+        .comment-name { font-size: 12px; font-weight: 800; display: block; margin-bottom: 3px; cursor: pointer; }
+        .comment-text { font-size: 13px; color: #444; line-height: 1.4; }
         .delete-comment { position: absolute; top: 10px; left: 10px; font-size: 10px; color: var(--error); cursor: pointer; }
+        .reply-btn { position: absolute; bottom: 8px; left: 10px; font-size: 10px; color: var(--primary); cursor: pointer; font-weight: bold; }
+        .reply-btn:hover { text-decoration: underline; }
 
-        /* Media Gallery Modal */
+        /* Modals */
         #media-viewer-modal .modal-content { max-width: 90%; background: transparent; box-shadow: none; border: none; padding: 0; height: auto; text-align: center; }
         .full-media-container { position: relative; display: flex; flex-direction: column; align-items: center; }
         .full-media-item { max-width: 100%; max-height: 80vh; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         .media-close-btn { position: fixed; top: 20px; left: 20px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2002; font-size: 20px; border: 1px solid rgba(255,255,255,0.3); }
+        
+        /* Seen By List Modal */
+        .seen-user-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid var(--surface-light); }
+        .seen-user-item img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
+        .seen-user-item:last-child { border-bottom: none; }
 
     </style>
 </head>
@@ -391,7 +282,7 @@
     <div id="loader">
         <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color:var(--primary);"></i>
         <h2 style="margin-top:20px; color:var(--primary-dark); font-size:18px; font-weight:800;">نظام الصيانة الذكي</h2>
-        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V3.5 Enterprise</p>
+        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V4.0 Social Enterprise</p>
     </div>
 
     <div id="auth-screen" class="hidden" style="min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:25px;">
@@ -617,8 +508,7 @@
                                     <th>التقييم</th>
                                 </tr>
                             </thead>
-                            <tbody id="tech-performance-body">
-                                </tbody>
+                            <tbody id="tech-performance-body"></tbody>
                         </table>
                     </div>
                 </div>
@@ -725,7 +615,10 @@
             <div class="nav-item active" onclick="nav('home', this)"><i class="fa-solid fa-list-check"></i>المهام</div>
             <div class="nav-add-btn" onclick="nav('create', null)"><i class="fa-solid fa-plus"></i></div>
             <div class="nav-item" onclick="nav('team', this)"><i class="fa-solid fa-users"></i>الفريق</div>
-            <div class="nav-item" onclick="nav('albayan', this)"><i class="fa-solid fa-bullhorn"></i>البيان</div>
+            <div class="nav-item" onclick="nav('albayan', this)">
+                <i class="fa-solid fa-bullhorn"></i>البيان
+                <div id="feed-badge" class="nav-badge"></div>
+            </div>
             <div class="nav-item" onclick="nav('profile', this)"><i class="fa-solid fa-user"></i>حسابي</div>
             <div class="nav-item" onclick="nav('settings', this)"><i class="fa-solid fa-gear"></i></div>
         </div>
@@ -734,8 +627,15 @@
     <div id="media-viewer-modal" class="modal-overlay hidden" style="background: rgba(0,0,0,0.95); z-index:2005;">
         <div class="media-close-btn" onclick="closeModal('media-viewer-modal')"><i class="fa-solid fa-xmark"></i></div>
         <div class="modal-content" style="background:transparent; box-shadow:none; border:none; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
-            <div id="media-viewer-content" class="full-media-container" style="width:100%;">
-                </div>
+            <div id="media-viewer-content" class="full-media-container" style="width:100%;"></div>
+        </div>
+    </div>
+
+    <div id="seen-users-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="close-btn" onclick="closeModal('seen-users-modal')"><i class="fa-solid fa-xmark"></i></div>
+            <h3 style="margin-bottom:15px; color:var(--text);">المشاهدون <i class="fa-solid fa-eye" style="color:var(--primary);"></i></h3>
+            <div id="seen-users-list" style="max-height:300px; overflow-y:auto;"></div>
         </div>
     </div>
 
@@ -761,14 +661,11 @@
 
             <div id="tech-select-area" class="hidden" style="margin-top:20px;">
                 <p style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:12px;">تعيين الفني:</p>
-                
                 <div style="display:flex; gap:10px; margin-bottom:15px;">
                     <label style="flex:1; cursor:pointer;"><input type="radio" name="tech-type" value="internal" checked onchange="toggleTechType(this.value)"> <span style="font-size:12px;">فني مسجل</span></label>
                     <label style="flex:1; cursor:pointer;"><input type="radio" name="tech-type" value="external" onchange="toggleTechType(this.value)"> <span style="font-size:12px;">فني تعاقد (خارجي)</span></label>
                 </div>
-
                 <div id="tech-list-action" class="tech-select-grid" style="max-height:200px; overflow-y:auto; padding:5px;"></div>
-
                 <div id="ext-tech-form" class="ext-tech-form hidden">
                     <div class="input-group"><input type="text" id="ext-name" placeholder="اسم الفني"></div>
                     <div class="input-group"><input type="tel" id="ext-phone" placeholder="رقم الهاتف"></div>
@@ -776,7 +673,6 @@
                     <div class="input-group"><input type="number" id="ext-cost" placeholder="التكلفة (اختياري)"></div>
                 </div>
             </div>
-
             <button onclick="submitAction()" id="act-submit-btn" class="btn-main" style="margin-top:20px;">تنفيذ</button>
         </div>
     </div>
@@ -803,9 +699,10 @@
     <div id="friend-profile-modal" class="modal-overlay hidden">
         <div class="modal-content" style="text-align:center; z-index:2001;">
             <div class="close-btn" onclick="closeModal('friend-profile-modal')"><i class="fa-solid fa-xmark"></i></div>
-            <img id="fp-pic" src="" style="width:100px; height:100px; border-radius:50%; margin-bottom:15px;">
-            <h3 id="fp-name"></h3>
-            <p id="fp-role"></p>
+            <img id="fp-pic" src="" style="width:100px; height:100px; border-radius:50%; margin-bottom:15px; border:4px solid var(--surface-light);">
+            <h3 id="fp-name" style="margin-bottom:5px;"></h3>
+            <p id="fp-role" style="color:var(--text-muted); font-size:14px;"></p>
+            <div id="fp-info" style="margin-top:15px; font-size:13px; color:#555;"></div>
             <div id="fp-actions" style="margin-top:20px;"></div>
         </div>
     </div>
@@ -867,7 +764,7 @@
     let systemSpecialties = [];
     let systemLocations = [];
     let reportChart = null;
-    let postsListener = null; // To unsubscribe if needed
+    let postsListener = null;
 
     // --- Helpers ---
     function generateUniqueCode() {
@@ -1004,6 +901,9 @@
                 document.getElementById('req-date').valueAsDate = new Date();
                 document.getElementById('req-time').value = new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
 
+                // Check for unseen posts initially
+                checkUnseenNotifications();
+
                 setTimeout(() => { document.getElementById('loader').classList.add('hidden'); }, 500);
             }
         } catch(e) { 
@@ -1013,7 +913,7 @@
         }
     }
 
-    // --- NEW: System Data Management (Admin Logic) ---
+    // --- Admin: System Data ---
     async function fetchSystemData() {
         try {
             const doc = await db.collection('system_settings').doc('config').get();
@@ -1138,7 +1038,11 @@
 
         if(p==='profile') loadProfilePageData(); 
         if(p==='reports') generateReports(); 
-        if(p==='albayan') loadFeedPosts(); 
+        if(p==='albayan') {
+            loadFeedPosts(); 
+            // Hide badge when opening feed
+            document.getElementById('feed-badge').classList.remove('active');
+        }
     }
     
     function showScreen(id) { 
@@ -1652,7 +1556,7 @@
         if(snap.empty) { list.innerHTML = "<p style='text-align:center; color:#999; font-size:12px;'>لا يوجد أصدقاء</p>"; return; }
         snap.forEach(d => {
             const f = d.data();
-            list.innerHTML += `<div class="friend-item"><img src="${f.pic}" style="width:40px;height:40px;border-radius:50%;"><b>${f.name}</b></div>`;
+            list.innerHTML += `<div class="friend-item" onclick="viewUserProfile('${f.friendId}')"><img src="${f.pic}" style="width:40px;height:40px;border-radius:50%;"><b>${f.name}</b></div>`;
         });
     }
 
@@ -1704,7 +1608,7 @@
         document.getElementById('request-details-modal').classList.remove('hidden');
         
         let mediaHtml = "";
-        // NEW: Open in Lightbox Logic
+        // Open in Lightbox Logic
         if(d.media) {
             d.media.forEach((m, idx) => {
                 if(m.type === 'audio') {
@@ -1734,7 +1638,7 @@
         document.getElementById('req-details-content').innerHTML = `
             ${tlHtml}
             <div style="text-align:center; margin-bottom:15px;"><span class="req-code" style="font-size:16px;">#${d.uniqueCode||'---'}</span></div>
-            <p style="font-size:12px; color:#666; margin-bottom:5px;"><strong>المنشئ:</strong> ${d.userData.fullName} (ID: ${d.userId.substring(0,5)})</p>
+            <p style="font-size:12px; color:#666; margin-bottom:5px;"><strong>المنشئ:</strong> <span onclick="viewUserProfile('${d.userId}')" style="color:var(--primary); cursor:pointer;">${d.userData.fullName}</span> (ID: ${d.userId.substring(0,5)})</p>
             <p><strong>الوصف:</strong> ${d.description}</p>
             <p><strong>الموقع:</strong> ${d.location}</p>
             ${d.extTechData ? `<div style="background:#fff7ed;padding:10px;border-radius:10px;margin-top:10px;"><p style="margin:0;font-weight:bold;color:#c2410c;">فني خارجي:</p><p style="margin:0;font-size:12px;">${d.extTechData.name} - ${d.extTechData.phone}</p></div>` : ''}
@@ -1932,8 +1836,20 @@
     }
 
     // =========================================================================
-    // NEW: AL-BAYAN (SOCIAL FEED) LOGIC
+    // NEW: AL-BAYAN (SOCIAL FEED) LOGIC - ENHANCED
     // =========================================================================
+
+    function checkUnseenNotifications() {
+        // Simple polling for unseen posts to show red dot on app start
+        db.collection('posts').orderBy('createdAt', 'desc').limit(5).get().then(snap => {
+            let hasUnseen = false;
+            snap.forEach(doc => {
+                const p = doc.data();
+                if(!p.seenBy || !p.seenBy.includes(currentUser.uid)) hasUnseen = true;
+            });
+            if(hasUnseen) document.getElementById('feed-badge').classList.add('active');
+        });
+    }
 
     function loadFeedPosts() {
         if(postsListener) return; // Already listening
@@ -1946,12 +1862,23 @@
                 container.innerHTML = "";
                 if(snap.empty) { container.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">لا يوجد منشورات</div>'; return; }
                 
+                let hasUnseenInStream = false;
+
                 snap.forEach(doc => {
+                    const p = doc.data();
+                    // Check if current post is unseen by user to update badge state logic
+                    if(!p.seenBy || !p.seenBy.includes(currentUser.uid)) {
+                        hasUnseenInStream = true;
+                    }
                     renderPostItem(doc);
                 });
                 
-                // Mark posts as seen logic (simple implementation: mark latest loaded)
-                markPostsAsSeen(snap.docs);
+                // If user is currently viewing the feed tab, mark them as seen
+                if(!document.getElementById('page-albayan').classList.contains('hidden')) {
+                    markPostsAsSeen(snap.docs);
+                } else if (hasUnseenInStream) {
+                    document.getElementById('feed-badge').classList.add('active');
+                }
             });
     }
 
@@ -1978,7 +1905,7 @@
         const html = `
         <div class="feed-post" id="post-${pid}">
             <div class="post-header">
-                <div class="post-author">
+                <div class="post-author" onclick="viewUserProfile('${p.authorId}')">
                     <img src="${p.authorPic}">
                     <div class="post-meta">
                         <h4>${p.authorName} <span style="font-weight:normal; font-size:10px; color:var(--primary);">(${p.role})</span></h4>
@@ -1997,7 +1924,7 @@
                         <i class="fa-regular fa-comment"></i> تعليق
                     </button>
                 </div>
-                <div class="seen-indicator">
+                <div class="seen-indicator" onclick="showSeenUsers('${pid}')">
                     <i class="fa-solid fa-eye"></i> ${seenCount}
                 </div>
             </div>
@@ -2073,15 +2000,23 @@
                 }
                 list.innerHTML += `
                 <div class="comment-item">
-                    <img src="${c.authorPic}">
+                    <img src="${c.authorPic}" onclick="viewUserProfile('${c.authorId}')">
                     <div class="comment-box">
-                        <span class="comment-name">${c.authorName}</span>
+                        <span class="comment-name" onclick="viewUserProfile('${c.authorId}')">${c.authorName}</span>
                         <span class="comment-text">${c.text}</span>
+                        <span class="reply-btn" onclick="prepareReply('${pid}', '${c.authorName}')">رد</span>
                         ${del}
                     </div>
                 </div>`;
             });
         });
+    }
+
+    // Prepare reply: puts @Name in input box
+    function prepareReply(pid, name) {
+        const input = document.getElementById(`comment-input-${pid}`);
+        input.value = `@${name} `;
+        input.focus();
     }
 
     async function addComment(pid) {
@@ -2103,8 +2038,8 @@
         await db.collection('posts').doc(pid).collection('comments').doc(cid).delete();
     }
 
+    // Logic to update seen array
     async function markPostsAsSeen(docs) {
-        // Batch update implies complexity, let's do simple individual check
         docs.forEach(doc => {
             const p = doc.data();
             if(!p.seenBy || !p.seenBy.includes(currentUser.uid)) {
@@ -2113,6 +2048,95 @@
                 });
             }
         });
+    }
+
+    // NEW: Open Modal showing who saw the post
+    async function showSeenUsers(pid) {
+        const modal = document.getElementById('seen-users-modal');
+        const list = document.getElementById('seen-users-list');
+        list.innerHTML = "جاري التحميل...";
+        modal.classList.remove('hidden');
+
+        try {
+            const postDoc = await db.collection('posts').doc(pid).get();
+            const seenIds = postDoc.data().seenBy || [];
+            
+            if(seenIds.length === 0) {
+                list.innerHTML = "<p style='text-align:center;color:#999'>لم يشاهده أحد بعد</p>";
+                return;
+            }
+
+            // In real app, batch fetch. For demo, we might fetch users collection and filter client side 
+            // or perform a 'where in' query. Firebase 'in' limits to 10.
+            // For simplicity/robustness in this snippet, we will fetch users who are in the list.
+            
+            // NOTE: To avoid complex queries in this demo, I will fetch all users and filter.
+            // In production with 1000s users, this should be optimized.
+            const usersSnap = await db.collection('users').get();
+            list.innerHTML = "";
+            let found = 0;
+            
+            usersSnap.forEach(uDoc => {
+                if(seenIds.includes(uDoc.id)) {
+                    const u = uDoc.data();
+                    list.innerHTML += `
+                    <div class="seen-user-item" onclick="viewUserProfile('${uDoc.id}')">
+                        <img src="${u.photoUrl}">
+                        <span>${u.fullName}</span>
+                    </div>`;
+                    found++;
+                }
+            });
+            if(found === 0) list.innerHTML = "<p>بيانات غير متوفرة</p>";
+
+        } catch(e) { list.innerHTML = "خطأ في التحميل"; }
+    }
+
+    // NEW: Generalized View User Profile
+    async function viewUserProfile(uid) {
+        // If clicking own profile, go to profile tab
+        if(uid === currentUser.uid) {
+            nav('profile', document.querySelector('.nav-item:nth-child(5)'));
+            return;
+        }
+
+        const modal = document.getElementById('friend-profile-modal');
+        modal.classList.remove('hidden');
+        document.getElementById('fp-name').innerText = "جاري التحميل...";
+        
+        const doc = await db.collection('users').doc(uid).get();
+        if(doc.exists) {
+            const u = doc.data();
+            const roleMap = { 'employee': 'موظف', 'supervisor': 'مشرف', 'manager': 'مدير', 'technician': 'فني', 'engineer': 'مهندس' };
+            
+            document.getElementById('fp-pic').src = u.photoUrl;
+            document.getElementById('fp-name').innerText = u.fullName;
+            document.getElementById('fp-role').innerText = roleMap[u.role] || u.role;
+            
+            // Info
+            const infoDiv = document.getElementById('fp-info') || document.createElement('div');
+            infoDiv.id = 'fp-info';
+            infoDiv.style.marginTop = "15px";
+            infoDiv.style.color = "#666";
+            infoDiv.style.fontSize = "13px";
+            infoDiv.innerHTML = `
+                <p><i class="fa-solid fa-briefcase"></i> ${u.jobTitle || '-'}</p>
+                <p><i class="fa-solid fa-location-dot"></i> ${u.location || '-'}</p>
+            `;
+            // Insert info div after role if not exists (handled by HTML structure in part 1)
+            // But let's make sure we populate the actions div correctly
+            
+            const actionsDiv = document.getElementById('fp-actions');
+            actionsDiv.innerHTML = "";
+            
+            // Check if friend
+            const friendCheck = await db.collection('users').doc(currentUser.uid).collection('friends').where('friendId','==',uid).get();
+            if(friendCheck.empty) {
+                actionsDiv.innerHTML = `<button onclick="addFriend('${doc.id}', '${u.fullName}', '${u.photoUrl}')" class="btn-main btn-sm">إضافة صديق +</button>`;
+            } else {
+                actionsDiv.innerHTML = `<span style="color:green; font-weight:bold;"><i class="fa-solid fa-check"></i> صديق</span>`;
+            }
+        }
     }
 
 </script>
