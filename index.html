@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام الصيانة الذكي - جامعة الريادة (V8.1 - Fix)</title>
+    <title>نظام الصيانة الذكي - جامعة الريادة (V9.0 - Camera Feature)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -304,7 +304,7 @@
     <div id="loader">
         <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color:var(--primary);"></i>
         <h2 style="margin-top:20px; color:var(--primary-dark); font-size:18px; font-weight:800;">نظام الصيانة الذكي</h2>
-        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V8.1 Final Fix</p>
+        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V9.0 Camera Feature</p>
     </div>
 
     <div id="auth-screen" class="hidden" style="min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:25px;">
@@ -428,6 +428,13 @@
                             <p style="font-size:12px; color:var(--text-muted); margin:0;">صور / فيديو</p>
                             <input type="file" id="req-files" hidden multiple accept="image/*,video/*" onchange="handleFiles(this)">
                         </div>
+                        
+                        <div style="flex:1; background:var(--surface-light); padding:20px; border-radius:16px; border:2px dashed var(--border); text-align:center; cursor:pointer;" onclick="document.getElementById('req-camera').click()">
+                            <i class="fa-solid fa-camera fa-2x" style="color:var(--primary); margin-bottom:10px;"></i>
+                            <p style="font-size:12px; color:var(--text-muted); margin:0;">كاميرا</p>
+                            <input type="file" id="req-camera" hidden accept="image/*" capture="environment" onchange="handleFiles(this)">
+                        </div>
+
                         <div id="mic-trigger" class="mic-btn" onclick="toggleRecording()">
                             <i class="fa-solid fa-microphone"></i>
                         </div>
@@ -1000,6 +1007,7 @@
                     await db.collection('users').doc(currentUser.uid).update({shortId: Math.random().toString(36).substr(2,6).toUpperCase()});
                 }
                 
+                // 1. Fetch System Data
                 await fetchSystemData();
 
                 renderHeader();
@@ -1011,9 +1019,11 @@
                 loadFriendReqs();
                 loadProfilePageData();
                 
+                // Defaults
                 document.getElementById('req-date').valueAsDate = new Date();
                 document.getElementById('req-time').value = new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
 
+                // Check for unseen posts initially
                 checkUnseenNotifications();
 
                 setTimeout(() => { document.getElementById('loader').classList.add('hidden'); }, 500);
@@ -1081,45 +1091,47 @@
     }
 
     // =========================================================================
-    // V8.1 STRICT ROLE UI SETUP (FIXED)
+    // V8.1 STRICT ROLE UI SETUP (CORRECTED & VERIFIED)
     // =========================================================================
     function setupRoleUI() {
         const r = userData.role;
         const shortcuts = document.getElementById('manager-shortcuts');
-        const staffShortcuts = document.getElementById('staff-shortcuts'); // NEW
+        const staffShortcuts = document.getElementById('staff-shortcuts'); 
         const adminBtn = document.getElementById('btn-admin-panel');
         const settingsManagerArea = document.getElementById('settings-manager-area');
-        const settingsStaffArea = document.getElementById('settings-staff-area'); // NEW
+        const settingsStaffArea = document.getElementById('settings-staff-area'); 
         const createPostBox = document.getElementById('create-post-box');
         const navCreateBtn = document.getElementById('nav-create-btn'); 
 
-        // 1. CREATE REQUEST BUTTON
-        // HIDE for: Manager, Engineer, Technician
+        // 1. CREATE REQUEST BUTTON:
+        // HIDDEN for: Manager, Engineer, Technician
         if(r === 'manager' || r === 'engineer' || r === 'technician') {
              navCreateBtn.classList.add('hidden');
+             // Also lock the page content if accessed directly via console
              document.getElementById('page-create').innerHTML = "<div style='text-align:center; padding:50px; color:#999;'><i class='fa-solid fa-lock fa-2x'></i><p>غير مصرح بإنشاء بلاغات لهذا الحساب.</p></div>";
         }
 
-        // 2. REPORTS & ADMIN PANEL (Managers & Engineers)
+        // 2. REPORTS & ADMIN PANEL:
+        // VISIBLE for: Manager, Engineer ONLY
         if(r === 'manager' || r === 'engineer') {
-            shortcuts.classList.remove('hidden');
-            settingsManagerArea.classList.remove('hidden');
+            shortcuts.classList.remove('hidden'); // Home Shortcuts
+            settingsManagerArea.classList.remove('hidden'); // Settings Area
             
-            // Only Manager sees "Admin Panel" button
+            // Only Manager sees "Admin Panel" inside shortcuts
             if(r === 'manager') {
                 adminBtn.classList.remove('hidden');
             }
         }
 
-        // 3. INVENTORY (OHDA) (Supervisors & Employees)
+        // 3. INVENTORY (OHDA):
+        // VISIBLE for: Supervisor, Employee ONLY
         if(r === 'supervisor' || r === 'employee') {
-            // Show Shortcut in Home
-            staffShortcuts.classList.remove('hidden');
-            // Show Button in Settings
-            settingsStaffArea.classList.remove('hidden');
+            staffShortcuts.classList.remove('hidden'); // Show button in Home
+            settingsStaffArea.classList.remove('hidden'); // Show button in Settings
         }
 
-        // 4. POSTING IN AL-BAYAN
+        // 4. POSTING IN AL-BAYAN:
+        // VISIBLE for: Manager, Engineer, Supervisor
         if(r === 'manager' || r === 'engineer' || r === 'supervisor') {
             createPostBox.classList.remove('hidden'); 
         }
@@ -1183,6 +1195,7 @@
         document.getElementById('page-'+p).classList.remove('hidden'); 
         
         document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active')); 
+        // Ensure create button isn't activated if hidden
         if(p !== 'create' && p !== 'reports' && p !== 'admin-settings' && p !== 'inventory') {
             if(el) el.classList.add('active'); 
         }
