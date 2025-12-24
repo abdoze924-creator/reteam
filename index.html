@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام الصيانة الذكي - جامعة الريادة (V7.0 - Roles Update)</title>
+    <title>نظام الصيانة الذكي - جامعة الريادة (V8.0 - Final Ops)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -304,7 +304,7 @@
     <div id="loader">
         <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color:var(--primary);"></i>
         <h2 style="margin-top:20px; color:var(--primary-dark); font-size:18px; font-weight:800;">نظام الصيانة الذكي</h2>
-        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V7.0 Roles Update</p>
+        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V8.0 Final Ops</p>
     </div>
 
     <div id="auth-screen" class="hidden" style="min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:25px;">
@@ -373,6 +373,10 @@
                         <button onclick="nav('reports', null)" class="btn-sm btn-main" style="flex:1; background: #fff; color:var(--primary); border:1px solid var(--border); box-shadow:none;"><i class="fa-solid fa-chart-pie"></i> التقارير</button>
                         <button onclick="nav('admin-settings', null)" id="btn-admin-panel" class="hidden btn-sm btn-main" style="flex:1; background: #fff; color:var(--gold); border:1px solid var(--border); box-shadow:none;"><i class="fa-solid fa-sliders"></i> لوحة الإدارة</button>
                     </div>
+                </div>
+                
+                <div id="staff-shortcuts" class="hidden" style="margin: 0 15px 15px 15px;">
+                    <button id="btn-inventory-home" onclick="nav('inventory', null)" class="btn-sm btn-main" style="width:100%; background: #fff; color:var(--primary); border:1px solid var(--border); box-shadow:none;"><i class="fa-solid fa-boxes-stacked"></i> الدخول لجرد العهدة</button>
                 </div>
 
                 <div class="tabs-container">
@@ -991,20 +995,23 @@
                     await db.collection('users').doc(currentUser.uid).update({shortId: Math.random().toString(36).substr(2,6).toUpperCase()});
                 }
                 
+                // 1. Fetch System Data
                 await fetchSystemData();
 
                 renderHeader();
                 showScreen('app-container');
-                setupRoleUI(); // Critical for permissions
+                setupRoleUI(); // Apply Permissions
                 
                 loadFeed();
                 loadTeam(); 
                 loadFriendReqs();
                 loadProfilePageData();
                 
+                // Defaults
                 document.getElementById('req-date').valueAsDate = new Date();
                 document.getElementById('req-time').value = new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
 
+                // Check for unseen posts initially
                 checkUnseenNotifications();
 
                 setTimeout(() => { document.getElementById('loader').classList.add('hidden'); }, 500);
@@ -1072,7 +1079,7 @@
     }
 
     // =========================================================================
-    // V7.0 ROLE UI SETUP (CRITICAL UPDATE)
+    // V8.0 STRICT ROLE UI SETUP
     // =========================================================================
     function setupRoleUI() {
         const r = userData.role;
@@ -1080,31 +1087,37 @@
         const adminBtn = document.getElementById('btn-admin-panel');
         const settingsAdminArea = document.getElementById('settings-manager-area');
         const createPostBox = document.getElementById('create-post-box');
-        const invBtn = document.getElementById('btn-inventory-setting');
+        const invBtn = document.getElementById('btn-inventory-setting'); // Button in Settings
         const navCreateBtn = document.getElementById('nav-create-btn'); // Bottom Nav Add Button
 
-        // 1. Hide "Create Request" for Manager, Engineer, Technician
-        if(r === 'technician' || r === 'engineer' || r === 'manager') {
+        // 1. CREATE REQUEST BUTTON
+        // HIDE for: Manager, Engineer, Technician
+        if(r === 'manager' || r === 'engineer' || r === 'technician') {
              navCreateBtn.classList.add('hidden');
+             // Also lock the page content if accessed directly
              document.getElementById('page-create').innerHTML = "<div style='text-align:center; padding:50px; color:#999;'><i class='fa-solid fa-lock fa-2x'></i><p>غير مصرح بإنشاء بلاغات لهذا الحساب.</p></div>";
         }
 
-        // 2. Reports & Admin Panel: Only Manager & Engineer
+        // 2. REPORTS & ADMIN PANEL
+        // SHOW ONLY for: Manager, Engineer
         if(r === 'manager' || r === 'engineer') {
             shortcuts.classList.remove('hidden');
             settingsAdminArea.classList.remove('hidden');
-            // Manager specifically sees the "Admin Panel" button inside shortcuts
+            
+            // Only Manager sees "Admin Panel" inside shortcuts
             if(r === 'manager') {
                 adminBtn.classList.remove('hidden');
             }
         }
 
-        // 3. Inventory (Ohda): Only Supervisor & Employee
+        // 3. INVENTORY (OHDA)
+        // SHOW ONLY for: Supervisor, Employee
         if(r === 'supervisor' || r === 'employee') {
             invBtn.classList.remove('hidden');
         }
 
-        // 4. Social Feed Posting: Manager, Engineer, Supervisor
+        // 4. POSTING IN AL-BAYAN
+        // SHOW for: Manager, Engineer, Supervisor
         if(r === 'manager' || r === 'engineer' || r === 'supervisor') {
             createPostBox.classList.remove('hidden'); 
         }
@@ -1317,7 +1330,6 @@
             let actionBtns = "";
             let deleteBtn = "";
 
-            // Delete logic for Manager (Not in Trash view) or Trash Manager
             if(userData.role === 'manager' && currentTab !== 'trash') {
                 deleteBtn = `<button onclick="event.stopPropagation(); softDelete('${d.id}')" class="btn-ghost btn-sm" style="color:var(--error); border-color:var(--border); margin-left:10px;"><i class="fa-solid fa-trash"></i></button>`;
             } else if (userData.role === 'manager' && currentTab === 'trash') {
