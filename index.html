@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام الصيانة الذكي - جامعة الريادة (V12.0 - Ultimate UI)</title>
+    <title>نظام الصيانة الذكي - جامعة الريادة (V11.0 - Detailed Timeline)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* ==================== Core Styling ==================== */
+        /* ==================== Core Styling (الأساسيات) ==================== */
         :root {
             --primary: #0056b3;          
             --primary-dark: #003d80;     
-            --dark: #f1f5f9; /* Lighter background for better contrast */            
+            --dark: #f8fafc;             
             --surface: #ffffff;          
-            --surface-light: #f8fafc;    
+            --surface-light: #f1f5f9;    
             --border: #e2e8f0;           
             --text: #1e293b;             
             --text-muted: #64748b;         
@@ -31,8 +31,12 @@
             --purple: #8b5cf6;
             --bg-image: url('https://a.top4top.io/p_36115ao3o1.jpg');
             --glass: rgba(255, 255, 255, 0.95);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --radius: 16px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            
+            --chart-bg-1: rgba(0, 86, 179, 0.1);
+            --chart-border-1: #0056b3;
+            --chart-bg-2: rgba(16, 185, 129, 0.1);
+            --chart-border-2: #10b981;
         }
         
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -43,64 +47,34 @@
             color: var(--text); 
             margin: 0; 
             min-height: 100vh;
-            background-image: linear-gradient(rgba(241, 245, 249, 0.9), rgba(241, 245, 249, 0.9)), var(--bg-image);
+            background-image: linear-gradient(rgba(248,250,252,0.85), rgba(248,250,252,0.85)), var(--bg-image);
             background-size: cover; 
             background-position: center; 
             background-attachment: fixed;
+            position: relative; 
             overflow-x: hidden;
         }
         
-        /* Force English Numbers */
-        .en-num { font-family: 'Roboto Mono', monospace; direction: ltr; display: inline-block; }
-        input[type="number"], input[type="tel"], input[type="date"], input[type="time"] { font-family: 'Roboto Mono', monospace; direction: ltr; text-align: right; }
-
-        /* Responsive Wrapper */
-        .app-wrapper { 
-            width: 100%; 
-            min-height: 100vh; 
-            position: relative; 
-            padding-bottom: 100px; 
-            margin: 0 auto;
-        }
-
-        /* Desktop Optimization */
-        @media (min-width: 768px) {
-            .app-wrapper { max-width: 1000px; padding-bottom: 20px; }
-            .bottom-nav { 
-                top: 0; bottom: auto !important; 
-                border-radius: 0 0 20px 20px !important; 
-                position: sticky !important;
-                max-width: 1000px;
-                margin: 0 auto;
-            }
-            .main-banner { border-radius: 0 0 30px 30px !important; margin-top: 80px; }
-            
-            /* Grid Layout for Feed */
-            #requests-feed, #albayan-feed {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                gap: 20px;
-            }
-            .glass-card { margin: 0 !important; height: 100%; }
-        }
-
+        .app-wrapper { max-width: 600px; margin: 0 auto; min-height: 100vh; position: relative; padding-bottom: 100px; }
         .hidden { display: none !important; }
+        html { scroll-behavior: smooth; }
 
         /* Loader */
         #loader {
             position: fixed; inset: 0; background-color: var(--dark);
-            z-index: 99999; display: flex; 
+            background-image: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), var(--bg-image);
+            background-size: cover; z-index: 99999; display: flex; 
             flex-direction: column; justify-content: center; align-items: center; text-align: center;
         }
 
         /* --- Header --- */
         .main-banner {
-            height: 200px; 
-            background: linear-gradient(to bottom, rgba(0,86,179,0.6), rgba(0, 61, 128, 0.9)), url('https://a.top4top.io/p_36115ao3o1.jpg');
+            height: 220px; 
+            background: linear-gradient(to bottom, rgba(0,86,179,0.3), rgba(0, 61, 128, 0.9)), url('https://a.top4top.io/p_36115ao3o1.jpg');
             background-size: cover; background-position: center;
             display: flex; flex-direction: column; justify-content: flex-end; padding: 25px;
-            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; 
-            margin-bottom: 25px; box-shadow: var(--shadow); position: relative; color: white;
+            border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; 
+            margin-bottom: 25px; box-shadow: 0 10px 40px rgba(0,86,179,0.3); position: relative;
         }
 
         .header-top {
@@ -115,129 +89,212 @@
         }
         .bell-badge {
             position: absolute; top: 8px; right: 8px; width: 8px; height: 8px;
-            background: var(--error); border-radius: 50%; display: none; border: 2px solid #fff;
+            background: var(--error); border-radius: 50%; display: none; border: 1px solid #fff;
         }
 
         .header-content { display: flex; align-items: flex-end; justify-content: space-between; width: 100%; padding-bottom: 10px; }
 
-        .user-minimal h1 { margin: 0; font-size: 24px; font-weight: 800; color: #fff; }
+        /* User Info */
+        .user-minimal { display: flex; flex-direction: column; gap: 6px; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .user-minimal h1 { margin: 0; font-size: 26px; font-weight: 900; color: #fff; line-height: 1.1; letter-spacing: -0.5px; }
         .user-minimal .role-badge { 
-            background: rgba(255, 255, 255, 0.25); color: white; padding: 4px 12px; 
-            border-radius: 20px; font-size: 11px; font-weight: 700; width: fit-content;
-            backdrop-filter: blur(4px);
+            background: rgba(255, 255, 255, 0.2); color: white; padding: 5px 14px; 
+            border-radius: 20px; font-size: 11px; font-weight: 800; width: fit-content;
+            border: 1px solid rgba(255,255,255,0.4); backdrop-filter: blur(4px);
         }
 
-        /* --- User Avatar --- */
-        .user-avatar-container { position: relative; width: 80px; height: 80px; border-radius: 50%; margin-bottom: 5px; cursor: pointer; }
+        /* --- AVATAR & FRAMES --- */
+        .user-avatar-container { position: relative; width: 85px; height: 85px; border-radius: 50%; margin-bottom: 5px; }
         .user-avatar-container img {
             width: 100%; height: 100%; border-radius: 50%;
-            border: 3px solid rgba(255,255,255,0.8); object-fit: cover;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); background: #fff;
+            border: 4px solid rgba(255,255,255,0.3); object-fit: cover;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); background: #fff; display: block;
         }
-        .user-avatar-container .frame-overlay { position: absolute; inset: -3px; pointer-events: none; border-radius: 50%; z-index: 2; }
+        .user-avatar-container .frame-overlay { position: absolute; inset: -5px; pointer-events: none; border-radius: 50%; z-index: 2; }
         
-        /* --- Cards --- */
+        .frame-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
+        .frame-option { width: 100%; aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--border); cursor: pointer; position: relative; overflow: hidden; }
+        .frame-option.selected { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,86,179,0.2); }
+        .f-gold { border: 5px solid #ffd700; box-shadow: inset 0 0 10px #ffd700, 0 0 10px rgba(255, 215, 0, 0.5); }
+        .f-blue { border: 5px dashed var(--primary); }
+        .f-grad { background: linear-gradient(45deg, var(--primary), var(--info)); padding: 4px; }
+        .f-grad-in { background: transparent; width: 100%; height: 100%; border-radius: 50%; }
+        .f-none { border: 1px solid #ccc; background: #eee; display: flex; align-items: center; justify-content: center; color: #777; font-size: 10px; }
+
+        /* --- Cards & General --- */
         .glass-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 20px; margin: 15px;
-            box-shadow: var(--shadow); position: relative; overflow: hidden; transition: 0.3s ease;
+            background: rgba(255, 255, 255, 0.95); border: 1px solid var(--border);
+            border-radius: 24px; padding: 24px; margin: 15px;
+            box-shadow: var(--shadow); position: relative; overflow: hidden; transition: 0.2s;
         }
-        
-        /* --- IMPROVED REQUEST CARD (Ticket Style) --- */
-        .request-card {
-            padding: 0; border: 1px solid var(--border); border-right-width: 5px;
-            display: flex; flex-direction: column;
-        }
-        .request-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-        
-        .req-header {
-            padding: 15px; border-bottom: 1px solid var(--surface-light);
-            display: flex; justify-content: space-between; align-items: center; background: #fafafa;
-        }
-        .req-body { padding: 15px; flex: 1; }
-        .req-footer { padding: 12px 15px; background: var(--surface-light); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); }
-        
-        .req-id { font-family: 'Roboto Mono', monospace; font-weight: 700; background: var(--text); color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
-        
-        /* Status Pills */
-        .status-pill { padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
-        .st-pending { background: #e0f2fe; color: #0284c7; } 
-        .st-at_engineer { background: #f3e8ff; color: #9333ea; } 
-        .st-at_tech { background: #ffedd5; color: #ea580c; } 
-        .st-working { background: #fef3c7; color: #d97706; } 
-        .st-pending_confirmation { background: #fce7f3; color: #db2777; } 
-        .st-done { background: #dcfce7; color: #16a34a; } 
-        .st-rejected { background: #fee2e2; color: #dc2626; }
+        .glass-card h2, .glass-card h3 { color: var(--primary-dark); }
+        .request-card { cursor: pointer; border-right: 4px solid transparent; margin-bottom: 15px; background: rgba(255,255,255,0.95); transition: transform 0.2s; border: 1px solid var(--border); }
+        .request-card:active { transform: scale(0.98); }
+        .req-code { font-family: monospace; font-weight: 900; background: var(--text); color: white; padding: 3px 8px; border-radius: 6px; font-size: 12px; letter-spacing: 1px; display: inline-block; direction: ltr; margin-left: 8px; }
 
         /* --- Inputs --- */
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; }
-        input, select, textarea { width: 100%; padding: 14px; background: var(--surface-light); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-family: 'Cairo', sans-serif; font-size: 14px; transition: 0.2s; }
-        input:focus, select:focus, textarea:focus { border-color: var(--primary); background: #fff; outline: none; box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1); }
+        .input-group { margin-bottom: 20px; position: relative; }
+        .input-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; }
+        input, select, textarea { width: 100%; padding: 16px; background: var(--surface-light); border: 1px solid var(--border); border-radius: 16px; color: var(--text); font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 600; transition: 0.3s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.1); }
 
         /* --- Auth --- */
-        .auth-logo-modern { width: 80px; height: 80px; border-radius: 16px; margin-bottom: 15px; object-fit: cover; box-shadow: var(--shadow); }
-        .auth-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
-        .auth-card { background: var(--surface-light); border: 1px solid var(--border); padding: 12px 5px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; }
-        .auth-card-input:checked + .auth-card { background: #eff6ff; border-color: var(--primary); color: var(--primary); font-weight: bold; }
+        .auth-logo-modern { width: 90px; height: 90px; border-radius: 20px; margin-bottom: 15px; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .auth-section-label { text-align: right; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; margin-top: 15px; display: block; font-weight: 700; }
+        .auth-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+        .auth-card-input { display: none; }
+        .auth-card { background: var(--surface-light); border: 1px solid var(--border); padding: 15px 5px; border-radius: 14px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .auth-card-input:checked + .auth-card { background: rgba(0, 86, 179, 0.1); border-color: var(--primary); }
+        .auth-card-input:checked + .auth-card i { color: var(--primary); }
 
-        /* --- Buttons --- */
-        .btn-main { width: 100%; padding: 14px; background: var(--primary); border: none; border-radius: 12px; color: white; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 14px; transition: 0.2s; }
-        .btn-main:hover { background: var(--primary-dark); }
-        .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); border-radius: 12px; cursor: pointer; padding: 8px 12px; font-size: 12px; }
-        .btn-danger { background: var(--error); color: white; }
+        /* Priority Grid */
+        .priority-grid { display: flex; gap: 10px; }
+        .prio-card { flex: 1; padding: 15px 5px; background: var(--surface-light); border: 1px solid var(--border); border-radius: 16px; text-align: center; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-muted); }
+        .prio-radio:checked + .prio-card.p-low { background: #ecfdf5; border-color: var(--success); color: var(--success); }
+        .prio-radio:checked + .prio-card.p-med { background: #fff7ed; border-color: var(--warning); color: var(--warning); }
+        .prio-radio:checked + .prio-card.p-high { background: #fef2f2; border-color: var(--error); color: var(--error); }
 
-        /* --- Nav --- */
-        .bottom-nav { 
-            position: fixed; bottom: 0; left: 0; right: 0; 
-            background: rgba(255, 255, 255, 0.98); 
-            border-top: 1px solid var(--border); 
-            display: flex; justify-content: space-around; align-items: flex-end; 
-            padding: 10px 10px 25px; z-index: 900; 
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.05); 
-        }
-        .nav-item { text-align: center; color: #94a3b8; font-size: 10px; cursor: pointer; padding: 0 10px; position: relative; }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; display: block; transition: 0.2s; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item.active i { transform: translateY(-2px); }
-        
-        .nav-add-btn { 
-            width: 50px; height: 50px; 
-            background: var(--primary); 
-            border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            color: white; font-size: 22px; 
-            box-shadow: 0 8px 20px rgba(0, 86, 179, 0.3); 
-            transform: translateY(-20px); 
-            border: 4px solid var(--dark); 
-            cursor: pointer;
-        }
+        /* Buttons & Mic */
+        .btn-main { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: none; border-radius: 16px; color: white; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 8px 20px rgba(0, 86, 179, 0.2); font-size: 15px; font-family: 'Cairo', sans-serif; transition: 0.1s; }
+        .btn-main:active { transform: scale(0.97); }
+        .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); border-radius: 14px; font-family: 'Cairo', sans-serif; cursor: pointer; padding: 10px; }
+        .btn-danger { background: linear-gradient(135deg, var(--error), #b91c1c); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.2); color: white; }
+        .btn-sm { padding: 8px 16px; font-size: 12px; width: auto; margin: 0; border-radius: 10px; min-height: 35px; }
+        .mic-btn { background: var(--surface-light); border: 2px solid var(--border); color: var(--text-muted); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; font-size: 20px; }
+        .mic-btn.recording { background: #fef2f2; border-color: var(--error); color: var(--error); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-        /* --- Inventory Table --- */
-        .modern-table-container { overflow-x: auto; background: #fff; border-radius: 16px; border: 1px solid var(--border); }
-        .modern-table { width: 100%; border-collapse: collapse; min-width: 600px; /* Ensure horizontal scroll on mobile */ }
-        .modern-table th { text-align: right; padding: 12px; font-size: 11px; color: var(--text-muted); border-bottom: 2px solid var(--surface-light); white-space: nowrap; }
-        .modern-table td { padding: 12px; border-bottom: 1px solid var(--surface-light); font-size: 12px; color: var(--text); vertical-align: middle; }
-        
-        .stepper-container { display: flex; align-items: center; gap: 5px; }
-        .stepper-btn { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border); background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; }
-        .stepper-input { width: 30px; text-align: center; border: none; background: transparent; font-weight: bold; font-family: 'Roboto Mono'; }
-
-        /* --- Timeline --- */
-        .timeline { padding: 0 5px; }
-        .timeline-item { display: flex; gap: 12px; padding-bottom: 20px; position: relative; }
-        .timeline-item::before { content: ''; position: absolute; right: 11px; top: 24px; bottom: 0; width: 2px; background: var(--border); }
+        /* Timeline & Tabs & Nav */
+        .timeline { margin: 20px 0; padding: 0 10px; }
+        .timeline-item { display: flex; gap: 15px; padding-bottom: 25px; position: relative; }
+        .timeline-item::before { content: ''; position: absolute; right: 14px; top: 30px; bottom: 0; width: 2px; background: var(--border); }
         .timeline-item:last-child::before { display: none; }
-        .tl-icon { width: 24px; height: 24px; border-radius: 50%; background: var(--surface-light); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted); z-index: 2; flex-shrink: 0; margin-top: 2px; }
-        .timeline-item.active .tl-icon { background: var(--primary); border-color: var(--primary); color: white; }
-        .tl-content h4 { margin: 0 0 2px; font-size: 13px; font-weight: 700; }
-        .tl-detail { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
-        .tl-highlight { color: var(--primary); font-weight: bold; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; font-size: 10px; }
+        .tl-icon { width: 30px; height: 30px; border-radius: 50%; background: var(--surface-light); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-muted); z-index: 2; flex-shrink: 0; }
+        .timeline-item.active .tl-icon { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 0 15px rgba(0, 86, 179, 0.3); }
+        .timeline-item.rejected .tl-icon { background: var(--error); border-color: var(--error); color: white; }
+        .tl-content h4 { margin: 0 0 5px; font-size: 14px; }
+        .tl-detail { display: block; font-size: 11px; color: var(--primary); font-weight: bold; background: #e0f2fe; padding: 2px 8px; border-radius: 5px; width: fit-content; }
+        
+        .tabs-container { display: flex; margin: 15px; background: #fff; padding: 6px; border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .tab-btn { flex: 1; padding: 12px; color: var(--text-muted); font-size: 13px; font-weight: 700; cursor: pointer; border-radius: 14px; background: transparent; border: none; font-family: 'Cairo', sans-serif; transition: 0.3s; }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(0, 86, 179, 0.2); }
 
-        /* --- Misc --- */
-        .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin-top: 10px; }
-        .media-item { aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #000; position: relative; }
-        .date-badge { font-size: 10px; background: var(--surface-light); padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-end; padding: 10px 10px 25px; z-index: 900; border-top-left-radius: 30px; border-top-right-radius: 30px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); }
+        .nav-item { text-align: center; color: #94a3b8; font-size: 10px; cursor: pointer; width: 50px; position: relative; }
+        .nav-item i { font-size: 18px; margin-bottom: 6px; display: block; }
+        .nav-item.active { color: var(--primary); }
+        .nav-add-btn { width: 55px; height: 55px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 10px 25px rgba(0, 86, 179, 0.4); transform: translateY(-25px); border: 5px solid var(--dark); }
+        
+        .nav-badge { position: absolute; top: -5px; right: 8px; width: 10px; height: 10px; background: var(--error); border-radius: 50%; border: 2px solid #fff; display: none; }
+        .nav-badge.active { display: block; animation: pulse 2s infinite; }
+
+        /* Modals & Tech Select */
+        .friend-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #fff; border-radius: 18px; margin-bottom: 10px; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
+        .modal-content { width: 100%; max-width: 450px; background: #fff; border: 1px solid var(--border); border-radius: 30px; padding: 30px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.15); }
+        .close-btn { position: absolute; top: 20px; left: 20px; background: #f1f5f9; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); }
+        .status-pill { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px; width: fit-content; }
+        /* Status colors omitted for brevity, same as before */
+        .st-pending { background: #e0f2fe; color: var(--info); border: 1px solid #bae6fd; } .st-at_engineer { background: #f3e8ff; color: var(--purple); border: 1px solid #d8b4fe; } .st-at_tech { background: #fff7ed; color: var(--gold); border: 1px solid #fdba74; } .st-working { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; } .st-pending_confirmation { background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; } .st-done { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; } .st-rejected { background: #fef2f2; color: var(--error); border: 1px solid #fecaca; }
+        .tech-select-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .tech-select-card { border: 1px solid var(--border); border-radius: 16px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; background: var(--surface-light); }
+        .tech-select-card.selected { border-color: var(--primary); background: #eff6ff; box-shadow: 0 4px 12px rgba(0,86,179,0.1); }
+        .tech-select-card img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; border: 2px solid white; }
+        
+        /* Media & Reports Styles */
+        .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .media-item { aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: #f8fafc; border: 1px solid var(--border); position: relative; cursor: pointer; }
+        .media-item img, .media-item video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        .remove-file { position: absolute; top: 4px; right: 4px; background: var(--error); color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 10px; }
+        .ext-tech-form { background: #fff; padding: 15px; border: 1px dashed var(--border); border-radius: 16px; margin-top: 15px; }
+        
+        /* Reports Specifics */
+        .report-summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+        .report-card { background: #fff; border-radius: 20px; padding: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
+        .report-card h4 { margin: 0; color: var(--text-muted); font-size: 12px; font-weight: 700; z-index: 2; }
+        .report-card .val { font-size: 28px; font-weight: 900; color: var(--text); margin-top: 5px; z-index: 2; line-height: 1; }
+        .report-card i { position: absolute; bottom: -10px; left: -10px; font-size: 70px; opacity: 0.05; color: var(--text); z-index: 1; transform: rotate(15deg); }
+        .rc-primary { border-bottom: 4px solid var(--primary); } .rc-success { border-bottom: 4px solid var(--success); } .rc-warning { border-bottom: 4px solid var(--warning); } .rc-error { border-bottom: 4px solid var(--error); }
+        .modern-table-container { overflow-x: auto; background: #fff; border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .modern-table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        .modern-table th { text-align: right; padding: 15px; font-size: 12px; color: var(--text-muted); border-bottom: 2px solid var(--surface-light); font-weight: 700; }
+        .modern-table td { padding: 15px; border-bottom: 1px solid var(--surface-light); font-size: 13px; color: var(--text); vertical-align: middle; }
+        .tech-row { display: flex; align-items: center; gap: 10px; }
+        .tech-row img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
+        .chart-container { background: #fff; border-radius: 20px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; position: relative; height: 300px; }
+        .admin-list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: var(--surface-light); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border); transition: 0.2s; }
+        .delete-icon { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: var(--error); background: rgba(239,68,68,0.1); border-radius: 50%; cursor: pointer; transition: 0.2s; }
+        .settings-btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .settings-card-btn { background: #fff; border: 1px solid var(--border); padding: 20px; border-radius: 16px; text-align: center; cursor: pointer; transition: 0.2s; color: var(--text); }
+        .settings-card-btn i { font-size: 24px; margin-bottom: 10px; display: block; color: var(--primary); }
+        .date-range-container { display: flex; gap: 10px; background: #fff; padding: 15px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; }
+        .date-input-mini { flex: 1; min-width: 120px; }
+        
+        /* Al-Bayan Styles */
+        .feed-post { background: #fff; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; }
+        .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .post-author { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .post-author img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--surface-light); }
+        .post-meta h4 { margin: 0; font-size: 14px; font-weight: 800; color: var(--text); }
+        .post-meta span { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+        .post-body { font-size: 14px; line-height: 1.6; color: var(--text); margin-bottom: 15px; white-space: pre-wrap; }
+        .post-actions { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid var(--surface-light); }
+        .action-group { display: flex; gap: 15px; }
+        .act-btn { background: none; border: none; font-family: 'Cairo'; font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .act-btn:hover { color: var(--primary); }
+        .act-btn.liked { color: var(--error); }
+        .act-btn.liked i { animation: pop 0.3s ease; }
+        @keyframes pop { 50% { transform: scale(1.3); } }
+        .seen-indicator { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 5px; border-radius: 10px; transition: 0.2s; }
+        .seen-indicator:hover { background: var(--surface-light); color: var(--primary); }
+        .comments-section { background: var(--surface-light); margin: 15px -20px -20px; padding: 15px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; border-top: 1px solid var(--border); display: none; }
+        .comments-section.show { display: block; }
+        .comment-item { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
+        .comment-item img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid white; cursor: pointer; }
+        .comment-box { background: #fff; padding: 10px 15px; border-radius: 12px; border: 1px solid var(--border); flex: 1; position: relative; }
+        .comment-name { font-size: 12px; font-weight: 800; display: block; margin-bottom: 3px; cursor: pointer; }
+        .comment-text { font-size: 13px; color: #444; line-height: 1.4; }
+        .delete-comment { position: absolute; top: 10px; left: 10px; font-size: 10px; color: var(--error); cursor: pointer; }
+        .reply-btn { position: absolute; bottom: 8px; left: 10px; font-size: 10px; color: var(--primary); cursor: pointer; font-weight: bold; }
+        
+        #media-viewer-modal .modal-content { max-width: 90%; background: transparent; box-shadow: none; border: none; padding: 0; height: auto; text-align: center; }
+        .full-media-container { position: relative; display: flex; flex-direction: column; align-items: center; }
+        .full-media-item { max-width: 100%; max-height: 80vh; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .media-close-btn { position: fixed; top: 20px; left: 20px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2002; font-size: 20px; border: 1px solid rgba(255,255,255,0.3); }
+        .seen-user-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid var(--surface-light); }
+        .seen-user-item img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
+
+        /* ==================== NEW: INVENTORY & COST STYLES ==================== */
+        
+        /* Technician Cost Form (Modern) */
+        .tech-cost-form {
+            background: #fff; padding: 20px; border-radius: 16px; border: 1px dashed var(--gold);
+            margin-top: 20px; background-image: radial-gradient(var(--surface-light) 1px, transparent 1px); background-size: 10px 10px;
+        }
+        .cost-item-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .add-item-btn { 
+            width: 100%; padding: 10px; border: 1px dashed var(--primary); background: rgba(0,86,179,0.05); 
+            color: var(--primary); border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold;
+        }
+
+        /* Inventory Table & Stepper */
+        .inventory-search { margin-bottom: 20px; display: flex; gap: 10px; }
+        .stepper-container { display: flex; align-items: center; gap: 5px; justify-content: center; }
+        .stepper-btn { 
+            width: 25px; height: 25px; border-radius: 50%; border: 1px solid var(--border); 
+            background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; 
+            font-size: 10px; color: var(--text);
+        }
+        .stepper-btn:active { background: var(--surface-light); }
+        .stepper-input { 
+            width: 50px; text-align: center; border: none; background: transparent; 
+            font-weight: bold; font-size: 13px; padding: 0; 
+        }
+        
+        .inv-meta-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -248,37 +305,44 @@
 
     <div id="loader">
         <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color:var(--primary);"></i>
-        <h2 style="margin-top:20px;">نظام الصيانة</h2>
-        <p style="color:var(--text-muted);">V12.0 Ultimate</p>
+        <h2 style="margin-top:20px; color:var(--primary-dark); font-size:18px; font-weight:800;">نظام الصيانة الذكي</h2>
+        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V11.0 Detailed Timeline</p>
     </div>
 
     <div id="auth-screen" class="hidden" style="min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:25px;">
         <div class="glass-card" style="text-align:center; padding: 40px 25px;">
             <img src="https://a.top4top.io/p_36115ao3o1.jpg" class="auth-logo-modern">
-            <h2 style="margin:0 0 5px; color:var(--primary-dark);">نظام الصيانة</h2>
+            <h2 style="margin:0 0 5px; font-weight:900; font-size: 22px; color:var(--primary-dark);">نظام الصيانة الذكي</h2>
+            <p style="color:var(--text-muted); font-size:13px; margin-bottom:35px; line-height:1.6;">جامعة الريادة للعلوم والتكنولوجيا</p>
+
             <div id="reg-fields" class="hidden">
-                 <div class="auth-grid" style="grid-template-columns: 1fr 1fr;">
+                <p class="auth-section-label">اختر النوع:</p>
+                <div class="auth-grid" style="grid-template-columns: 1fr 1fr;">
                     <label><input type="radio" name="auth-gender" value="male" class="auth-card-input" checked><div class="auth-card"><i class="fa-solid fa-person"></i><span>ذكر</span></div></label>
                     <label><input type="radio" name="auth-gender" value="female" class="auth-card-input"><div class="auth-card"><i class="fa-solid fa-person-dress"></i><span>أنثى</span></div></label>
                 </div>
                 <div class="input-group" style="margin-top:15px;"><input type="text" id="reg-name" placeholder="الاسم الكامل"></div>
                 <div class="input-group"><input type="tel" id="reg-phone" placeholder="01xxxxxxxxx"></div>
-                <div class="auth-grid" style="grid-template-columns: repeat(3, 1fr);">
-                    <label><input type="radio" name="auth-role" value="employee" class="auth-card-input" checked><div class="auth-card"><span>موظف</span></div></label>
-                    <label><input type="radio" name="auth-role" value="supervisor" class="auth-card-input"><div class="auth-card"><span>مشرف</span></div></label>
-                    <label><input type="radio" name="auth-role" value="engineer" class="auth-card-input"><div class="auth-card"><span>مهندس</span></div></label>
-                    <label><input type="radio" name="auth-role" value="technician" class="auth-card-input"><div class="auth-card"><span>فني</span></div></label>
-                    <label><input type="radio" name="auth-role" value="manager" class="auth-card-input"><div class="auth-card"><span>مدير</span></div></label>
+                
+                <p class="auth-section-label">الوظيفة:</p>
+                <div class="auth-grid" style="grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                    <label><input type="radio" name="auth-role" value="employee" class="auth-card-input" checked><div class="auth-card"><i class="fa-solid fa-user-pen"></i><span style="font-size:10px;">موظف</span></div></label>
+                    <label><input type="radio" name="auth-role" value="supervisor" class="auth-card-input"><div class="auth-card"><i class="fa-solid fa-user-tie"></i><span style="font-size:10px;">مشرف</span></div></label>
+                    <label><input type="radio" name="auth-role" value="engineer" class="auth-card-input"><div class="auth-card"><i class="fa-solid fa-helmet-safety"></i><span style="font-size:10px;">مهندس</span></div></label>
+                    <label><input type="radio" name="auth-role" value="technician" class="auth-card-input"><div class="auth-card"><i class="fa-solid fa-screwdriver-wrench"></i><span style="font-size:10px;">فني</span></div></label>
+                    <label><input type="radio" name="auth-role" value="manager" class="auth-card-input"><div class="auth-card"><i class="fa-solid fa-user-shield"></i><span style="font-size:10px;">مدير</span></div></label>
                 </div>
-                <div class="input-group"><input type="text" id="reg-job" placeholder="المسمى الوظيفي"></div>
+                <div class="input-group" style="margin-top:15px;"><input type="text" id="reg-job" placeholder="المسمى الوظيفي"></div>
                 <div class="input-group"><input type="text" id="reg-loc" placeholder="مقر العمل"></div>
             </div>
-            <div class="input-group"><input type="email" id="email" placeholder="البريد الجامعي"></div>
+
+            <div class="input-group"><input type="email" id="email" placeholder="البريد الإلكتروني الجامعي"></div>
             <div class="input-group"><input type="password" id="password" placeholder="كلمة المرور"></div>
             <div id="confirm-pass-field" class="hidden input-group"><input type="password" id="confirm-password" placeholder="تأكيد كلمة المرور"></div>
-            <button onclick="handleAuth()" id="auth-btn" class="btn-main">تسجيل الدخول</button>
-            <div onclick="toggleAuth()" style="margin-top:20px; font-size:12px; cursor:pointer; color:var(--text-muted);">
-                <span id="auth-switch-text">ليس لديك حساب؟ <b>إنشاء حساب</b></span>
+            
+            <button onclick="handleAuth()" id="auth-btn" class="btn-main" style="margin-top:25px;">تسجيل الدخول</button>
+            <div onclick="toggleAuth()" style="margin-top:25px; font-size:13px; cursor:pointer; padding:10px; color:var(--text-muted);">
+                <span id="auth-switch-text">ليس لديك حساب؟ <b style="color:var(--primary)">إنشاء حساب جديد</b></span>
             </div>
         </div>
     </div>
@@ -287,112 +351,173 @@
         <div class="main-banner">
             <div class="header-top">
                 <div class="user-avatar-container" onclick="nav('profile', document.querySelector('.nav-item:nth-child(5)'))">
-                    <img id="banner-img" src="">
+                    <img id="banner-img" src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png">
                     <div id="banner-frame" class="frame-overlay"></div>
                 </div>
-                <div class="bell-btn" onclick="toast('لا توجد إشعارات')"><i class="fa-regular fa-bell"></i><div class="bell-badge"></div></div>
+                <div class="bell-btn" onclick="toast('لا توجد إشعارات جديدة')">
+                    <i class="fa-regular fa-bell"></i>
+                    <div class="bell-badge"></div>
+                </div>
             </div>
             <div class="header-content">
                 <div class="user-minimal">
                     <span id="banner-role" class="role-badge">User</span>
                     <h1 id="banner-name">Guest</h1>
-                    <span id="banner-id" class="en-num" style="font-size:11px; opacity:0.8;">ID: --</span>
+                    <span id="banner-id" style="color:rgba(255,255,255,0.8); font-family:monospace; font-size:12px;">ID: --</span>
                 </div>
             </div>
         </div>
         
-        <div id="main-content" style="padding: 0 10px;">
+        <div id="main-content">
             <div id="page-home" class="page-section">
-                <div id="manager-shortcuts" class="hidden" style="margin-bottom:15px; display:flex; gap:10px;">
-                    <button onclick="nav('reports', null)" class="btn-sm btn-ghost" style="flex:1; background:#fff; color:var(--primary); border:none; box-shadow:0 2px 5px rgba(0,0,0,0.05);"><i class="fa-solid fa-chart-pie"></i> التقارير</button>
-                    <button onclick="nav('admin-settings', null)" id="btn-admin-panel" class="hidden btn-sm btn-ghost" style="flex:1; background:#fff; color:var(--gold); border:none; box-shadow:0 2px 5px rgba(0,0,0,0.05);"><i class="fa-solid fa-sliders"></i> الإدارة</button>
+                <div id="manager-shortcuts" class="hidden" style="margin: 0 15px 15px 15px;">
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="nav('reports', null)" class="btn-sm btn-main" style="flex:1; background: #fff; color:var(--primary); border:1px solid var(--border); box-shadow:none;"><i class="fa-solid fa-chart-pie"></i> التقارير</button>
+                        <button onclick="nav('admin-settings', null)" id="btn-admin-panel" class="hidden btn-sm btn-main" style="flex:1; background: #fff; color:var(--gold); border:1px solid var(--border); box-shadow:none;"><i class="fa-solid fa-sliders"></i> لوحة الإدارة</button>
+                    </div>
                 </div>
-                <div id="staff-shortcuts" class="hidden" style="margin-bottom:15px;">
-                     <button onclick="nav('inventory', null)" class="btn-sm btn-ghost" style="width:100%; background:#fff; color:var(--primary); border:none; box-shadow:0 2px 5px rgba(0,0,0,0.05);"><i class="fa-solid fa-boxes-stacked"></i> الدخول لجرد العهدة</button>
+                
+                <div id="staff-shortcuts" class="hidden" style="margin: 0 15px 15px 15px;">
+                    <button id="btn-inventory-home" onclick="nav('inventory', null)" class="btn-sm btn-main" style="width:100%; background: #fff; color:var(--primary); border:1px solid var(--border); box-shadow:none;"><i class="fa-solid fa-boxes-stacked"></i> الدخول لجرد العهدة</button>
                 </div>
 
                 <div class="tabs-container">
-                    <button class="tab-btn active" onclick="switchTab('active', this)">جارية</button>
-                    <button class="tab-btn" onclick="switchTab('history', this)">أرشيف</button>
-                    <button class="tab-btn" onclick="switchTab('trash', this)" style="color:var(--error);">سلة</button>
+                    <button class="tab-btn active" onclick="switchTab('active', this)">المهام الجارية</button>
+                    <button class="tab-btn" onclick="switchTab('history', this)">الأرشيف</button>
+                    <button class="tab-btn" onclick="switchTab('trash', this)" style="color:var(--error);">المحذوفات</button>
                 </div>
-                <div id="requests-feed"></div>
+                <div id="requests-feed" style="padding-bottom:100px;"></div>
             </div>
-
+            
             <div id="page-create" class="page-section hidden">
-                <div class="glass-card">
-                    <h3 style="margin-bottom:20px; color:var(--primary);">بلاغ جديد</h3>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                         <div class="input-group"><label>التاريخ</label><input type="date" id="req-date"></div>
-                         <div class="input-group"><label>الوقت</label><input type="time" id="req-time"></div>
-                    </div>
-                    <div class="input-group"><label>نوع العطل</label><select id="req-type"><option value="">تحميل...</option></select></div>
-                    <div class="input-group"><label>الأهمية</label>
-                        <div class="priority-grid">
-                            <label style="flex:1"><input type="radio" name="prio" value="low" class="auth-card-input" checked><div class="prio-card"><span>عادي</span></div></label>
-                            <label style="flex:1"><input type="radio" name="prio" value="medium" class="auth-card-input"><div class="prio-card"><span>متوسط</span></div></label>
-                            <label style="flex:1"><input type="radio" name="prio" value="high" class="auth-card-input"><div class="prio-card"><span>عاجل</span></div></label>
-                        </div>
+                <div class="glass-card" style="margin-top:0;">
+                    <h3 style="margin:0 0 20px; font-weight:800; color:var(--primary-dark); border-right:4px solid var(--primary); padding-right:15px; font-size:20px;">بلاغ جديد</h3>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:15px;">
+                        <div class="input-group"><label>التاريخ</label><div class="date-wrapper"><input type="date" id="req-date"></div></div>
+                        <div class="input-group"><label>الوقت</label><div class="time-wrapper"><input type="time" id="req-time"></div></div>
                     </div>
                     <div class="input-group">
-                        <label>الموقع</label>
-                        <select id="req-faculty" style="margin-bottom:8px;"><option value="">المبنى/الكلية...</option></select>
-                        <select id="req-floor" style="margin-bottom:8px;"><option value="">الدور...</option></select>
-                        <input type="text" id="req-room" placeholder="رقم الغرفة">
+                        <label>نوع العطل</label>
+                        <select id="req-type">
+                            <option value="">جاري التحميل...</option>
+                        </select>
                     </div>
-                    <div class="input-group"><label>الوصف</label><textarea id="req-desc" rows="3"></textarea></div>
+                    <div class="input-group">
+                        <label>الأهمية</label>
+                        <div class="priority-grid">
+                            <label class="prio-label" style="flex:1"><input type="radio" name="prio" value="low" class="prio-radio" checked><div class="prio-card p-low"><i class="fa-regular fa-face-smile"></i><span>عادي</span></div></label>
+                            <label class="prio-label" style="flex:1"><input type="radio" name="prio" value="medium" class="prio-radio"><div class="prio-card p-med"><i class="fa-regular fa-face-meh"></i><span>متوسط</span></div></label>
+                            <label class="prio-label" style="flex:1"><input type="radio" name="prio" value="high" class="prio-radio"><div class="prio-card p-high"><i class="fa-solid fa-fire"></i><span>عاجل</span></div></label>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>الموقع</label>
+                        <select id="req-faculty" style="margin-bottom:12px;">
+                            <option value="">اختر المبنى/الكلية...</option>
+                        </select>
+                        <select id="req-floor" style="margin-bottom:12px;">
+                             <option value="">اختر الدور...</option>
+                        </select>
+                        <input type="text" id="req-room" placeholder="رقم الغرفة / القاعة">
+                    </div>
+
+                    <div class="input-group"><label>وصف البلاغ</label><textarea id="req-desc" rows="4" placeholder="تفاصيل المشكلة..."></textarea></div>
                     
                     <div style="display:flex; gap:10px; margin-bottom:20px;">
-                        <div style="flex:1; background:#f1f5f9; padding:15px; border-radius:12px; text-align:center; cursor:pointer;" onclick="document.getElementById('req-files').click()">
-                             <i class="fa-solid fa-paperclip"></i> <span style="font-size:11px;">ملف</span>
-                             <input type="file" id="req-files" hidden multiple accept="image/*,video/*" onchange="handleFiles(this)">
+                        <div style="flex:1; background:var(--surface-light); padding:20px; border-radius:16px; border:2px dashed var(--border); text-align:center; cursor:pointer;" onclick="document.getElementById('req-files').click()">
+                            <i class="fa-solid fa-cloud-arrow-up fa-2x" style="color:var(--text-muted); margin-bottom:10px;"></i>
+                            <p style="font-size:12px; color:var(--text-muted); margin:0;">صور / فيديو</p>
+                            <input type="file" id="req-files" hidden multiple accept="image/*,video/*" onchange="handleFiles(this)">
                         </div>
-                        <div style="flex:1; background:#f1f5f9; padding:15px; border-radius:12px; text-align:center; cursor:pointer;" onclick="document.getElementById('req-camera').click()">
-                             <i class="fa-solid fa-camera"></i> <span style="font-size:11px;">كاميرا</span>
-                             <input type="file" id="req-camera" hidden accept="image/*" capture="environment" onchange="handleFiles(this)">
+                        
+                        <div style="flex:1; background:var(--surface-light); padding:20px; border-radius:16px; border:2px dashed var(--border); text-align:center; cursor:pointer;" onclick="document.getElementById('req-camera').click()">
+                            <i class="fa-solid fa-camera fa-2x" style="color:var(--primary); margin-bottom:10px;"></i>
+                            <p style="font-size:12px; color:var(--text-muted); margin:0;">كاميرا</p>
+                            <input type="file" id="req-camera" hidden accept="image/*" capture="environment" onchange="handleFiles(this)">
                         </div>
-                        <div id="mic-trigger" style="flex:1; background:#f1f5f9; padding:15px; border-radius:12px; text-align:center; cursor:pointer;" onclick="toggleRecording()">
-                             <i class="fa-solid fa-microphone"></i>
+
+                        <div id="mic-trigger" class="mic-btn" onclick="toggleRecording()">
+                            <i class="fa-solid fa-microphone"></i>
                         </div>
                     </div>
-                    <div id="preview-grid" class="media-grid"></div>
-                    <button onclick="openSupModal()" class="btn-main" style="margin-top:20px;">التالي</button>
+                    
+                    <div id="preview-grid" class="media-grid" style="margin-bottom:20px;"></div>
+                    <button onclick="openSupModal()" class="btn-main">التالي: اختيار المشرف <i class="fa-solid fa-arrow-left"></i></button>
                 </div>
             </div>
 
             <div id="page-admin-settings" class="page-section hidden">
                 <div class="glass-card">
-                    <h3>إدارة النظام</h3>
-                    <div style="margin:20px 0;">
-                        <input type="text" id="new-spec-input" placeholder="تخصص جديد">
-                        <button onclick="addSystemData('specialties')" class="btn-main" style="margin-top:5px;">إضافة تخصص</button>
-                        <div id="admin-specs-list" style="margin-top:10px;"></div>
+                    <h3 style="margin-bottom:20px; color:var(--gold);"><i class="fa-solid fa-sliders"></i> لوحة إدارة النظام</h3>
+                    <p style="color:var(--text-muted); font-size:12px; margin-bottom:25px;">إضافة وحذف البيانات الأساسية للنظام</p>
+
+                    <div style="margin-bottom:30px;">
+                        <h4 style="font-size:14px; margin-bottom:10px;">🛠️ التخصصات (أنواع الأعطال)</h4>
+                        <div style="display:flex; gap:10px; margin-bottom:10px;">
+                            <input type="text" id="new-spec-input" placeholder="اسم التخصص الجديد...">
+                            <button onclick="addSystemData('specialties')" class="btn-sm btn-main" style="width:auto;"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div id="admin-specs-list" style="max-height:200px; overflow-y:auto;"></div>
                     </div>
+
+                    <hr style="border:0; border-top:1px dashed var(--border); margin:20px 0;">
+
+                    <div style="margin-bottom:30px;">
+                        <h4 style="font-size:14px; margin-bottom:10px;">🏢 الكليات والمباني</h4>
+                        <div style="display:flex; gap:10px; margin-bottom:10px;">
+                            <input type="text" id="new-loc-input" placeholder="اسم المبنى الجديد...">
+                            <button onclick="addSystemData('locations')" class="btn-sm btn-main" style="width:auto;"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div id="admin-locs-list" style="max-height:200px; overflow-y:auto;"></div>
                     </div>
+                    
+                    <hr style="border:0; border-top:1px dashed var(--border); margin:20px 0;">
+
+                    <div>
+                        <h4 style="font-size:14px; margin-bottom:10px;">📶 الأدوار</h4>
+                        <div style="display:flex; gap:10px; margin-bottom:10px;">
+                            <input type="text" id="new-floor-input" placeholder="اسم الدور (مثال: الدور الأول)...">
+                            <button onclick="addSystemData('floors')" class="btn-sm btn-main" style="width:auto;"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div id="admin-floors-list" style="max-height:200px; overflow-y:auto;"></div>
+                    </div>
+                </div>
             </div>
 
             <div id="page-inventory" class="page-section hidden">
                 <div class="glass-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                        <h3>جرد العهدة</h3>
-                        <button onclick="openSendReportModal()" class="btn-ghost" style="font-size:11px; border-color:var(--gold); color:var(--gold);">إرسال للمدير</button>
-                    </div>
-                    <div class="input-group" style="display:flex; gap:5px;">
-                        <input type="text" id="inv-search" placeholder="بحث..." style="flex:1;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h3 style="margin:0;"><i class="fa-solid fa-boxes-stacked" style="color:var(--primary);"></i> جرد العهدة</h3>
+                        <button onclick="sendInventoryReport()" class="btn-sm btn-main" style="width:auto; background:var(--gold);">إرسال تقرير للمدير <i class="fa-regular fa-paper-plane"></i></button>
                     </div>
                     
-                    <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-bottom:20px; border:1px dashed var(--border);">
-                        <p style="font-size:11px; font-weight:bold; margin-bottom:10px;">إضافة صنف:</p>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-bottom:5px;">
-                            <select id="inv-faculty"><option value="">المبنى...</option></select>
-                            <select id="inv-floor"><option value="">الدور...</option></select>
+                    <div class="inventory-search">
+                         <input type="text" id="inv-search" placeholder="بحث عن صنف..." style="flex:2;">
+                         <select id="inv-filter" style="flex:1;">
+                             <option value="all">الكل</option>
+                             <option value="low">رصيد منخفض</option>
+                         </select>
+                    </div>
+
+                    <div style="background:var(--surface-light); padding:15px; border-radius:12px; margin-bottom:20px; border:1px dashed var(--border);">
+                        <p style="font-size:12px; font-weight:bold; margin-bottom:10px;">إضافة صنف جديد:</p>
+                        
+                        <div class="inv-meta-grid">
+                            <select id="inv-faculty" style="font-size:11px; padding:8px;">
+                                <option value="">المبنى/الكلية...</option>
+                            </select>
+                            <select id="inv-floor" style="font-size:11px; padding:8px;">
+                                <option value="">الدور...</option>
+                            </select>
+                            <input type="text" id="inv-room" placeholder="رقم الغرفة" style="font-size:11px; padding:8px;">
                         </div>
-                        <input type="text" id="inv-room" placeholder="الغرفة" style="margin-bottom:5px;">
-                        <input type="text" id="inv-name" placeholder="اسم الصنف" style="margin-bottom:5px;">
-                        <div style="display:flex; gap:5px;">
-                            <input type="number" id="inv-total" placeholder="إجمالي">
-                            <input type="number" id="inv-current" placeholder="حالي">
-                            <button onclick="addInventoryItem()" class="btn-main" style="width:auto;">+</button>
+
+                        <div style="display:grid; grid-template-columns: 2fr 1fr 1fr auto; gap:5px;">
+                            <input type="text" id="inv-name" placeholder="اسم الجهاز/الأداة" style="font-size:12px; padding:8px;">
+                            <input type="number" id="inv-total" placeholder="إجمالي" style="font-size:12px; padding:8px;">
+                            <input type="number" id="inv-current" placeholder="موجود" style="font-size:12px; padding:8px;">
+                            <button onclick="addInventoryItem()" class="btn-sm btn-main" style="width:auto;"><i class="fa-solid fa-plus"></i></button>
                         </div>
                     </div>
 
@@ -400,50 +525,333 @@
                         <table class="modern-table">
                             <thead>
                                 <tr>
-                                    <th>الصنف</th>
-                                    <th>المبنى</th>
-                                    <th>الغرفة</th>
-                                    <th>العدد</th>
-                                    <th></th>
+                                    <th>الصنف & المكان</th>
+                                    <th>الإجمالي</th>
+                                    <th>الموجود</th>
+                                    <th>بواسطة</th>
+                                    <th>حذف</th>
                                 </tr>
                             </thead>
-                            <tbody id="inventory-body"></tbody>
+                            <tbody id="inventory-body">
+                                </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-            
-            <div id="page-reports" class="page-section hidden"><div class="glass-card"><h3>التقارير</h3><div class="report-summary-grid"><div class="report-card rc-success"><h4>تم</h4><div class="val en-num" id="rep-done">0</div></div><div class="report-card rc-warning"><h4>جاري</h4><div class="val en-num" id="rep-active">0</div></div></div><div class="chart-container"><canvas id="statusChart"></canvas></div><div class="modern-table-container"><table class="modern-table"><tbody id="tech-performance-body"></tbody></table></div></div></div>
-             <div id="page-albayan" class="page-section hidden"><div id="create-post-box" class="glass-card hidden"><textarea id="new-post-content" rows="2"></textarea><button onclick="createPost()" class="btn-main">نشر</button></div><div id="albayan-feed"></div></div>
-             <div id="page-team" class="page-section hidden"><div class="glass-card"><input type="text" id="search-query" placeholder="بحث ID"><button onclick="searchUser()" class="btn-main">بحث</button><div id="search-results"></div><div id="team-list"></div></div></div>
-             <div id="page-profile" class="page-section hidden"><div class="glass-card"><div class="user-avatar-container" style="margin:0 auto;"><img id="edit-current-pic"></div><div class="en-num" style="text-align:center; display:block; margin:10px 0;" id="edit-id-display"></div><input type="file" id="edit-profile-file" hidden onchange="previewProfilePic(this)"><button onclick="saveProfile()" class="btn-main">حفظ</button></div></div>
-             <div id="page-settings" class="page-section hidden"><div class="glass-card"><h3>الإعدادات</h3><button onclick="reqNotifyPerm()" class="btn-ghost" style="width:100%; margin-bottom:10px;">تفعيل الصوت</button><div id="settings-staff-area" class="hidden"><button onclick="nav('inventory',null)" class="btn-main">جرد العهدة</button></div><button onclick="logout()" class="btn-danger btn-main">خروج</button></div></div>
 
+            <div id="page-reports" class="page-section hidden">
+                <div class="glass-card" style="padding-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h3 style="margin:0;">📊 التقارير والإحصائيات</h3>
+                        <button onclick="exportReportsPDF()" class="btn-sm btn-ghost" style="color:var(--primary); border-color:var(--primary);"><i class="fa-solid fa-file-pdf"></i> تصدير</button>
+                    </div>
+
+                    <div class="date-range-container">
+                        <div class="date-input-mini">
+                            <label>من:</label>
+                            <input type="date" id="report-start-date">
+                        </div>
+                        <div class="date-input-mini">
+                            <label>إلى:</label>
+                            <input type="date" id="report-end-date">
+                        </div>
+                        <button onclick="generateReports()" class="btn-sm btn-main" style="width:auto; height:38px; align-self:flex-end;">تحديث</button>
+                    </div>
+
+                    <div class="report-summary-grid">
+                        <div class="report-card rc-primary">
+                            <h4>إجمالي البلاغات</h4>
+                            <div class="val" id="rep-total">0</div>
+                            <i class="fa-regular fa-clipboard"></i>
+                        </div>
+                        <div class="report-card rc-success">
+                            <h4>تم الإنجاز</h4>
+                            <div class="val" id="rep-done" style="color:var(--success)">0</div>
+                            <i class="fa-solid fa-check-double"></i>
+                        </div>
+                        <div class="report-card rc-warning">
+                            <h4>قيد العمل</h4>
+                            <div class="val" id="rep-active" style="color:var(--warning)">0</div>
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div class="report-card rc-error">
+                            <h4>مرفوض/ملغي</h4>
+                            <div class="val" id="rep-rejected" style="color:var(--error)">0</div>
+                            <i class="fa-solid fa-ban"></i>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-bottom:10px;">تحليل الحالة</h4>
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                    
+                    <h4 style="margin-bottom:10px; margin-top:25px;">تحليل الأهمية</h4>
+                    <div style="display:flex; gap:10px; margin-bottom:20px;">
+                        <div style="flex:1; background:#fef2f2; padding:10px; border-radius:12px; text-align:center; border:1px solid var(--error);">
+                            <span style="font-size:10px; color:#991b1b;">عاجل 🔥</span>
+                            <div style="font-weight:900; font-size:18px; color:#991b1b;" id="rep-prio-high">0</div>
+                        </div>
+                        <div style="flex:1; background:#fff7ed; padding:10px; border-radius:12px; text-align:center; border:1px solid var(--warning);">
+                            <span style="font-size:10px; color:#9a3412;">متوسط 😐</span>
+                            <div style="font-weight:900; font-size:18px; color:#9a3412;" id="rep-prio-med">0</div>
+                        </div>
+                        <div style="flex:1; background:#f0fdf4; padding:10px; border-radius:12px; text-align:center; border:1px solid var(--success);">
+                            <span style="font-size:10px; color:#166534;">عادي 🙂</span>
+                            <div style="font-weight:900; font-size:18px; color:#166534;" id="rep-prio-low">0</div>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-bottom:10px; margin-top:25px;">أداء الفنيين</h4>
+                    <div class="modern-table-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>الفني</th>
+                                    <th>المكلفة</th>
+                                    <th>المنجزة</th>
+                                    <th>التقييم</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tech-performance-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-albayan" class="page-section hidden">
+                <div class="glass-card" style="border-top:3px solid var(--primary); margin-bottom:15px; padding-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3><i class="fa-solid fa-bullhorn" style="color:var(--primary);"></i> البيان</h3>
+                        <span style="font-size:11px; color:var(--text-muted);">أخبار وتعميمات</span>
+                    </div>
+                </div>
+
+                <div id="create-post-box" class="glass-card hidden" style="margin-top:0;">
+                    <textarea id="new-post-content" rows="3" placeholder="اكتب منشوراً جديداً..." style="margin-bottom:10px;"></textarea>
+                    <button onclick="createPost()" class="btn-main btn-sm">نشر <i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+
+                <div id="albayan-feed" style="padding-bottom:100px;">
+                    <div style="text-align:center; padding:20px; color:var(--text-muted);">جاري تحميل المنشورات...</div>
+                </div>
+            </div>
+
+            <div id="page-team" class="page-section hidden">
+                <div class="glass-card" style="border-top: 3px solid var(--gold);">
+                    <h3 style="margin-bottom:20px;">فريق العمل</h3>
+                    <div style="display:flex; gap:10px; margin-bottom:20px;">
+                        <input type="text" id="search-query" placeholder="بحث بالـ ID ..." style="margin:0;">
+                        <button onclick="searchUser()" class="btn-main" style="width:auto; margin:0;"><i class="fa-solid fa-search"></i></button>
+                    </div>
+                    <div id="search-results" class="hidden" style="margin-bottom:20px;"></div>
+                    <div id="friend-reqs" class="hidden" style="background:#fff7ed; padding:15px; border-radius:15px; margin-bottom:20px; border:1px solid var(--gold);">
+                        <h5 style="margin:0 0 10px; color:var(--gold);">طلبات صداقة جديدة:</h5>
+                        <div id="reqs-list"></div>
+                    </div>
+                    <h5 style="color:var(--text-muted);">الأصدقاء:</h5>
+                    <div id="team-list"></div>
+                </div>
+            </div>
+
+            <div id="page-profile" class="page-section hidden">
+                <div class="glass-card" style="margin-top:20px;">
+                    <div style="text-align:center;">
+                        <div class="user-avatar-container" style="margin: 0 auto 25px;">
+                            <img id="edit-current-pic" src="">
+                            <div id="edit-frame-overlay" class="frame-overlay"></div>
+                            <div onclick="document.getElementById('edit-profile-file').click()" style="position:absolute; bottom:-5px; right:-5px; background:var(--primary); width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid #fff; z-index:3;"><i class="fa-solid fa-camera" style="color:white; font-size:14px;"></i></div>
+                        </div>
+                        <input type="file" id="edit-profile-file" hidden accept="image/*" onchange="previewProfilePic(this)">
+                        
+                        <div style="margin-bottom:20px;">
+                             <p style="font-size:12px; font-weight:bold;">اختر إطار للصورة:</p>
+                             <div class="frame-grid">
+                                 <div class="frame-option f-none selected" onclick="selectFrame(this, '')">بدون</div>
+                                 <div class="frame-option f-gold" onclick="selectFrame(this, 'f-gold')"></div>
+                                 <div class="frame-option f-blue" onclick="selectFrame(this, 'f-blue')"></div>
+                                 <div class="frame-option f-grad" onclick="selectFrame(this, 'f-grad')"><div class="f-grad-in"></div></div>
+                             </div>
+                        </div>
+
+                        <div style="font-family:monospace; background:var(--surface-light); display:inline-block; padding:10px 25px; border-radius:30px; margin-bottom:30px; color:var(--primary-dark); border:1px solid var(--border);" onclick="copyId()">ID: <span id="edit-id-display">--</span> <i class="fa-regular fa-copy"></i></div>
+                        <div style="text-align:right;">
+                            <div class="input-group"><label>الاسم الكامل</label><input type="text" id="edit-name"></div>
+                            <div class="input-group"><label>النوع</label><select id="edit-gender"><option value="male">ذكر</option><option value="female">أنثى</option></select></div>
+                            <div class="input-group"><label>رقم الهاتف</label><input type="tel" id="edit-phone"></div>
+                            <div class="input-group"><label>المسمى الوظيفي</label><input type="text" id="edit-job"></div>
+                            <div class="input-group"><label>مقر العمل</label><input type="text" id="edit-loc"></div>
+                        </div>
+                        <button onclick="saveProfile()" class="btn-main" id="save-profile-btn" style="margin-top:20px;">حفظ التعديلات</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-settings" class="page-section hidden">
+                <div class="glass-card">
+                    <h3 style="margin-bottom:25px;">الإعدادات</h3>
+                    <div class="input-group">
+                        <label>الإشعارات</label>
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-light); padding:15px; border-radius:16px; border:1px solid var(--border);">
+                            <span>تفعيل التنبيهات الصوتية</span>
+                            <button onclick="reqNotifyPerm()" class="btn-sm btn-main" style="width:auto;">تفعيل</button>
+                        </div>
+                    </div>
+                    
+                    <div id="settings-manager-area" class="hidden">
+                        <div class="settings-btn-grid">
+                            <div class="settings-card-btn" onclick="nav('reports', null)">
+                                <i class="fa-solid fa-chart-line"></i>
+                                <span>التقارير</span>
+                            </div>
+                            <div class="settings-card-btn" onclick="nav('admin-settings', null)">
+                                <i class="fa-solid fa-cogs"></i>
+                                <span>إدارة النظام</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="settings-staff-area" class="hidden" style="margin-top:15px;">
+                         <div class="settings-btn-grid">
+                             <div class="settings-card-btn" onclick="nav('inventory', null)">
+                                 <i class="fa-solid fa-boxes-stacked"></i>
+                                 <span>جرد العهدة</span>
+                             </div>
+                         </div>
+                    </div>
+
+                    <button onclick="document.getElementById('logout-modal').classList.remove('hidden')" class="btn-main btn-danger" style="margin-top:20px;">تسجيل خروج</button>
+                </div>
+            </div>
         </div>
 
         <div class="bottom-nav">
-            <div class="nav-item active" onclick="nav('home', this)"><i class="fa-solid fa-list-check"></i></div>
+            <div class="nav-item active" onclick="nav('home', this)"><i class="fa-solid fa-list-check"></i>المهام</div>
             <div id="nav-create-btn" class="nav-add-btn" onclick="nav('create', null)"><i class="fa-solid fa-plus"></i></div>
-            <div class="nav-item" onclick="nav('team', this)"><i class="fa-solid fa-users"></i></div>
-            <div class="nav-item" onclick="nav('albayan', this)"><i class="fa-solid fa-bullhorn"></i><div id="feed-badge" class="nav-badge"></div></div>
-            <div class="nav-item" onclick="nav('profile', this)"><i class="fa-solid fa-user"></i></div>
+            <div class="nav-item" onclick="nav('team', this)"><i class="fa-solid fa-users"></i>الفريق</div>
+            <div class="nav-item" onclick="nav('albayan', this)">
+                <i class="fa-solid fa-bullhorn"></i>البيان
+                <div id="feed-badge" class="nav-badge"></div>
+            </div>
+            <div class="nav-item" onclick="nav('profile', this)"><i class="fa-solid fa-user"></i>حسابي</div>
             <div class="nav-item" onclick="nav('settings', this)"><i class="fa-solid fa-gear"></i></div>
+        </div>
+    </div>
+    
+    <div id="media-viewer-modal" class="modal-overlay hidden" style="background: rgba(0,0,0,0.95); z-index:2005;">
+        <div class="media-close-btn" onclick="closeModal('media-viewer-modal')"><i class="fa-solid fa-xmark"></i></div>
+        <div class="modal-content" style="background:transparent; box-shadow:none; border:none; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+            <div id="media-viewer-content" class="full-media-container" style="width:100%;"></div>
+        </div>
+    </div>
+
+    <div id="send-report-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="close-btn" onclick="closeModal('send-report-modal')"><i class="fa-solid fa-xmark"></i></div>
+            <h3 style="margin-bottom:20px; border-right:4px solid var(--gold); padding-right:15px; color:var(--text);">إرسال التقرير</h3>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">اختر المدير لإرسال تقرير العهدة الخاص بك:</p>
+            <div id="manager-select-list" style="max-height:200px; overflow-y:auto; margin-bottom:20px; display:grid; gap:10px;"></div>
+            <button onclick="confirmSendReport()" id="confirm-send-rep-btn" class="btn-main" disabled>إرسال الآن <i class="fa-regular fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <div id="seen-users-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="close-btn" onclick="closeModal('seen-users-modal')"><i class="fa-solid fa-xmark"></i></div>
+            <h3 style="margin-bottom:15px; color:var(--text);">المشاهدون <i class="fa-solid fa-eye" style="color:var(--primary);"></i></h3>
+            <div id="seen-users-list" style="max-height:300px; overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <div id="sup-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="close-btn" onclick="closeModal('sup-modal')"><i class="fa-solid fa-xmark"></i></div>
+            <h3 style="margin-bottom:20px; border-right:4px solid var(--gold); padding-right:15px; color:var(--text);">اختر المشرف</h3>
+            <div id="sup-list" style="max-height:300px; overflow-y:auto; margin-bottom:20px;"></div>
+            <button onclick="sendRequestFinal()" class="btn-main" id="confirm-send-btn">إرسال البلاغ <i class="fa-regular fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <div id="action-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="close-btn" onclick="closeModal('action-modal')"><i class="fa-solid fa-xmark"></i></div>
+            <h3 id="act-title" style="margin-bottom:20px; color:var(--text);">إجراء</h3>
+            <textarea id="act-comment" rows="4" placeholder="اكتب ملاحظات..."></textarea>
+            
+            <div id="eng-select-area" class="hidden" style="margin-top:20px;">
+                <p style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:12px;">اختر المهندس المسؤول:</p>
+                <div id="eng-list-action" class="tech-select-grid" style="max-height:200px; overflow-y:auto; padding:5px;"></div>
+            </div>
+
+            <div id="tech-select-area" class="hidden" style="margin-top:20px;">
+                <p style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:12px;">تعيين الفني:</p>
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <label style="flex:1; cursor:pointer;"><input type="radio" name="tech-type" value="internal" checked onchange="toggleTechType(this.value)"> <span style="font-size:12px;">فني مسجل</span></label>
+                    <label style="flex:1; cursor:pointer;"><input type="radio" name="tech-type" value="external" onchange="toggleTechType(this.value)"> <span style="font-size:12px;">فني تعاقد (خارجي)</span></label>
+                </div>
+                <div id="tech-list-action" class="tech-select-grid" style="max-height:200px; overflow-y:auto; padding:5px;"></div>
+                <div id="ext-tech-form" class="ext-tech-form hidden">
+                    <div class="input-group"><input type="text" id="ext-name" placeholder="اسم الفني"></div>
+                    <div class="input-group"><input type="tel" id="ext-phone" placeholder="رقم الهاتف"></div>
+                    <div class="input-group"><input type="text" id="ext-company" placeholder="الشركة / الجهة"></div>
+                    <div class="input-group"><input type="number" id="ext-cost" placeholder="التكلفة (اختياري)"></div>
+                </div>
+            </div>
+            
+            <div id="tech-finish-form" class="hidden">
+                 <div class="tech-cost-form">
+                     <p style="font-size:13px; font-weight:bold; color:var(--gold); margin-bottom:10px;">💵 التكلفة والأدوات المستخدمة</p>
+                     <div id="cost-items-container"></div>
+                     <div class="add-item-btn" onclick="addCostItemRow()">+ إضافة مادة/أداة</div>
+                 </div>
+            </div>
+
+            <button onclick="submitAction()" id="act-submit-btn" class="btn-main" style="margin-top:20px;">تنفيذ</button>
         </div>
     </div>
 
     <div id="request-details-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="close-btn" onclick="closeModal('request-details-modal')">x</div>
+        <div class="modal-content" style="max-width:550px;">
+            <div class="close-btn" onclick="closeModal('request-details-modal')"><i class="fa-solid fa-xmark"></i></div>
+            <h3 style="text-align:center; color:var(--primary); margin-bottom:25px;">تفاصيل البلاغ</h3>
             <div id="req-details-content"></div>
         </div>
     </div>
-    
-    <div id="sup-modal" class="modal-overlay hidden"><div class="modal-content"><h3>المشرف</h3><div id="sup-list"></div><button onclick="sendRequestFinal()" class="btn-main">إرسال</button></div></div>
-    <div id="action-modal" class="modal-overlay hidden"><div class="modal-content"><h3 id="act-title"></h3><textarea id="act-comment"></textarea><div id="eng-select-area" class="hidden"></div><div id="tech-select-area" class="hidden"></div><div id="tech-finish-form" class="hidden"><div id="cost-items-container"></div><button onclick="addCostItemRow()" class="btn-ghost">+ مادة</button></div><button onclick="submitAction()" class="btn-main">تأكيد</button></div></div>
-    <div id="send-report-modal" class="modal-overlay hidden"><div class="modal-content"><h3>اختر المدير</h3><div id="manager-select-list"></div><button onclick="confirmSendReport()" id="confirm-send-rep-btn" class="btn-main" disabled>إرسال</button></div></div>
-    <div id="media-viewer-modal" class="modal-overlay hidden"><div class="media-close-btn" onclick="closeModal('media-viewer-modal')">x</div><div id="media-viewer-content" class="full-media-container"></div></div>
 
-    <div id="toast" style="position:fixed; top:20px; left:50%; transform:translate(-50%); background:#333; color:#fff; padding:10px 20px; border-radius:20px; display:none; z-index:9999;"></div>
+    <div id="confirm-modal" class="modal-overlay hidden">
+         <div class="modal-content" style="text-align:center; max-width:320px;">
+             <h3 style="margin-bottom:15px;">تأكيد</h3>
+             <p id="confirm-modal-msg" style="color:#666; margin-bottom:20px;"></p>
+             <div style="display:flex; gap:10px;">
+                 <button id="confirm-yes-btn" class="btn-main btn-danger">نعم</button>
+                 <button onclick="closeModal('confirm-modal')" class="btn-ghost" style="width:100%;">إلغاء</button>
+             </div>
+         </div>
+    </div>
+
+    <div id="friend-profile-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="text-align:center; z-index:2001;">
+            <div class="close-btn" onclick="closeModal('friend-profile-modal')"><i class="fa-solid fa-xmark"></i></div>
+            <img id="fp-pic" src="" style="width:100px; height:100px; border-radius:50%; margin-bottom:15px; border:4px solid var(--surface-light);">
+            <h3 id="fp-name" style="margin-bottom:5px;"></h3>
+            <p id="fp-role" style="color:var(--text-muted); font-size:14px;"></p>
+            <div id="fp-info" style="margin-top:15px; font-size:13px; color:#555;"></div>
+            <div id="fp-actions" style="margin-top:20px;"></div>
+        </div>
+    </div>
+    
+    <div id="logout-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="text-align:center;">
+            <h3 style="color:var(--text);">تأكيد الخروج؟</h3>
+            <div style="display:flex; gap:10px; margin-top:25px;">
+                <button onclick="logout()" class="btn-main btn-danger">خروج</button>
+                <button onclick="closeModal('logout-modal')" class="btn-ghost" style="width:100%;">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" style="position:fixed; top:30px; left:50%; transform:translateX(-50%); background:rgba(15, 23, 42, 0.95); color:white; padding:12px 30px; border-radius:50px; border:1px solid rgba(255,255,255,0.1); z-index:9999; display:none; font-size:13px; font-weight:bold; box-shadow:0 10px 40px rgba(0,0,0,0.5); font-family:'Cairo'; backdrop-filter:blur(5px);"></div>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -451,6 +859,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
 <script>
+    // ================= CONFIGURATION =================
     const firebaseConfig = {
         apiKey: "AIzaSyABwJfEkkbNB8GurZkyj67R8ksVNEXZ11I",
         authDomain: "ryadanur1-375a8.firebaseapp.com",
@@ -461,15 +870,45 @@
     };
     const CLOUD_NAME = "djzfruh22"; 
     const CLOUD_PRESET = "udyvggup";
+
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    let currentUser, userData, isLoginMode=true, selectedSup, currentTab='active', requestsCache=[], uploadQueue=[], tempActionData={}, selectedTech, selectedEng, newProfilePicFile, isFirstLoad=true, mediaRecorder, audioChunks, isRecording=false, isRegistering=false;
-    let systemSpecialties=[], systemLocations=[], systemFloors=[], reportChart, postsListener, selectedManagerForReport;
+    // --- Global State ---
+    let currentUser = null;
+    let userData = null;
+    let isLoginMode = true;
+    let selectedSup = null;
+    let currentTab = 'active'; 
+    let requestsCache = [];
+    let uploadQueue = []; 
+    let tempActionData = {}; 
+    let selectedTech = null; 
+    let selectedEng = null; 
+    let newProfilePicFile = null;
+    let isFirstLoad = true;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let isRegistering = false;
+    
+    // Global Vars for Admin, Reports & Feed
+    let systemSpecialties = [];
+    let systemLocations = [];
+    let systemFloors = []; 
+    let reportChart = null;
+    let postsListener = null;
 
-    function generateUniqueCode() { return Math.random().toString(36).substr(2,4).toUpperCase(); }
-    function toEnglishDigits(str) { return str.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)); }
+    // --- Helpers ---
+    function generateUniqueCode() {
+        const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+        let result = '';
+        for (let i = 0; i < 4; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
     // --- Authentication Logic ---
     auth.onAuthStateChanged(async u => {
         if(isRegistering) return;
