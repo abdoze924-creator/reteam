@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام الصيانة الذكي - جامعة الريادة (V10.0 - Private Inventory)</title>
+    <title>نظام الصيانة الذكي - جامعة الريادة (V11.0 - Detailed Timeline)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -172,6 +172,8 @@
         .tl-icon { width: 30px; height: 30px; border-radius: 50%; background: var(--surface-light); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-muted); z-index: 2; flex-shrink: 0; }
         .timeline-item.active .tl-icon { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 0 15px rgba(0, 86, 179, 0.3); }
         .timeline-item.rejected .tl-icon { background: var(--error); border-color: var(--error); color: white; }
+        .tl-content h4 { margin: 0 0 5px; font-size: 14px; }
+        .tl-detail { display: block; font-size: 11px; color: var(--primary); font-weight: bold; background: #e0f2fe; padding: 2px 8px; border-radius: 5px; width: fit-content; }
         
         .tabs-container { display: flex; margin: 15px; background: #fff; padding: 6px; border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); }
         .tab-btn { flex: 1; padding: 12px; color: var(--text-muted); font-size: 13px; font-weight: 700; cursor: pointer; border-radius: 14px; background: transparent; border: none; font-family: 'Cairo', sans-serif; transition: 0.3s; }
@@ -304,7 +306,7 @@
     <div id="loader">
         <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color:var(--primary);"></i>
         <h2 style="margin-top:20px; color:var(--primary-dark); font-size:18px; font-weight:800;">نظام الصيانة الذكي</h2>
-        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V10.0 Private Inventory</p>
+        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V11.0 Detailed Timeline</p>
     </div>
 
     <div id="auth-screen" class="hidden" style="min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:25px;">
@@ -487,7 +489,7 @@
                 <div class="glass-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                         <h3 style="margin:0;"><i class="fa-solid fa-boxes-stacked" style="color:var(--primary);"></i> جرد العهدة</h3>
-                        <button onclick="openSendReportModal()" class="btn-sm btn-main" style="width:auto; background:var(--gold);">إرسال تقرير للمدير <i class="fa-regular fa-paper-plane"></i></button>
+                        <button onclick="sendInventoryReport()" class="btn-sm btn-main" style="width:auto; background:var(--gold);">إرسال تقرير للمدير <i class="fa-regular fa-paper-plane"></i></button>
                     </div>
                     
                     <div class="inventory-search">
@@ -897,7 +899,6 @@
     let systemFloors = []; 
     let reportChart = null;
     let postsListener = null;
-    let selectedManagerForReport = null; // New global
 
     // --- Helpers ---
     function generateUniqueCode() {
@@ -1071,28 +1072,35 @@
         const typeSelect = document.getElementById('req-type');
         const locSelect = document.getElementById('req-faculty');
         const floorSelect = document.getElementById('req-floor');
+        
         const invLocSelect = document.getElementById('inv-faculty');
         const invFloorSelect = document.getElementById('inv-floor');
 
         // Specialties
         typeSelect.innerHTML = '<option value="">اختر التخصص...</option>';
-        systemSpecialties.forEach(spec => { typeSelect.innerHTML += `<option value="${spec}">${spec}</option>`; });
+        systemSpecialties.forEach(spec => {
+            typeSelect.innerHTML += `<option value="${spec}">${spec}</option>`;
+        });
 
         // Locations
         let locOptions = '<option value="">اختر المبنى/الكلية...</option>';
-        systemLocations.forEach(loc => { locOptions += `<option value="${loc}">${loc}</option>`; });
+        systemLocations.forEach(loc => {
+            locOptions += `<option value="${loc}">${loc}</option>`;
+        });
         locSelect.innerHTML = locOptions + '<option value="Other">موقع آخر...</option>';
         invLocSelect.innerHTML = locOptions;
 
         // Floors
         let floorOptions = '<option value="">اختر الدور...</option>';
-        systemFloors.forEach(f => { floorOptions += `<option value="${f}">${f}</option>`; });
+        systemFloors.forEach(f => {
+            floorOptions += `<option value="${f}">${f}</option>`;
+        });
         floorSelect.innerHTML = floorOptions;
         invFloorSelect.innerHTML = floorOptions;
     }
 
     // =========================================================================
-    // V10.0 STRICT ROLE UI SETUP
+    // V8.1 STRICT ROLE UI SETUP
     // =========================================================================
     function setupRoleUI() {
         const r = userData.role;
@@ -1657,6 +1665,9 @@
         return map[s] || s;
     }
 
+    // =========================================================================
+    // V11.0: DETAILED TIMELINE LOGIC
+    // =========================================================================
     function openRequestDetails(id) {
         const d = requestsCache.find(r => r.id === id);
         document.getElementById('request-details-modal').classList.remove('hidden');
@@ -1669,18 +1680,73 @@
             });
         }
 
+        // --- NEW TIMELINE LOGIC ---
+        // 1. Employee Created (Always True if req exists)
+        let steps = [{ title: 'تم الإنشاء (موظف)', detail: `بواسطة: ${d.createdBy}`, active: true }];
+
+        // 2. Supervisor Approval
+        // If status is NOT pending, it means it moved past supervisor (approved) OR rejected.
+        // We handle rejection separately at the end.
+        let supActive = d.status !== 'pending' && d.status !== 'rejected';
+        steps.push({ 
+            title: 'موافقة المشرف', 
+            detail: supActive ? 'تم التوجيه للمهندس' : 'في الانتظار...', 
+            active: supActive 
+        });
+
+        // 3. Engineer Assigned
+        // If status moved past 'at_engineer'
+        let engActive = ['at_tech', 'working', 'pending_confirmation', 'done'].includes(d.status);
+        steps.push({ 
+            title: 'تعيين الفني (مهندس)', 
+            detail: engActive ? (d.engineerName ? `بواسطة: ${d.engineerName}` : 'تم التعيين') : 'في الانتظار...', 
+            active: engActive 
+        });
+
+        // 4. Technician Working (In Progress)
+        let techWorking = ['working', 'pending_confirmation', 'done'].includes(d.status);
+        steps.push({ 
+            title: 'قيد التنفيذ (فني)', 
+            detail: d.technicianName ? `الفني: ${d.technicianName}` : 'لم يبدأ بعد', 
+            active: techWorking 
+        });
+
+        // 5. Technician Finished (Done from Tech side)
+        let techFinished = ['pending_confirmation', 'done'].includes(d.status);
+        steps.push({ 
+            title: 'تم الإصلاح', 
+            detail: techFinished ? 'بانتظار التأكيد' : '...', 
+            active: techFinished 
+        });
+
+        // 6. Employee Confirmation
+        let empConfirmed = d.status === 'done';
+        steps.push({ 
+            title: 'تأكيد الموظف', 
+            detail: empConfirmed ? 'تم إغلاق البلاغ' : '...', 
+            active: empConfirmed 
+        });
+
+        // Generate HTML
         let tlHtml = '<div class="timeline">';
-        const statusOrder = ['pending', 'at_engineer', 'at_tech', 'working', 'pending_confirmation', 'done'];
-        const labels = ['إرسال', 'المهندس', 'الفني', 'التنفيذ', 'المراجعة', 'تم'];
-        
-        if(d.status === 'rejected') {
-            tlHtml += `<div class="timeline-item active rejected"><div class="tl-icon"><i class="fa-solid fa-xmark"></i></div><div class="tl-content"><h4>مرفوض</h4><p>${d.rejectedBy || ''}</p></div></div>`;
+        if (d.status === 'rejected') {
+             tlHtml += `<div class="timeline-item active rejected">
+                          <div class="tl-icon"><i class="fa-solid fa-xmark"></i></div>
+                          <div class="tl-content"><h4>مرفوض</h4><span class="tl-detail">بواسطة: ${d.rejectedBy || 'غير محدد'}</span></div>
+                        </div>`;
         } else {
-             const currentIndex = statusOrder.indexOf(d.status);
-             labels.forEach((lbl, idx) => {
-                 let active = idx <= currentIndex;
-                 tlHtml += `<div class="timeline-item ${active?'active':''}"><div class="tl-icon"><i class="fa-solid fa-check"></i></div><div class="tl-content"><h4>${lbl}</h4></div></div>`;
-             });
+            steps.forEach((step, index) => {
+                // Logic to connect lines: if this step is active, line is colored
+                // This css logic is handled by .active class on parent
+                tlHtml += `
+                <div class="timeline-item ${step.active ? 'active' : ''}">
+                    <div class="tl-icon"><i class="fa-solid fa-check"></i></div>
+                    <div class="tl-content">
+                        <h4>${step.title}</h4>
+                        <span class="tl-detail">${step.detail}</span>
+                    </div>
+                </div>`;
+            });
         }
         tlHtml += '</div>';
         
@@ -1689,7 +1755,16 @@
             costHtml = `<div style="background:#f8fafc; padding:15px; border-radius:12px; margin-top:15px; border:1px dashed var(--border);"><p style="font-weight:bold; color:var(--primary); font-size:12px; margin-bottom:10px;">المواد المستخدمة:</p><ul style="padding-right:20px; font-size:12px; margin:0;">${d.usedMaterials.map(m => `<li>${m.name} (${m.price} ج.م)</li>`).join('')}</ul><p style="margin-top:10px; font-weight:bold; font-size:13px;">الإجمالي: ${d.totalCost} ج.م</p></div>`;
         }
 
-        document.getElementById('req-details-content').innerHTML = `${tlHtml}<div style="text-align:center; margin-bottom:15px;"><span class="req-code" style="font-size:16px;">#${d.uniqueCode||'---'}</span></div><p style="font-size:12px; color:#666; margin-bottom:5px;"><strong>المنشئ:</strong> <span onclick="viewUserProfile('${d.userId}')" style="color:var(--primary); cursor:pointer;">${d.userData.fullName}</span> (ID: ${d.userId.substring(0,5)})</p><p><strong>الوصف:</strong> ${d.description}</p><p><strong>الموقع:</strong> ${d.location}</p>${d.extTechData ? `<div style="background:#fff7ed;padding:10px;border-radius:10px;margin-top:10px;"><p style="margin:0;font-weight:bold;color:#c2410c;">فني خارجي:</p><p style="margin:0;font-size:12px;">${d.extTechData.name} - ${d.extTechData.phone}</p></div>` : ''}${costHtml}<div class="media-grid">${mediaHtml}</div>`;
+        document.getElementById('req-details-content').innerHTML = `
+            ${tlHtml}
+            <div style="text-align:center; margin-bottom:15px;"><span class="req-code" style="font-size:16px;">#${d.uniqueCode||'---'}</span></div>
+            <p style="font-size:12px; color:#666; margin-bottom:5px;"><strong>المنشئ:</strong> <span onclick="viewUserProfile('${d.userId}')" style="color:var(--primary); cursor:pointer;">${d.userData.fullName}</span> (ID: ${d.userId.substring(0,5)})</p>
+            <p><strong>الوصف:</strong> ${d.description}</p>
+            <p><strong>الموقع:</strong> ${d.location}</p>
+            ${d.extTechData ? `<div style="background:#fff7ed;padding:10px;border-radius:10px;margin-top:10px;"><p style="margin:0;font-weight:bold;color:#c2410c;">فني خارجي:</p><p style="margin:0;font-size:12px;">${d.extTechData.name} - ${d.extTechData.phone}</p></div>` : ''}
+            ${costHtml}
+            <div class="media-grid">${mediaHtml}</div>
+        `;
     }
     
     function openMediaViewer(reqId, startIndex) {
@@ -1819,7 +1894,6 @@
         const body = document.getElementById('inventory-body');
         body.innerHTML = '<tr><td colspan="5" style="text-align:center;">جاري التحميل...</td></tr>';
         
-        // **KEY CHANGE: FILTER BY USER ID (Private Inventory)**
         db.collection('inventory').where('userId', '==', currentUser.uid).onSnapshot(snap => {
             body.innerHTML = "";
             if(snap.empty) {
@@ -1884,7 +1958,7 @@
             floor: floorText,
             room: room,
             updatedBy: userData.fullName, 
-            userId: currentUser.uid, // Ensuring ownership
+            userId: currentUser.uid, 
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         
@@ -1928,7 +2002,6 @@
         modal.classList.remove('hidden');
         
         try {
-            // Fetch Managers
             const snap = await db.collection('users').where('role', '==', 'manager').get();
             list.innerHTML = "";
             
@@ -1956,11 +2029,8 @@
     }
     
     function selectManager(el, uid) {
-        // Visual Selection
         document.querySelectorAll('#manager-select-list .tech-select-card').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
-        
-        // Logic Selection
         selectedManagerForReport = uid;
         document.getElementById('confirm-send-rep-btn').disabled = false;
     }
@@ -1973,7 +2043,6 @@
         btn.disabled = true;
         
         try {
-            // 1. Get User's Private Inventory
             const snap = await db.collection('inventory').where('userId', '==', currentUser.uid).get();
             let items = [];
             snap.forEach(doc => items.push(doc.data()));
@@ -1984,11 +2053,10 @@
                 return;
             }
             
-            // 2. Create Report Object
             await db.collection('inventory_reports').add({
                 senderName: userData.fullName,
                 senderId: currentUser.uid,
-                recipientId: selectedManagerForReport, // The selected manager
+                recipientId: selectedManagerForReport, 
                 role: userData.role,
                 reportDate: firebase.firestore.FieldValue.serverTimestamp(),
                 itemCount: items.length,
@@ -2005,7 +2073,7 @@
         } finally {
             btn.innerText = "إرسال الآن";
             btn.disabled = false;
-            selectedManagerForReport = null; // Reset
+            selectedManagerForReport = null; 
         }
     }
 
@@ -2035,7 +2103,6 @@
                 if(snap.empty) { container.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">لا يوجد منشورات</div>'; return; }
                 
                 let hasUnseenInStream = false;
-                // Detect *changes* to identify new posts for sound
                 snap.docChanges().forEach(change => {
                     if (change.type === 'added') {
                         const p = change.doc.data();
