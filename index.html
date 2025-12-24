@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام الصيانة الذكي - جامعة الريادة (V5.0 - Ultimate)</title>
+    <title>نظام الصيانة الذكي - جامعة الريادة (V6.0 - Full Ops)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -192,6 +192,7 @@
         .modal-content { width: 100%; max-width: 450px; background: #fff; border: 1px solid var(--border); border-radius: 30px; padding: 30px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.15); }
         .close-btn { position: absolute; top: 20px; left: 20px; background: #f1f5f9; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); }
         .status-pill { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px; width: fit-content; }
+        /* Status colors omitted for brevity, same as before */
         .st-pending { background: #e0f2fe; color: var(--info); border: 1px solid #bae6fd; } .st-at_engineer { background: #f3e8ff; color: var(--purple); border: 1px solid #d8b4fe; } .st-at_tech { background: #fff7ed; color: var(--gold); border: 1px solid #fdba74; } .st-working { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; } .st-pending_confirmation { background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; } .st-done { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; } .st-rejected { background: #fef2f2; color: var(--error); border: 1px solid #fecaca; }
         .tech-select-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .tech-select-card { border: 1px solid var(--border); border-radius: 16px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; background: var(--surface-light); }
@@ -287,6 +288,10 @@
             width: 50px; text-align: center; border: none; background: transparent; 
             font-weight: bold; font-size: 13px; padding: 0; 
         }
+        
+        .inv-meta-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px;
+        }
 
     </style>
 </head>
@@ -299,7 +304,7 @@
     <div id="loader">
         <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color:var(--primary);"></i>
         <h2 style="margin-top:20px; color:var(--primary-dark); font-size:18px; font-weight:800;">نظام الصيانة الذكي</h2>
-        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V5.0 Ultimate</p>
+        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V6.0 Full Ops</p>
     </div>
 
     <div id="auth-screen" class="hidden" style="min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:25px;">
@@ -471,6 +476,7 @@
                 <div class="glass-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                         <h3 style="margin:0;"><i class="fa-solid fa-boxes-stacked" style="color:var(--primary);"></i> جرد العهدة</h3>
+                        <button onclick="sendInventoryReport()" class="btn-sm btn-main" style="width:auto; background:var(--gold);">إرسال تقرير للمدير <i class="fa-regular fa-paper-plane"></i></button>
                     </div>
                     
                     <div class="inventory-search">
@@ -483,6 +489,17 @@
 
                     <div style="background:var(--surface-light); padding:15px; border-radius:12px; margin-bottom:20px; border:1px dashed var(--border);">
                         <p style="font-size:12px; font-weight:bold; margin-bottom:10px;">إضافة صنف جديد:</p>
+                        
+                        <div class="inv-meta-grid">
+                            <select id="inv-faculty" style="font-size:11px; padding:8px;">
+                                <option value="">المبنى/الكلية...</option>
+                            </select>
+                            <select id="inv-floor" style="font-size:11px; padding:8px;">
+                                <option value="">الدور...</option>
+                            </select>
+                            <input type="text" id="inv-room" placeholder="رقم الغرفة" style="font-size:11px; padding:8px;">
+                        </div>
+
                         <div style="display:grid; grid-template-columns: 2fr 1fr 1fr auto; gap:5px;">
                             <input type="text" id="inv-name" placeholder="اسم الجهاز/الأداة" style="font-size:12px; padding:8px;">
                             <input type="number" id="inv-total" placeholder="إجمالي" style="font-size:12px; padding:8px;">
@@ -495,9 +512,10 @@
                         <table class="modern-table">
                             <thead>
                                 <tr>
-                                    <th>الصنف</th>
+                                    <th>الصنف & المكان</th>
                                     <th>الإجمالي</th>
                                     <th>الموجود</th>
+                                    <th>بواسطة</th>
                                     <th>حذف</th>
                                 </tr>
                             </thead>
@@ -628,7 +646,7 @@
                                 <i class="fa-solid fa-cogs"></i>
                                 <span>إدارة النظام</span>
                             </div>
-                            <div class="settings-card-btn" onclick="nav('inventory', null)">
+                            <div id="btn-inventory-setting" class="settings-card-btn hidden" onclick="nav('inventory', null)">
                                 <i class="fa-solid fa-boxes-stacked"></i>
                                 <span>جرد العهدة</span>
                             </div>
@@ -702,8 +720,7 @@
             <div id="tech-finish-form" class="hidden">
                  <div class="tech-cost-form">
                      <p style="font-size:13px; font-weight:bold; color:var(--gold); margin-bottom:10px;">💵 التكلفة والأدوات المستخدمة</p>
-                     <div id="cost-items-container">
-                         </div>
+                     <div id="cost-items-container"></div>
                      <div class="add-item-btn" onclick="addCostItemRow()">+ إضافة مادة/أداة</div>
                  </div>
             </div>
@@ -798,7 +815,7 @@
     // Global Vars for Admin, Reports & Feed
     let systemSpecialties = [];
     let systemLocations = [];
-    let systemFloors = []; // NEW: Floors
+    let systemFloors = []; 
     let reportChart = null;
     let postsListener = null;
 
@@ -949,7 +966,7 @@
         }
     }
 
-    // --- Admin: System Data (Updated with Floors) ---
+    // --- Admin: System Data ---
     async function fetchSystemData() {
         try {
             const doc = await db.collection('system_settings').doc('config').get();
@@ -957,7 +974,7 @@
                 const data = doc.data();
                 systemSpecialties = data.specialties || [];
                 systemLocations = data.locations || [];
-                systemFloors = data.floors || []; // NEW
+                systemFloors = data.floors || [];
             } else {
                 systemSpecialties = ['كهرباء', 'سباكة', 'نجارة', 'تكييف', 'شبكات (IT)', 'أجهزة طبية'];
                 systemLocations = ['المبنى الإداري', 'كلية الطب', 'كلية الصيدلة', 'كلية الهندسة', 'كلية الأسنان', 'المسجد'];
@@ -976,24 +993,33 @@
     function populateDropdowns() {
         const typeSelect = document.getElementById('req-type');
         const locSelect = document.getElementById('req-faculty');
-        const floorSelect = document.getElementById('req-floor'); // NEW
+        const floorSelect = document.getElementById('req-floor');
         
+        // Inventory Dropdowns
+        const invLocSelect = document.getElementById('inv-faculty');
+        const invFloorSelect = document.getElementById('inv-floor');
+
+        // Populate Specialties
         typeSelect.innerHTML = '<option value="">اختر التخصص...</option>';
         systemSpecialties.forEach(spec => {
             typeSelect.innerHTML += `<option value="${spec}">${spec}</option>`;
         });
 
-        locSelect.innerHTML = '<option value="">اختر المبنى/الكلية...</option>';
+        // Populate Locations (Requests & Inventory)
+        let locOptions = '<option value="">اختر المبنى/الكلية...</option>';
         systemLocations.forEach(loc => {
-            locSelect.innerHTML += `<option value="${loc}">${loc}</option>`;
+            locOptions += `<option value="${loc}">${loc}</option>`;
         });
-        locSelect.innerHTML += '<option value="Other">موقع آخر...</option>';
+        locSelect.innerHTML = locOptions + '<option value="Other">موقع آخر...</option>';
+        invLocSelect.innerHTML = locOptions;
 
-        // Populate Floors
-        floorSelect.innerHTML = '<option value="">اختر الدور...</option>';
+        // Populate Floors (Requests & Inventory)
+        let floorOptions = '<option value="">اختر الدور...</option>';
         systemFloors.forEach(f => {
-            floorSelect.innerHTML += `<option value="${f}">${f}</option>`;
+            floorOptions += `<option value="${f}">${f}</option>`;
         });
+        floorSelect.innerHTML = floorOptions;
+        invFloorSelect.innerHTML = floorOptions;
     }
 
     // --- Role UI & Admin Features ---
@@ -1003,31 +1029,35 @@
         const adminBtn = document.getElementById('btn-admin-panel');
         const settingsAdminArea = document.getElementById('settings-manager-area');
         const createPostBox = document.getElementById('create-post-box');
+        const invBtn = document.getElementById('btn-inventory-setting');
 
-        // Show Create features based on role
+        // Hide Add Button for Techs
         if(r === 'technician' || r === 'engineer') {
              document.querySelector('.nav-add-btn').classList.add('hidden');
              document.getElementById('page-create').innerHTML = "<div style='text-align:center; padding:50px; color:#999;'><i class='fa-solid fa-lock fa-2x'></i><p>حسابك مخصص لاستقبال وتنفيذ المهام فقط.</p></div>";
         }
 
-        // Show Admin/Report features
+        // Features for Manager/Eng/Sup
         if(r === 'manager' || r === 'engineer' || r === 'supervisor') {
             shortcuts.classList.remove('hidden');
             settingsAdminArea.classList.remove('hidden');
-            createPostBox.classList.remove('hidden'); // Allow posting
+            createPostBox.classList.remove('hidden'); 
             
-            if(r === 'manager') {
-                adminBtn.classList.remove('hidden');
-            }
+            if(r === 'manager') adminBtn.classList.remove('hidden');
+        }
+
+        // Inventory Access: Only Supervisor & Employee (and show button for them)
+        if(r === 'supervisor' || r === 'employee') {
+            invBtn.classList.remove('hidden');
         }
     }
 
-    // --- Admin Panel Logic (Updated) ---
+    // --- Admin Panel Logic ---
     async function addSystemData(type) {
         let inputId;
         if(type === 'specialties') inputId = 'new-spec-input';
         else if(type === 'locations') inputId = 'new-loc-input';
-        else inputId = 'new-floor-input'; // NEW
+        else inputId = 'new-floor-input';
 
         let val = document.getElementById(inputId).value.trim();
         if(!val) return;
@@ -1056,34 +1086,21 @@
     function renderAdminLists() {
         const specsDiv = document.getElementById('admin-specs-list');
         const locsDiv = document.getElementById('admin-locs-list');
-        const floorsDiv = document.getElementById('admin-floors-list'); // NEW
+        const floorsDiv = document.getElementById('admin-floors-list');
         
         specsDiv.innerHTML = "";
         systemSpecialties.forEach(item => {
-            specsDiv.innerHTML += `
-            <div class="admin-list-item">
-                <span>${item}</span>
-                <div class="delete-icon" onclick="deleteSystemData('specialties', '${item}')"><i class="fa-solid fa-trash"></i></div>
-            </div>`;
+            specsDiv.innerHTML += `<div class="admin-list-item"><span>${item}</span><div class="delete-icon" onclick="deleteSystemData('specialties', '${item}')"><i class="fa-solid fa-trash"></i></div></div>`;
         });
 
         locsDiv.innerHTML = "";
         systemLocations.forEach(item => {
-            locsDiv.innerHTML += `
-            <div class="admin-list-item">
-                <span>${item}</span>
-                <div class="delete-icon" onclick="deleteSystemData('locations', '${item}')"><i class="fa-solid fa-trash"></i></div>
-            </div>`;
+            locsDiv.innerHTML += `<div class="admin-list-item"><span>${item}</span><div class="delete-icon" onclick="deleteSystemData('locations', '${item}')"><i class="fa-solid fa-trash"></i></div></div>`;
         });
 
-        // Render Floors
         floorsDiv.innerHTML = "";
         systemFloors.forEach(item => {
-            floorsDiv.innerHTML += `
-            <div class="admin-list-item">
-                <span>${item}</span>
-                <div class="delete-icon" onclick="deleteSystemData('floors', '${item}')"><i class="fa-solid fa-trash"></i></div>
-            </div>`;
+            floorsDiv.innerHTML += `<div class="admin-list-item"><span>${item}</span><div class="delete-icon" onclick="deleteSystemData('floors', '${item}')"><i class="fa-solid fa-trash"></i></div></div>`;
         });
     }
 
@@ -1103,7 +1120,7 @@
             loadFeedPosts(); 
             document.getElementById('feed-badge').classList.remove('active');
         }
-        if(p==='inventory') loadInventory(); // NEW
+        if(p==='inventory') loadInventory();
     }
     
     function showScreen(id) { 
@@ -1130,9 +1147,7 @@
     // =========================================================================
 
     function handleFiles(input) { 
-        Array.from(input.files).forEach(file => {
-             addToQueue(file);
-        });
+        Array.from(input.files).forEach(file => { addToQueue(file); });
     }
 
     function addToQueue(f) {
@@ -1172,7 +1187,7 @@
     }
 
     // =========================================================================
-    // FEED & NOTIFICATIONS (UPDATED WITH SOUNDS)
+    // FEED & NOTIFICATIONS
     // =========================================================================
 
     function loadFeed() {
@@ -1202,7 +1217,6 @@
                 checkAndPlaySound(newItems);
             }
             isFirstLoad = false;
-            
             renderFeed();
         });
     }
@@ -1215,7 +1229,6 @@
         if(userData.role === 'employee' && newRequests.some(r => r.status === 'pending_confirmation')) notify = true;
         
         if (notify) {
-            // Updated: Play Distinct Request Sound
             const audio = document.getElementById('sound-notify-req');
             if(audio) audio.play().catch(e => console.log("Audio play blocked"));
             toast("🔔 إشعار جديد");
@@ -1243,7 +1256,6 @@
             let statusClass = 'st-' + d.status;
             let statusText = getStatusLabel(d.status);
             let codeBadge = `<span class="req-code">#${d.uniqueCode || '---'}</span>`;
-
             let actionBtns = "";
             let deleteBtn = "";
 
@@ -1256,37 +1268,15 @@
 
             if(currentTab === 'active') {
                 if(userData.role === 'supervisor' && d.status === 'pending') {
-                    actionBtns = `
-                    <div style="display:flex; gap:10px;">
-                        <button onclick="event.stopPropagation(); openAction('${d.id}','sup_approve')" class="btn-main btn-sm" style="background:var(--success);">توجيه للمهندس</button>
-                        <button onclick="event.stopPropagation(); openAction('${d.id}','reject')" class="btn-main btn-danger btn-sm">رفض</button>
-                    </div>`;
-                }
-                else if(userData.role === 'engineer' && d.status === 'at_engineer') {
-                    actionBtns = `
-                    <div style="display:flex; gap:10px;">
-                        <button onclick="event.stopPropagation(); openAction('${d.id}','eng_assign')" class="btn-main btn-sm" style="background:var(--purple); color:#fff;">تعيين الفني</button>
-                        <button onclick="event.stopPropagation(); openAction('${d.id}','reject')" class="btn-main btn-danger btn-sm">رفض</button>
-                    </div>`;
-                }
-                else if(userData.role === 'technician') {
-                    if(d.status === 'at_tech') {
-                        actionBtns = `<button onclick="event.stopPropagation(); openAction('${d.id}','tech_start')" class="btn-main btn-sm" style="background:var(--warning); color:#fff;">بدء العمل</button>`;
-                    } else if (d.status === 'working') {
-                        actionBtns = `<button onclick="event.stopPropagation(); openAction('${d.id}','tech_finish')" class="btn-main btn-sm" style="background:var(--success);">تم الإصلاح (إرسال للتأكيد)</button>`;
-                    } else if (d.status === 'pending_confirmation') {
-                        actionBtns = `<span style="font-size:11px; color:var(--text-muted); font-weight:bold;">بانتظار تأكيد الموظف...</span>`;
-                    }
-                }
-                else if(userData.role === 'employee' && d.status === 'pending_confirmation' && d.userId === currentUser.uid) {
-                    actionBtns = `
-                    <div style="display:flex; gap:10px; flex-direction:column; width:100%;">
-                        <p style="font-size:10px; color:var(--success); margin:0;">هل تم إصلاح العطل بالفعل؟</p>
-                        <div style="display:flex; gap:5px;">
-                            <button onclick="event.stopPropagation(); openAction('${d.id}','emp_confirm')" class="btn-main btn-sm" style="background:var(--success); flex:1;">نعم، تأكيد وإنهاء</button>
-                            <button onclick="event.stopPropagation(); openAction('${d.id}','emp_deny')" class="btn-main btn-danger btn-sm" style="flex:1;">لا، لم يتم</button>
-                        </div>
-                    </div>`;
+                    actionBtns = `<div style="display:flex; gap:10px;"><button onclick="event.stopPropagation(); openAction('${d.id}','sup_approve')" class="btn-main btn-sm" style="background:var(--success);">توجيه للمهندس</button><button onclick="event.stopPropagation(); openAction('${d.id}','reject')" class="btn-main btn-danger btn-sm">رفض</button></div>`;
+                } else if(userData.role === 'engineer' && d.status === 'at_engineer') {
+                    actionBtns = `<div style="display:flex; gap:10px;"><button onclick="event.stopPropagation(); openAction('${d.id}','eng_assign')" class="btn-main btn-sm" style="background:var(--purple); color:#fff;">تعيين الفني</button><button onclick="event.stopPropagation(); openAction('${d.id}','reject')" class="btn-main btn-danger btn-sm">رفض</button></div>`;
+                } else if(userData.role === 'technician') {
+                    if(d.status === 'at_tech') actionBtns = `<button onclick="event.stopPropagation(); openAction('${d.id}','tech_start')" class="btn-main btn-sm" style="background:var(--warning); color:#fff;">بدء العمل</button>`;
+                    else if (d.status === 'working') actionBtns = `<button onclick="event.stopPropagation(); openAction('${d.id}','tech_finish')" class="btn-main btn-sm" style="background:var(--success);">تم الإصلاح (إرسال للتأكيد)</button>`;
+                    else if (d.status === 'pending_confirmation') actionBtns = `<span style="font-size:11px; color:var(--text-muted); font-weight:bold;">بانتظار تأكيد الموظف...</span>`;
+                } else if(userData.role === 'employee' && d.status === 'pending_confirmation' && d.userId === currentUser.uid) {
+                    actionBtns = `<div style="display:flex; gap:10px; flex-direction:column; width:100%;"><p style="font-size:10px; color:var(--success); margin:0;">هل تم إصلاح العطل بالفعل؟</p><div style="display:flex; gap:5px;"><button onclick="event.stopPropagation(); openAction('${d.id}','emp_confirm')" class="btn-main btn-sm" style="background:var(--success); flex:1;">نعم، تأكيد وإنهاء</button><button onclick="event.stopPropagation(); openAction('${d.id}','emp_deny')" class="btn-main btn-danger btn-sm" style="flex:1;">لا، لم يتم</button></div></div>`;
                 }
             }
 
@@ -1305,16 +1295,12 @@
                     </div>
                     <span class="status-pill ${statusClass}">${statusText}</span>
                 </div>
-                
                 <div style="margin:10px 0; font-size:14px; line-height:1.5; color:var(--text);">
                     <span style="color:var(--info); font-size:12px; font-weight:bold; display:block; margin-bottom:4px;">[${d.type || 'عام'}]</span>
                     ${prioIcon} ${d.description}
                 </div>
-                
                 <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px; margin-top:8px;"><i class="fa-solid fa-location-dot"></i> ${d.location}</div>
-                
                 ${d.technicianName ? `<div style="font-size:11px; background:var(--surface-light); padding:5px 10px; border-radius:10px; display:inline-block; margin-bottom:10px;"><i class="fa-solid fa-screwdriver"></i> الفني: ${d.technicianName}</div>` : ''}
-
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     ${deleteBtn}
                     <div style="margin-right:auto; width:100%; display:flex; justify-content:flex-end;">${actionBtns}</div>
@@ -1336,10 +1322,7 @@
         l.innerHTML="<p style='text-align:center'>جاري تحميل المشرفين (الأصدقاء)...</p>"; 
         
         const friendsSnap = await db.collection('users').doc(currentUser.uid).collection('friends').get();
-        if(friendsSnap.empty) {
-             l.innerHTML = "<div style='text-align:center; padding:20px; color:var(--text-muted);'><p>لا يوجد أصدقاء. يجب إضافة المشرف كصديق أولاً.</p></div>";
-             return;
-        }
+        if(friendsSnap.empty) { l.innerHTML = "<div style='text-align:center; padding:20px; color:var(--text-muted);'><p>لا يوجد أصدقاء.</p></div>"; return; }
         const friendIds = friendsSnap.docs.map(doc => doc.data().friendId);
         
         const snap = await db.collection('users').where('role','==','supervisor').get();
@@ -1349,16 +1332,11 @@
         snap.forEach(d=>{ 
             if(friendIds.includes(d.id)) { 
                 const u=d.data(); 
-                l.innerHTML+=`
-                <div onclick="selectSup(this, '${d.id}')" style="display:flex; align-items:center; gap:10px; padding:15px; border:1px solid var(--border); margin-bottom:8px; border-radius:12px; cursor:pointer;">
-                    <img src="${u.photoUrl}" style="width:35px; height:35px; border-radius:50%;">
-                    <span style="color:var(--text)">${u.fullName}</span>
-                </div>`;
+                l.innerHTML+=`<div onclick="selectSup(this, '${d.id}')" style="display:flex; align-items:center; gap:10px; padding:15px; border:1px solid var(--border); margin-bottom:8px; border-radius:12px; cursor:pointer;"><img src="${u.photoUrl}" style="width:35px; height:35px; border-radius:50%;"><span style="color:var(--text)">${u.fullName}</span></div>`;
                 count++;
             }
         }); 
-        
-        if(count === 0) l.innerHTML = "<div style='text-align:center; padding:20px; color:var(--text-muted);'><p>لم يتم العثور على مشرفين في قائمة أصدقائك.</p></div>";
+        if(count === 0) l.innerHTML = "<div style='text-align:center; padding:20px; color:var(--text-muted);'><p>لم يتم العثور على مشرفين.</p></div>";
     }
 
     function selectSup(el, id) { 
@@ -1384,8 +1362,7 @@
             const facSelect = document.getElementById('req-faculty');
             let facText = facSelect.options[facSelect.selectedIndex].text;
             if(facSelect.value === 'Other') facText = "موقع آخر";
-            
-            const floorSelect = document.getElementById('req-floor'); // NEW
+            const floorSelect = document.getElementById('req-floor');
             let floorText = floorSelect.value ? ` - ${floorSelect.value}` : '';
 
             const loc = `${facText}${floorText} - ${document.getElementById('req-room').value}`;
@@ -1424,17 +1401,9 @@
         
         document.getElementById('eng-select-area').classList.add('hidden');
         document.getElementById('tech-select-area').classList.add('hidden');
-        document.getElementById('tech-finish-form').classList.add('hidden'); // NEW
+        document.getElementById('tech-finish-form').classList.add('hidden');
 
-        const titles = {
-            'sup_approve': 'قبول وتوجيه للمهندس',
-            'eng_assign': 'تعيين الفني المختص',
-            'tech_start': 'بدء التنفيذ',
-            'tech_finish': 'إنهاء العمل',
-            'emp_confirm': 'تأكيد إتمام الإصلاح',
-            'emp_deny': 'رفض الاستلام',
-            'reject': 'رفض الطلب'
-        };
+        const titles = { 'sup_approve': 'قبول وتوجيه للمهندس', 'eng_assign': 'تعيين الفني المختص', 'tech_start': 'بدء التنفيذ', 'tech_finish': 'إنهاء العمل', 'emp_confirm': 'تأكيد إتمام الإصلاح', 'emp_deny': 'رفض الاستلام', 'reject': 'رفض الطلب' };
         document.getElementById('act-title').innerText = titles[type] || 'إجراء';
 
         if(type === 'sup_approve') {
@@ -1448,22 +1417,17 @@
             loadTechnicians();
         }
         else if (type === 'tech_finish') {
-            // NEW: Show Cost Form for Tech
             document.getElementById('tech-finish-form').classList.remove('hidden');
-            document.getElementById('cost-items-container').innerHTML = ''; // Clear previous
-            addCostItemRow(); // Add one row by default
+            document.getElementById('cost-items-container').innerHTML = ''; 
+            addCostItemRow(); 
         }
     }
 
-    // NEW: Add Cost Row
     function addCostItemRow() {
         const container = document.getElementById('cost-items-container');
         const div = document.createElement('div');
         div.className = 'cost-item-row';
-        div.innerHTML = `
-            <input type="text" class="cost-name" placeholder="اسم المادة/الأداة" style="flex:2; font-size:12px;">
-            <input type="number" class="cost-val" placeholder="السعر" style="flex:1; font-size:12px;">
-        `;
+        div.innerHTML = `<input type="text" class="cost-name" placeholder="اسم المادة/الأداة" style="flex:2; font-size:12px;"><input type="number" class="cost-val" placeholder="السعر" style="flex:1; font-size:12px;">`;
         container.appendChild(div);
     }
 
@@ -1472,17 +1436,8 @@
         list.innerHTML = "جاري التحميل...";
         const snap = await db.collection('users').where('role','==','engineer').get();
         list.innerHTML = "";
-        if(snap.empty) { list.innerHTML = "<p style='grid-column:span 2;color:red;font-size:11px;'>لا يوجد مهندسين مسجلين</p>"; return; }
-        
-        snap.forEach(doc => {
-            const u = doc.data();
-            list.innerHTML += `
-            <div class="tech-select-card" onclick="selEng(this, '${doc.id}', '${u.fullName}')">
-                <img src="${u.photoUrl}">
-                <div style="font-size:12px; font-weight:bold;">${u.fullName}</div>
-                <div style="font-size:10px;">${u.jobTitle||'مهندس'}</div>
-            </div>`;
-        });
+        if(snap.empty) { list.innerHTML = "<p style='grid-column:span 2;color:red;font-size:11px;'>لا يوجد مهندسين</p>"; return; }
+        snap.forEach(doc => { const u = doc.data(); list.innerHTML += `<div class="tech-select-card" onclick="selEng(this, '${doc.id}', '${u.fullName}')"><img src="${u.photoUrl}"><div style="font-size:12px; font-weight:bold;">${u.fullName}</div><div style="font-size:10px;">${u.jobTitle||'مهندس'}</div></div>`; });
     }
 
     function selEng(el, id, name) {
@@ -1491,13 +1446,8 @@
     }
 
     function toggleTechType(val) {
-        if(val === 'internal') {
-            document.getElementById('tech-list-action').classList.remove('hidden');
-            document.getElementById('ext-tech-form').classList.add('hidden');
-        } else {
-            document.getElementById('tech-list-action').classList.add('hidden');
-            document.getElementById('ext-tech-form').classList.remove('hidden');
-        }
+        if(val === 'internal') { document.getElementById('tech-list-action').classList.remove('hidden'); document.getElementById('ext-tech-form').classList.add('hidden'); } 
+        else { document.getElementById('tech-list-action').classList.add('hidden'); document.getElementById('ext-tech-form').classList.remove('hidden'); }
     }
 
     async function loadTechnicians() {
@@ -1505,16 +1455,8 @@
         list.innerHTML = "جاري التحميل...";
         const snap = await db.collection('users').where('role','==','technician').get();
         list.innerHTML = "";
-        if(snap.empty) { list.innerHTML = "<p style='grid-column:span 2;color:red;font-size:11px;'>لا يوجد فنيين مسجلين</p>"; return; }
-
-        snap.forEach(doc => {
-            const u = doc.data();
-            list.innerHTML += `
-            <div class="tech-select-card" onclick="selTech(this, '${doc.id}', '${u.fullName}')">
-                <img src="${u.photoUrl}">
-                <div style="font-size:12px; font-weight:bold;">${u.fullName}</div>
-            </div>`;
-        });
+        if(snap.empty) { list.innerHTML = "<p style='grid-column:span 2;color:red;font-size:11px;'>لا يوجد فنيين</p>"; return; }
+        snap.forEach(doc => { const u = doc.data(); list.innerHTML += `<div class="tech-select-card" onclick="selTech(this, '${doc.id}', '${u.fullName}')"><img src="${u.photoUrl}"><div style="font-size:12px; font-weight:bold;">${u.fullName}</div></div>`; });
     }
 
     function selTech(el, id, name) {
@@ -1552,47 +1494,25 @@
                     updateData.status = 'working'; 
                     updateData.technicianName = name + " (تعاقد)";
                     updateData.techType = 'external';
-                    updateData.extTechData = {
-                        name: name,
-                        phone: document.getElementById('ext-phone').value,
-                        company: document.getElementById('ext-company').value,
-                        cost: document.getElementById('ext-cost').value
-                    };
+                    updateData.extTechData = { name: name, phone: document.getElementById('ext-phone').value, company: document.getElementById('ext-company').value, cost: document.getElementById('ext-cost').value };
                 }
             }
             else if(type === 'tech_start') { updateData.status = 'working'; }
             else if(type === 'tech_finish') { 
                 updateData.status = 'pending_confirmation';
                 updateData.techFinishedAt = firebase.firestore.FieldValue.serverTimestamp();
-                
-                // NEW: Collect Cost Data
                 let items = [];
                 let totalCost = 0;
                 document.querySelectorAll('.cost-item-row').forEach(row => {
                     const name = row.querySelector('.cost-name').value.trim();
                     const val = parseFloat(row.querySelector('.cost-val').value) || 0;
-                    if(name) {
-                        items.push({name, price: val});
-                        totalCost += val;
-                    }
+                    if(name) { items.push({name, price: val}); totalCost += val; }
                 });
-                if(items.length > 0) {
-                    updateData.usedMaterials = items;
-                    updateData.totalCost = totalCost;
-                }
+                if(items.length > 0) { updateData.usedMaterials = items; updateData.totalCost = totalCost; }
             }
-            else if(type === 'emp_confirm') { 
-                updateData.status = 'done';
-                updateData.completedAt = firebase.firestore.FieldValue.serverTimestamp();
-            }
-            else if(type === 'emp_deny') { 
-                updateData.status = 'working'; 
-                updateData.notes = "رفض الموظف الاستلام: " + comment;
-            }
-            else if(type === 'reject') { 
-                updateData.status = 'rejected';
-                updateData.rejectedBy = userData.fullName;
-            }
+            else if(type === 'emp_confirm') { updateData.status = 'done'; updateData.completedAt = firebase.firestore.FieldValue.serverTimestamp(); }
+            else if(type === 'emp_deny') { updateData.status = 'working'; updateData.notes = "رفض الموظف الاستلام: " + comment; }
+            else if(type === 'reject') { updateData.status = 'rejected'; updateData.rejectedBy = userData.fullName; }
 
             await db.collection('requests').doc(id).update(updateData);
             toast("✅ تم تنفيذ الإجراء"); closeModal('action-modal');
@@ -1615,27 +1535,15 @@
         
         resDiv.innerHTML = "";
         if(users.length === 0) { resDiv.innerHTML = '<p style="text-align:center; color:#999; font-size:12px;">غير موجود</p>'; return; }
-        
         users.forEach(u => {
             if(u.id === currentUser.uid) return;
             const roleMap = {'employee':'موظف', 'supervisor':'مشرف', 'technician':'فني', 'manager':'مدير', 'engineer': u.gender==='female'?'مهندسة':'مهندس'};
-            resDiv.innerHTML += `
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; background:var(--surface-light); border-radius:10px; margin-bottom:5px; border:1px solid var(--border);">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <img src="${u.photoUrl}" style="width:35px; height:35px; border-radius:50%;">
-                    <div><b style="font-size:12px; color:var(--text);">${u.fullName}</b><br><span style="font-size:10px; color:var(--gold);">${roleMap[u.role]||u.role}</span></div>
-                </div>
-                <button onclick="addFriend('${u.id}', '${u.fullName}', '${u.photoUrl}')" class="btn-main btn-sm">إضافة +</button>
-            </div>`;
+            resDiv.innerHTML += `<div style="display:flex; align-items:center; justify-content:space-between; padding:10px; background:var(--surface-light); border-radius:10px; margin-bottom:5px; border:1px solid var(--border);"><div style="display:flex; align-items:center; gap:10px;"><img src="${u.photoUrl}" style="width:35px; height:35px; border-radius:50%;"><div><b style="font-size:12px; color:var(--text);">${u.fullName}</b><br><span style="font-size:10px; color:var(--gold);">${roleMap[u.role]||u.role}</span></div></div><button onclick="addFriend('${u.id}', '${u.fullName}', '${u.photoUrl}')" class="btn-main btn-sm">إضافة +</button></div>`;
         });
     }
 
     async function addFriend(tid, tname, tpic) {
-        await db.collection('friend_requests').add({
-            fromId: currentUser.uid, toId: tid, status: 'pending',
-            fromData: { name: userData.fullName, pic: userData.photoUrl },
-            toData: { name: tname, pic: tpic }
-        });
+        await db.collection('friend_requests').add({ fromId: currentUser.uid, toId: tid, status: 'pending', fromData: { name: userData.fullName, pic: userData.photoUrl }, toData: { name: tname, pic: tpic } });
         toast("✅ تم إرسال الطلب");
     }
 
@@ -1643,10 +1551,7 @@
         const list = document.getElementById('team-list'); list.innerHTML = "";
         const snap = await db.collection('users').doc(currentUser.uid).collection('friends').get();
         if(snap.empty) { list.innerHTML = "<p style='text-align:center; color:#999; font-size:12px;'>لا يوجد أصدقاء</p>"; return; }
-        snap.forEach(d => {
-            const f = d.data();
-            list.innerHTML += `<div class="friend-item" onclick="viewUserProfile('${f.friendId}')"><img src="${f.pic}" style="width:40px;height:40px;border-radius:50%;"><b>${f.name}</b></div>`;
-        });
+        snap.forEach(d => { const f = d.data(); list.innerHTML += `<div class="friend-item" onclick="viewUserProfile('${f.friendId}')"><img src="${f.pic}" style="width:40px;height:40px;border-radius:50%;"><b>${f.name}</b></div>`; });
     }
 
     async function loadFriendReqs() {
@@ -1654,17 +1559,10 @@
         const list = document.getElementById('reqs-list');
         const snap = await db.collection('friend_requests').where('toId','==',currentUser.uid).where('status','==','pending').get();
         if(snap.empty) { div.classList.add('hidden'); return; }
-        
         div.classList.remove('hidden'); list.innerHTML = "";
         snap.forEach(d => {
             const r = d.data();
-            list.innerHTML += `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:10px; border-radius:10px; margin-bottom:5px;">
-                <div style="display:flex; align-items:center; gap:10px;"><img src="${r.fromData.pic}" style="width:30px;height:30px;border-radius:50%;"><span>${r.fromData.name}</span></div>
-                <div>
-                    <button onclick="acceptFriend('${d.id}', '${r.fromId}', '${r.fromData.name}', '${r.fromData.pic}')" class="btn-main btn-sm" style="background:var(--success);">قبول</button>
-                </div>
-            </div>`;
+            list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:10px; border-radius:10px; margin-bottom:5px;"><div style="display:flex; align-items:center; gap:10px;"><img src="${r.fromData.pic}" style="width:30px;height:30px;border-radius:50%;"><span>${r.fromData.name}</span></div><div><button onclick="acceptFriend('${d.id}', '${r.fromId}', '${r.fromData.name}', '${r.fromData.pic}')" class="btn-main btn-sm" style="background:var(--success);">قبول</button></div></div>`;
         });
     }
 
@@ -1684,11 +1582,7 @@
     }
     
     function getStatusLabel(s) {
-        const map = {
-            'pending': 'في انتظار المشرف', 'at_engineer': 'عند المهندس', 'at_tech': 'عند الفني',
-            'working': 'قيد التنفيذ', 'pending_confirmation': 'بانتظار تأكيدك',
-            'done': 'مكتمل', 'rejected': 'مرفوض'
-        };
+        const map = { 'pending': 'في انتظار المشرف', 'at_engineer': 'عند المهندس', 'at_tech': 'عند الفني', 'working': 'قيد التنفيذ', 'pending_confirmation': 'بانتظار تأكيدك', 'done': 'مكتمل', 'rejected': 'مرفوض' };
         return map[s] || s;
     }
 
@@ -1699,11 +1593,8 @@
         let mediaHtml = "";
         if(d.media) {
             d.media.forEach((m, idx) => {
-                if(m.type === 'audio') {
-                    mediaHtml += `<div class="media-item" onclick="openMediaViewer('${id}', ${idx})" style="background:#e0f2fe;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-play-circle fa-2x"></i></div>`;
-                } else {
-                    mediaHtml += `<div class="media-item" onclick="openMediaViewer('${id}', ${idx})"><img src="${m.url}" style="width:100%;height:100%;object-fit:cover;"></div>`;
-                }
+                if(m.type === 'audio') mediaHtml += `<div class="media-item" onclick="openMediaViewer('${id}', ${idx})" style="background:#e0f2fe;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-play-circle fa-2x"></i></div>`;
+                else mediaHtml += `<div class="media-item" onclick="openMediaViewer('${id}', ${idx})"><img src="${m.url}" style="width:100%;height:100%;object-fit:cover;"></div>`;
             });
         }
 
@@ -1722,28 +1613,12 @@
         }
         tlHtml += '</div>';
         
-        // NEW: Display Materials Cost
         let costHtml = '';
         if(d.usedMaterials && d.usedMaterials.length > 0) {
-            costHtml = `<div style="background:#f8fafc; padding:15px; border-radius:12px; margin-top:15px; border:1px dashed var(--border);">
-                <p style="font-weight:bold; color:var(--primary); font-size:12px; margin-bottom:10px;">المواد المستخدمة:</p>
-                <ul style="padding-right:20px; font-size:12px; margin:0;">
-                    ${d.usedMaterials.map(m => `<li>${m.name} (${m.price} ج.م)</li>`).join('')}
-                </ul>
-                <p style="margin-top:10px; font-weight:bold; font-size:13px;">الإجمالي: ${d.totalCost} ج.م</p>
-            </div>`;
+            costHtml = `<div style="background:#f8fafc; padding:15px; border-radius:12px; margin-top:15px; border:1px dashed var(--border);"><p style="font-weight:bold; color:var(--primary); font-size:12px; margin-bottom:10px;">المواد المستخدمة:</p><ul style="padding-right:20px; font-size:12px; margin:0;">${d.usedMaterials.map(m => `<li>${m.name} (${m.price} ج.م)</li>`).join('')}</ul><p style="margin-top:10px; font-weight:bold; font-size:13px;">الإجمالي: ${d.totalCost} ج.م</p></div>`;
         }
 
-        document.getElementById('req-details-content').innerHTML = `
-            ${tlHtml}
-            <div style="text-align:center; margin-bottom:15px;"><span class="req-code" style="font-size:16px;">#${d.uniqueCode||'---'}</span></div>
-            <p style="font-size:12px; color:#666; margin-bottom:5px;"><strong>المنشئ:</strong> <span onclick="viewUserProfile('${d.userId}')" style="color:var(--primary); cursor:pointer;">${d.userData.fullName}</span> (ID: ${d.userId.substring(0,5)})</p>
-            <p><strong>الوصف:</strong> ${d.description}</p>
-            <p><strong>الموقع:</strong> ${d.location}</p>
-            ${d.extTechData ? `<div style="background:#fff7ed;padding:10px;border-radius:10px;margin-top:10px;"><p style="margin:0;font-weight:bold;color:#c2410c;">فني خارجي:</p><p style="margin:0;font-size:12px;">${d.extTechData.name} - ${d.extTechData.phone}</p></div>` : ''}
-            ${costHtml}
-            <div class="media-grid">${mediaHtml}</div>
-        `;
+        document.getElementById('req-details-content').innerHTML = `${tlHtml}<div style="text-align:center; margin-bottom:15px;"><span class="req-code" style="font-size:16px;">#${d.uniqueCode||'---'}</span></div><p style="font-size:12px; color:#666; margin-bottom:5px;"><strong>المنشئ:</strong> <span onclick="viewUserProfile('${d.userId}')" style="color:var(--primary); cursor:pointer;">${d.userData.fullName}</span> (ID: ${d.userId.substring(0,5)})</p><p><strong>الوصف:</strong> ${d.description}</p><p><strong>الموقع:</strong> ${d.location}</p>${d.extTechData ? `<div style="background:#fff7ed;padding:10px;border-radius:10px;margin-top:10px;"><p style="margin:0;font-weight:bold;color:#c2410c;">فني خارجي:</p><p style="margin:0;font-size:12px;">${d.extTechData.name} - ${d.extTechData.phone}</p></div>` : ''}${costHtml}<div class="media-grid">${mediaHtml}</div>`;
     }
     
     function openMediaViewer(reqId, startIndex) {
@@ -1752,19 +1627,15 @@
         const content = document.getElementById('media-viewer-content');
         content.innerHTML = "";
         d.media.forEach(m => {
-            if(m.type === 'video') { content.innerHTML += `<video controls src="${m.url}" class="full-media-item" style="margin-bottom:15px;"></video>`; }
-            else if (m.type === 'audio') { content.innerHTML += `<audio controls src="${m.url}" style="width:80%; margin-bottom:15px;"></audio>`; }
-            else { content.innerHTML += `<img src="${m.url}" class="full-media-item" style="margin-bottom:15px;">`; }
+            if(m.type === 'video') content.innerHTML += `<video controls src="${m.url}" class="full-media-item" style="margin-bottom:15px;"></video>`;
+            else if (m.type === 'audio') content.innerHTML += `<audio controls src="${m.url}" style="width:80%; margin-bottom:15px;"></audio>`;
+            else content.innerHTML += `<img src="${m.url}" class="full-media-item" style="margin-bottom:15px;">`;
         });
         document.getElementById('media-viewer-modal').classList.remove('hidden');
     }
 
-    async function softDelete(id) { 
-        openConfirmModal("نقل للمهملات؟", async () => { await db.collection('requests').doc(id).update({isDeleted:true}); toast("تم النقل"); }); 
-    }
-    async function hardDelete(id) { 
-        openConfirmModal("حذف نهائي؟ لا يمكن التراجع.", async () => { await db.collection('requests').doc(id).delete(); toast("تم الحذف"); }); 
-    }
+    async function softDelete(id) { openConfirmModal("نقل للمهملات؟", async () => { await db.collection('requests').doc(id).update({isDeleted:true}); toast("تم النقل"); }); }
+    async function hardDelete(id) { openConfirmModal("حذف نهائي؟ لا يمكن التراجع.", async () => { await db.collection('requests').doc(id).delete(); toast("تم الحذف"); }); }
     async function restoreReq(id) { await db.collection('requests').doc(id).update({isDeleted:false}); toast("تم الاستعادة"); }
 
     function openConfirmModal(msg, action) {
@@ -1792,7 +1663,6 @@
         const newLoc = document.getElementById('edit-loc').value;
         const newPhone = document.getElementById('edit-phone').value;
         const newGender = document.getElementById('edit-gender').value;
-
         let picUrl = userData.photoUrl;
         const btn = document.getElementById('save-profile-btn');
         btn.innerText = "جاري الحفظ..."; btn.disabled = true;
@@ -1810,24 +1680,13 @@
         if(selectedFrameEl.classList.contains('f-blue')) frameClass = 'f-blue';
         if(selectedFrameEl.classList.contains('f-grad')) frameClass = 'f-grad';
 
-        await db.collection('users').doc(currentUser.uid).update({
-             fullName: newName, jobTitle: newJob, location: newLoc, phone: newPhone, gender: newGender, photoUrl: picUrl, frame: frameClass
-        });
-        
-        toast("✅ تم تحديث الملف الشخصي");
-        btn.innerText = "حفظ التعديلات"; btn.disabled = false;
-        location.reload(); 
+        await db.collection('users').doc(currentUser.uid).update({ fullName: newName, jobTitle: newJob, location: newLoc, phone: newPhone, gender: newGender, photoUrl: picUrl, frame: frameClass });
+        toast("✅ تم تحديث الملف الشخصي"); btn.innerText = "حفظ التعديلات"; btn.disabled = false; location.reload(); 
     }
 
-    function previewProfilePic(i) { 
-        newProfilePicFile = i.files[0];
-        document.getElementById('edit-current-pic').src = URL.createObjectURL(i.files[0]); 
-    }
+    function previewProfilePic(i) { newProfilePicFile = i.files[0]; document.getElementById('edit-current-pic').src = URL.createObjectURL(i.files[0]); }
     function copyId() { navigator.clipboard.writeText(userData.shortId); toast("تم نسخ ID"); }
-    function selectFrame(el, c) { 
-        document.querySelectorAll('.frame-option').forEach(f=>f.classList.remove('selected'));
-        el.classList.add('selected'); 
-    }
+    function selectFrame(el, c) { document.querySelectorAll('.frame-option').forEach(f=>f.classList.remove('selected')); el.classList.add('selected'); }
 
     // =========================================================================
     // REPORTS
@@ -1836,58 +1695,35 @@
     function generateReports() {
         let start = document.getElementById('report-start-date').valueAsDate;
         let end = document.getElementById('report-end-date').valueAsDate;
-        if(!start) start = new Date(0); 
-        if(!end) end = new Date(); 
-        end.setHours(23, 59, 59);
+        if(!start) start = new Date(0); if(!end) end = new Date(); end.setHours(23, 59, 59);
 
-        const reportData = requestsCache.filter(r => {
-            const rDate = new Date(r.date);
-            return rDate >= start && rDate <= end && r.isDeleted !== true;
-        });
-
+        const reportData = requestsCache.filter(r => { const rDate = new Date(r.date); return rDate >= start && rDate <= end && r.isDeleted !== true; });
         const total = reportData.length;
         const done = reportData.filter(r => r.status === 'done').length;
         const rejected = reportData.filter(r => r.status === 'rejected').length;
         const active = total - done - rejected;
-
         const pHigh = reportData.filter(r => r.priority === 'high').length;
         const pMed = reportData.filter(r => r.priority === 'medium').length;
         const pLow = reportData.filter(r => r.priority === 'low').length;
 
-        document.getElementById('rep-total').innerText = total;
-        document.getElementById('rep-done').innerText = done;
-        document.getElementById('rep-rejected').innerText = rejected;
-        document.getElementById('rep-active').innerText = active;
-        document.getElementById('rep-prio-high').innerText = pHigh;
-        document.getElementById('rep-prio-med').innerText = pMed;
+        document.getElementById('rep-total').innerText = total; document.getElementById('rep-done').innerText = done;
+        document.getElementById('rep-rejected').innerText = rejected; document.getElementById('rep-active').innerText = active;
+        document.getElementById('rep-prio-high').innerText = pHigh; document.getElementById('rep-prio-med').innerText = pMed;
         document.getElementById('rep-prio-low').innerText = pLow;
 
-        updateChart([done, active, rejected]);
-        renderTechTable(reportData);
+        updateChart([done, active, rejected]); renderTechTable(reportData);
     }
 
     function updateChart(data) {
         if(reportChart) reportChart.destroy();
         const ctx = document.getElementById('statusChart').getContext('2d');
-        reportChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: { labels: ['مكتمل', 'قيد العمل', 'مرفوض'], datasets: [{ data: data, backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-        });
+        reportChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['مكتمل', 'قيد العمل', 'مرفوض'], datasets: [{ data: data, backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
     }
 
     function renderTechTable(data) {
-        const tbody = document.getElementById('tech-performance-body');
-        tbody.innerHTML = "";
+        const tbody = document.getElementById('tech-performance-body'); tbody.innerHTML = "";
         const techs = {};
-        data.forEach(r => {
-            if(r.technicianName) {
-                const name = r.technicianName;
-                if(!techs[name]) techs[name] = { total: 0, done: 0, pic: 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png' };
-                techs[name].total++;
-                if(r.status === 'done') techs[name].done++;
-            }
-        });
+        data.forEach(r => { if(r.technicianName) { const name = r.technicianName; if(!techs[name]) techs[name] = { total: 0, done: 0, pic: 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png' }; techs[name].total++; if(r.status === 'done') techs[name].done++; } });
 
         if(Object.keys(techs).length === 0) { tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>لا يوجد بيانات فنيين</td></tr>"; return; }
 
@@ -1905,27 +1741,35 @@
     }
 
     // =========================================================================
-    // NEW: INVENTORY (OHDA) LOGIC
+    // NEW: INVENTORY (OHDA) LOGIC (UPDATED WITH LOCATION & REPORT)
     // =========================================================================
     
     function loadInventory() {
         const body = document.getElementById('inventory-body');
-        body.innerHTML = '<tr><td colspan="4" style="text-align:center;">جاري التحميل...</td></tr>';
+        body.innerHTML = '<tr><td colspan="5" style="text-align:center;">جاري التحميل...</td></tr>';
         
+        // Listen to inventory collection
         db.collection('inventory').onSnapshot(snap => {
             body.innerHTML = "";
             if(snap.empty) {
-                body.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا يوجد أصناف</td></tr>';
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center;">لا يوجد أصناف</td></tr>';
                 return;
             }
             
             snap.forEach(doc => {
                 const item = doc.data();
                 const id = doc.id;
-                // Calculate surplus/deficit implicitly by showing total vs current
+                // Construct location string
+                let locationStr = item.faculty ? item.faculty : '';
+                if(item.floor) locationStr += ` - ${item.floor}`;
+                if(item.room) locationStr += ` (غرفة: ${item.room})`;
+
                 body.innerHTML += `
                 <tr>
-                    <td style="font-weight:bold;">${item.name}</td>
+                    <td>
+                        <div style="font-weight:bold;">${item.name}</div>
+                        <div style="font-size:10px; color:var(--text-muted);">${locationStr}</div>
+                    </td>
                     <td>
                         <div class="stepper-container">
                              <div class="stepper-btn" onclick="updateInvStepper('${id}', -1, 'total')">-</div>
@@ -1940,6 +1784,7 @@
                              <div class="stepper-btn" onclick="updateInvStepper('${id}', 1, 'current')">+</div>
                         </div>
                     </td>
+                    <td style="font-size:11px; text-align:center;">${item.updatedBy || '-'}</td>
                     <td style="text-align:center;"><div class="delete-icon" onclick="deleteInventoryItem('${id}')" style="margin:0 auto;"><i class="fa-solid fa-trash"></i></div></td>
                 </tr>`;
             });
@@ -1951,15 +1796,30 @@
         const total = parseInt(document.getElementById('inv-total').value);
         const current = parseInt(document.getElementById('inv-current').value);
         
+        // Location Fields
+        const facSelect = document.getElementById('inv-faculty');
+        const floorSelect = document.getElementById('inv-floor');
+        const room = document.getElementById('inv-room').value;
+        
+        let facText = facSelect.options[facSelect.selectedIndex].text;
+        if(facSelect.value === "") facText = ""; // Not selected
+        let floorText = floorSelect.value ? floorSelect.value : "";
+
         if(!name || isNaN(total) || isNaN(current)) return toast("⚠️ أدخل بيانات صحيحة");
         
         await db.collection('inventory').add({
             name: name,
             total: total,
             current: current,
-            updatedBy: userData.fullName
+            faculty: facText,
+            floor: floorText,
+            room: room,
+            updatedBy: userData.fullName, // Storing who added/updated
+            userId: currentUser.uid,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         
+        // Reset basic fields only, keep location for ease of entry
         document.getElementById('inv-name').value = "";
         document.getElementById('inv-total').value = "";
         document.getElementById('inv-current').value = "";
@@ -1971,7 +1831,12 @@
         if(doc.exists) {
             let newVal = (doc.data()[field] || 0) + change;
             if(newVal < 0) newVal = 0;
-            await db.collection('inventory').doc(id).update({ [field]: newVal });
+            // Update value AND the user who modified it
+            await db.collection('inventory').doc(id).update({ 
+                [field]: newVal,
+                updatedBy: userData.fullName,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
         }
     }
 
@@ -1979,6 +1844,36 @@
         if(confirm("حذف الصنف من العهدة؟")) {
             await db.collection('inventory').doc(id).delete();
             toast("تم الحذف");
+        }
+    }
+    
+    // NEW: Send Report to Manager Logic
+    async function sendInventoryReport() {
+        if(!confirm("هل تريد إرسال تقرير العهدة الحالي للمدير؟")) return;
+        
+        try {
+            // Get current inventory snapshot
+            const snap = await db.collection('inventory').get();
+            let items = [];
+            snap.forEach(doc => items.push(doc.data()));
+            
+            // Create a report document in a separate collection (e.g. 'reports' or 'messages')
+            // This allows the manager to view it later.
+            // For now, we simulate sending by adding to a 'notifications' collection for manager
+            await db.collection('inventory_reports').add({
+                sender: userData.fullName,
+                senderId: currentUser.uid,
+                role: userData.role,
+                date: firebase.firestore.FieldValue.serverTimestamp(),
+                itemsCount: items.length,
+                data: items, // Save snapshot of items
+                status: 'unread'
+            });
+            
+            toast("✅ تم إرسال التقرير للمدير بنجاح");
+        } catch(e) {
+            console.error(e);
+            toast("❌ حدث خطأ أثناء الإرسال");
         }
     }
 
@@ -2008,7 +1903,19 @@
                 if(snap.empty) { container.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">لا يوجد منشورات</div>'; return; }
                 
                 let hasUnseenInStream = false;
-                let isFirstLoadPosts = true; // Simple check to avoid sound on init load if desired, but here we play always on new updates
+                // Detect *changes* to identify new posts for sound
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        // If it's a new post (not initial load if possible to distinguish, but here complex)
+                        // Simple check: if timestamp is very recent (within last 30 seconds)
+                        const p = change.doc.data();
+                        const now = new Date().getTime() / 1000;
+                        if (p.createdAt && (now - p.createdAt.seconds) < 30 && p.authorId !== currentUser.uid) {
+                             const audio = document.getElementById('sound-notify-post');
+                             if(audio) audio.play().catch(e=>console.log("Audio block"));
+                        }
+                    }
+                });
 
                 snap.forEach(doc => {
                     const p = doc.data();
@@ -2022,9 +1929,6 @@
                     markPostsAsSeen(snap.docs);
                 } else if (hasUnseenInStream) {
                     document.getElementById('feed-badge').classList.add('active');
-                    // Play Post Sound
-                    const audio = document.getElementById('sound-notify-post');
-                    if(audio) audio.play().catch(e=>console.log("Audio block"));
                 }
             });
     }
