@@ -12,9 +12,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
-        /* ==================== Core Styling ==================== */
+        /* ==================== Core Styling (نفس التنسيقات السابقة) ==================== */
         :root {
-            --primary: #0056b3;        
+            --primary: #0056b3;         
             --primary-dark: #003d80;    
             --dark: #f8fafc;            
             --surface: #ffffff;        
@@ -27,7 +27,7 @@
             --error: #ef4444;            
             --warning: #f59e0b;        
             --info: #0ea5e9;            
-            --purple: #8b5cf6; /* لون للمهندس */
+            --purple: #8b5cf6;
             --bg-image: url('https://a.top4top.io/p_36115ao3o1.jpg');
             --glass: rgba(255, 255, 255, 0.95);
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -291,7 +291,6 @@
 <body>
 
 <div class="app-wrapper">
-    
     <audio id="notify-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div id="loader">
@@ -624,10 +623,10 @@
     let mediaRecorder = null;
     let audioChunks = [];
     let isRecording = false;
+    let isRegistering = false; // <--- المتغير الجديد لحل المشكلة
 
     // --- Helpers ---
     function generateUniqueCode() {
-        // Generate 4 chars (Numbers + Uppercase)
         const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
         let result = '';
         for (let i = 0; i < 4; i++) {
@@ -636,8 +635,11 @@
         return result;
     }
 
-    // --- Authentication ---
+    // --- Authentication Logic (Modified for Race Condition) ---
     auth.onAuthStateChanged(async u => {
+        // إذا كنا في عملية تسجيل جديد، نوقف التحميل التلقائي
+        if(isRegistering) return;
+
         if(u) {
             if(!u.emailVerified) {
                 document.getElementById('loader').classList.add('hidden');
@@ -654,11 +656,96 @@
         }
     });
 
+    // --- Handle Auth (Create Account / Login) ---
+    async function handleAuth() {
+        const email = document.getElementById('email').value; 
+        const pass = document.getElementById('password').value;
+        const confirmPass = document.getElementById('confirm-password').value;
+        const btn = document.getElementById('auth-btn'); 
+
+        if(!isLoginMode) {
+             if(pass !== confirmPass) return toast("❌ كلمة المرور غير متطابقة");
+             if(pass.length < 6) return toast("❌ كلمة المرور ضعيفة");
+        }
+
+        btn.disabled=true; btn.innerText = "جاري المعالجة...";
+        
+        try {
+            if(isLoginMode) {
+                // تسجيل الدخول العادي
+                await auth.signInWithEmailAndPassword(email, pass);
+            } else {
+                // --- إنشاء حساب جديد ---
+                isRegistering = true; // Lock listener
+
+                const role = document.querySelector('input[name="auth-role"]:checked').value;
+                const gender = document.querySelector('input[name="auth-gender"]:checked').value;
+                const fullName = document.getElementById('reg-name').value;
+                const jobTitle = document.getElementById('reg-job').value;
+                const locationVal = document.getElementById('reg-loc').value;
+                const phone = document.getElementById('reg-phone').value;
+                const defaultPic = gender === 'male' ? 'https://cdn-icons-png.flaticon.com/512/4140/4140048.png' : 'https://cdn-icons-png.flaticon.com/512/4140/4140047.png';
+
+                // Check Manager Limit
+                if(role === 'manager') {
+                      const mSnap = await db.collection('users').where('role', '==', 'manager').get();
+                      if(mSnap.size >= 4) throw new Error("⛔ تم اكتمال عدد المديرين (4).");
+                }
+
+                // Create User in Auth
+                const cred = await auth.createUserWithEmailAndPassword(email, pass);
+
+                // SAVE TO FIRESTORE IMMEDIATELY
+                await db.collection('users').doc(cred.user.uid).set({
+                    email: email,
+                    role: role,
+                    fullName: fullName,
+                    gender: gender,
+                    photoUrl: defaultPic,
+                    shortId: Math.random().toString(36).substr(2,6).toUpperCase(),
+                    jobTitle: jobTitle,
+                    location: locationVal,
+                    phone: phone,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await cred.user.sendEmailVerification();
+                toast("✅ تم إنشاء الحساب وحفظ البيانات. راجع بريدك للتفعيل.");
+                
+                isRegistering = false; // Unlock
+                toggleAuth(); // Go back to login screen
+            }
+        } catch(e) { 
+            console.error(e);
+            toast(e.message); 
+            isRegistering = false;
+        } finally { 
+            btn.disabled=false; 
+            btn.innerText = isLoginMode?"تسجيل الدخول":"إنشاء حساب"; 
+        }
+    }
+    
+    function toggleAuth() { 
+        isLoginMode = !isLoginMode; 
+        const regFields = document.getElementById('reg-fields');
+        const confirmPass = document.getElementById('confirm-pass-field');
+        if (isLoginMode) {
+            regFields.classList.add('hidden'); confirmPass.classList.add('hidden');
+            document.getElementById('auth-btn').innerText = "تسجيل الدخول";
+            document.getElementById('auth-switch-text').innerHTML = "ليس لديك حساب؟ <b style='color:var(--primary)'>إنشاء حساب جديد</b>";
+        } else {
+            regFields.classList.remove('hidden'); confirmPass.classList.remove('hidden');
+            document.getElementById('auth-btn').innerText = "إنشاء حساب";
+            document.getElementById('auth-switch-text').innerHTML = "لديك حساب بالفعل؟ <b style='color:var(--primary)'>تسجيل الدخول</b>";
+        }
+    }
+// تابع في الجزء الثاني...
     async function loadUser() {
         try {
             const doc = await db.collection('users').doc(currentUser.uid).get();
             if(doc.exists) {
                 userData = doc.data();
+                // Ensure shortId exists
                 if(!userData.shortId) {
                     await db.collection('users').doc(currentUser.uid).update({shortId: Math.random().toString(36).substr(2,6).toUpperCase()});
                 }
@@ -687,16 +774,9 @@
     // Role UI Adjustments
     function setupRoleUI() {
         const r = userData.role;
-        // Manager only allows Full delete
-        // Employees create requests
-        // Engineers/Techs can't create requests
         if(r === 'technician' || r === 'engineer') {
-             // Hide Add Button for Eng/Tech
              document.querySelector('.nav-add-btn').classList.add('hidden');
              document.getElementById('page-create').innerHTML = "<div style='text-align:center; padding:50px; color:#999;'><i class='fa-solid fa-lock fa-2x'></i><p>حسابك مخصص لاستقبال وتنفيذ المهام فقط.</p></div>";
-        }
-        if(r === 'manager') {
-             // Manager specific items if any
         }
     }
 
@@ -729,64 +809,9 @@
         const frameEl = document.getElementById('banner-frame');
         frameEl.className = 'frame-overlay ' + (userData.frame || '');
     }
-    
-    function toggleAuth() { 
-        isLoginMode = !isLoginMode; 
-        const regFields = document.getElementById('reg-fields');
-        const confirmPass = document.getElementById('confirm-pass-field');
-        if (isLoginMode) {
-            regFields.classList.add('hidden'); confirmPass.classList.add('hidden');
-            document.getElementById('auth-btn').innerText = "تسجيل الدخول";
-            document.getElementById('auth-switch-text').innerHTML = "ليس لديك حساب؟ <b style='color:var(--primary)'>إنشاء حساب جديد</b>";
-        } else {
-            regFields.classList.remove('hidden'); confirmPass.classList.remove('hidden');
-            document.getElementById('auth-btn').innerText = "إنشاء حساب";
-            document.getElementById('auth-switch-text').innerHTML = "لديك حساب بالفعل؟ <b style='color:var(--primary)'>تسجيل الدخول</b>";
-        }
-    }
-
-    async function handleAuth() {
-        const email = document.getElementById('email').value; 
-        const pass = document.getElementById('password').value;
-        const confirmPass = document.getElementById('confirm-password').value;
-        const btn = document.getElementById('auth-btn'); 
-
-        if(!isLoginMode) {
-             if(pass !== confirmPass) return toast("❌ كلمة المرور غير متطابقة");
-             if(pass.length < 6) return toast("❌ كلمة المرور ضعيفة");
-        }
-
-        btn.disabled=true; btn.innerText = "جاري المعالجة...";
-        try {
-            if(isLoginMode) {
-                await auth.signInWithEmailAndPassword(email, pass);
-            } else {
-                const role = document.querySelector('input[name="auth-role"]:checked').value;
-                if(role === 'manager') {
-                      const mSnap = await db.collection('users').where('role', '==', 'manager').get();
-                      if(mSnap.size >= 4) throw new Error("⛔ تم اكتمال عدد المديرين (4).");
-                }
-                const cred = await auth.createUserWithEmailAndPassword(email, pass);
-                await cred.user.sendEmailVerification();
-                toast("✅ تم إنشاء الحساب. راجع بريدك للتفعيل.");
-                
-                const gender = document.querySelector('input[name="auth-gender"]:checked').value;
-                const defaultPic = gender === 'male' ? 'https://cdn-icons-png.flaticon.com/512/4140/4140048.png' : 'https://cdn-icons-png.flaticon.com/512/4140/4140047.png';
-                
-                await db.collection('users').doc(cred.user.uid).set({
-                    email, role, fullName:document.getElementById('reg-name').value, 
-                    gender, photoUrl: defaultPic,
-                    shortId: Math.random().toString(36).substr(2,6).toUpperCase(),
-                    jobTitle: document.getElementById('reg-job').value, location: document.getElementById('reg-loc').value, phone: document.getElementById('reg-phone').value
-                });
-                toggleAuth();
-            }
-        } catch(e) { toast(e.message); }
-        finally { btn.disabled=false; btn.innerText = isLoginMode?"تسجيل الدخول":"إنشاء حساب"; }
-    }
 
     // =========================================================================
-    // 2. CREATE REQUEST (Employee -> Friend Supervisor)
+    // 2. CREATE REQUEST & MEDIA
     // =========================================================================
 
     function handleFiles(input) { 
@@ -803,188 +828,6 @@
         grid.innerHTML += `<div class="media-item">${content}<div class="remove-file" onclick="uploadQueue.splice(${index},1); this.parentElement.remove()">x</div></div>`;
     }
 
-    // =========================================================================
-    // 1. CORE LOGIC: FEED & ROLES
-    // =========================================================================
-
-    function loadFeed() {
-        let q = db.collection('requests');
-        
-        // --- 1. Role-Based Data Access (The Funnel) ---
-        if(userData.role === 'employee') {
-            q = q.where('userId','==',currentUser.uid); // Employee sees only their requests
-        } else if(userData.role === 'supervisor') {
-            q = q.where('supervisorId','==',currentUser.uid); // Supervisor sees requests sent to them
-        } else if(userData.role === 'engineer') {
-            q = q.where('engineerId','==',currentUser.uid); // Engineer sees requests assigned to them
-        } else if(userData.role === 'technician') {
-            q = q.where('technicianId','==',currentUser.uid); // Technician sees requests assigned to them
-        }
-        // Manager sees ALL (no filter applied)
-
-        q.onSnapshot(snap => {
-            const currentIds = requestsCache.map(r => r.id);
-            let newItems = [];
-            let updatedCache = [];
-
-            snap.forEach(doc => {
-                const data = {id: doc.id, ...doc.data()};
-                updatedCache.push(data);
-                if (!isFirstLoad && !currentIds.includes(doc.id)) {
-                    newItems.push(data);
-                }
-            });
-
-            requestsCache = updatedCache;
-            // Sort by Created Date Descending
-            requestsCache.sort((a,b) => (b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-            
-            if(!isFirstLoad && newItems.length > 0) {
-                checkAndPlaySound(newItems);
-            }
-            isFirstLoad = false;
-            
-            renderFeed();
-        });
-    }
-
-    function checkAndPlaySound(newRequests) {
-        // Logic to notify only relevant users
-        let notify = false;
-        if(userData.role === 'supervisor' && newRequests.some(r => r.status === 'pending')) notify = true;
-        if(userData.role === 'engineer' && newRequests.some(r => r.status === 'at_engineer')) notify = true;
-        if(userData.role === 'technician' && newRequests.some(r => r.status === 'at_tech')) notify = true;
-        if(userData.role === 'employee' && newRequests.some(r => r.status === 'pending_confirmation')) notify = true;
-        
-        if (notify) {
-            const audio = document.getElementById('notify-sound');
-            if(audio) audio.play().catch(e => console.log("Audio play blocked"));
-            toast("🔔 إشعار جديد");
-            document.querySelector('.bell-badge').style.display = 'block';
-        }
-    }
-
-    function renderFeed() {
-        const container = document.getElementById('requests-feed'); container.innerHTML = "";
-        let list = requestsCache;
-
-        // Tabs Logic
-        if(currentTab === 'trash') {
-            // Only Manager can see trash usually, but logic allows filtering
-            list = list.filter(r => r.isDeleted === true);
-        } else {
-            list = list.filter(r => r.isDeleted !== true); // Hide deleted
-            if(currentTab === 'active') {
-                list = list.filter(r => ['pending','at_engineer','at_tech','working','pending_confirmation'].includes(r.status));
-            } else if(currentTab === 'history') {
-                list = list.filter(r => ['done','rejected'].includes(r.status));
-            }
-        }
-
-        if(list.length === 0) { 
-            container.innerHTML = `<div style="text-align:center; padding:50px 20px; color:var(--text-muted);"><i class="fa-regular fa-clipboard fa-3x" style="opacity:0.5; margin-bottom:10px;"></i><p>لا يوجد بيانات</p></div>`; 
-            return; 
-        }
-
-        list.forEach(d => {
-            let statusClass = 'st-' + d.status;
-            let statusText = getStatusLabel(d.status);
-            
-            // Unique Code Badge
-            let codeBadge = `<span class="req-code">#${d.uniqueCode || '---'}</span>`;
-
-            // Action Buttons Logic
-            let actionBtns = "";
-            let deleteBtn = "";
-
-            // --- DELETION: MANAGER ONLY ---
-            if(userData.role === 'manager' && currentTab !== 'trash') {
-                deleteBtn = `<button onclick="event.stopPropagation(); softDelete('${d.id}')" class="btn-ghost btn-sm" style="color:var(--error); border-color:var(--border); margin-left:10px;"><i class="fa-solid fa-trash"></i></button>`;
-            } else if (userData.role === 'manager' && currentTab === 'trash') {
-                 deleteBtn = `<button onclick="event.stopPropagation(); restoreReq('${d.id}')" class="btn-ghost btn-sm" style="color:var(--success); border-color:var(--success); margin-left:5px;">استعادة</button>
-                              <button onclick="event.stopPropagation(); hardDelete('${d.id}')" class="btn-ghost btn-sm" style="color:var(--error); border-color:var(--border);">حذف نهائي</button>`;
-            }
-
-            // --- WORKFLOW ACTIONS ---
-            if(currentTab === 'active') {
-                // 1. Supervisor Actions (Pending -> Engineer)
-                if(userData.role === 'supervisor' && d.status === 'pending') {
-                    actionBtns = `
-                    <div style="display:flex; gap:10px;">
-                        <button onclick="event.stopPropagation(); openAction('${d.id}','sup_approve')" class="btn-main btn-sm" style="background:var(--success);">توجيه للمهندس</button>
-                        <button onclick="event.stopPropagation(); openAction('${d.id}','reject')" class="btn-main btn-danger btn-sm">رفض</button>
-                    </div>`;
-                }
-                
-                // 2. Engineer Actions (At Engineer -> Technician)
-                else if(userData.role === 'engineer' && d.status === 'at_engineer') {
-                    actionBtns = `
-                    <div style="display:flex; gap:10px;">
-                        <button onclick="event.stopPropagation(); openAction('${d.id}','eng_assign')" class="btn-main btn-sm" style="background:var(--purple); color:#fff;">تعيين الفني</button>
-                        <button onclick="event.stopPropagation(); openAction('${d.id}','reject')" class="btn-main btn-danger btn-sm">رفض</button>
-                    </div>`;
-                }
-
-                // 3. Technician Actions (At Tech -> Working -> Pending Confirmation)
-                else if(userData.role === 'technician') {
-                    if(d.status === 'at_tech') {
-                        actionBtns = `<button onclick="event.stopPropagation(); openAction('${d.id}','tech_start')" class="btn-main btn-sm" style="background:var(--warning); color:#fff;">بدء العمل</button>`;
-                    } else if (d.status === 'working') {
-                        actionBtns = `<button onclick="event.stopPropagation(); openAction('${d.id}','tech_finish')" class="btn-main btn-sm" style="background:var(--success);">تم الإصلاح (إرسال للتأكيد)</button>`;
-                    } else if (d.status === 'pending_confirmation') {
-                        actionBtns = `<span style="font-size:11px; color:var(--text-muted); font-weight:bold;">بانتظار تأكيد الموظف...</span>`;
-                    }
-                }
-
-                // 4. Employee Confirmation (Pending Confirmation -> Done/Archived)
-                else if(userData.role === 'employee' && d.status === 'pending_confirmation' && d.userId === currentUser.uid) {
-                    actionBtns = `
-                    <div style="display:flex; gap:10px; flex-direction:column; width:100%;">
-                        <p style="font-size:10px; color:var(--success); margin:0;">هل تم إصلاح العطل بالفعل؟</p>
-                        <div style="display:flex; gap:5px;">
-                            <button onclick="event.stopPropagation(); openAction('${d.id}','emp_confirm')" class="btn-main btn-sm" style="background:var(--success); flex:1;">نعم، تأكيد وإنهاء</button>
-                            <button onclick="event.stopPropagation(); openAction('${d.id}','emp_deny')" class="btn-main btn-danger btn-sm" style="flex:1;">لا، لم يتم</button>
-                        </div>
-                    </div>`;
-                }
-            }
-
-            let prioIcon = d.priority === 'high' ? '<i class="fa-solid fa-fire" style="color:var(--error)"></i>' : '';
-            let prioColor = d.priority === 'high' ? 'var(--error)' : d.priority === 'medium' ? 'var(--warning)' : 'var(--success)';
-            
-            // Card HTML
-            container.innerHTML += `
-            <div class="glass-card request-card" onclick="openRequestDetails('${d.id}')" style="border-right-color:${prioColor};">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <img src="${d.userData.photoUrl}" class="avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
-                        <div>
-                            <b style="font-size:13px; display:block; color:var(--text);">${d.userData.fullName} ${codeBadge}</b>
-                            <span style="font-size:10px; color:var(--text-muted);"><i class="fa-regular fa-clock"></i> ${d.date}</span>
-                        </div>
-                    </div>
-                    <span class="status-pill ${statusClass}">${statusText}</span>
-                </div>
-                
-                <div style="margin:10px 0; font-size:14px; line-height:1.5; color:var(--text);">
-                    <span style="color:var(--info); font-size:12px; font-weight:bold; display:block; margin-bottom:4px;">[${d.type || 'عام'}]</span>
-                    ${prioIcon} ${d.description}
-                </div>
-                
-                <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px; margin-top:8px;"><i class="fa-solid fa-location-dot"></i> ${d.location}</div>
-                
-                ${d.technicianName ? `<div style="font-size:11px; background:var(--surface-light); padding:5px 10px; border-radius:10px; display:inline-block; margin-bottom:10px;"><i class="fa-solid fa-screwdriver"></i> الفني: ${d.technicianName}</div>` : ''}
-
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    ${deleteBtn}
-                    <div style="margin-right:auto; width:100%; display:flex; justify-content:flex-end;">${actionBtns}</div>
-                </div>
-            </div>`;
-        });
-    }
-    // =========================================================================
-    // 3. VOICE RECORDING & MEDIA
-    // =========================================================================
     async function toggleRecording() {
         const btn = document.getElementById('mic-trigger');
         if (!isRecording) {
@@ -1014,8 +857,170 @@
     }
 
     // =========================================================================
-    // 4. REQUEST SUBMISSION (Employee -> Supervisor Friend)
+    // 3. CORE LOGIC: FEED & ROLES
     // =========================================================================
+
+    function loadFeed() {
+        let q = db.collection('requests');
+        
+        if(userData.role === 'employee') {
+            q = q.where('userId','==',currentUser.uid);
+        } else if(userData.role === 'supervisor') {
+            q = q.where('supervisorId','==',currentUser.uid);
+        } else if(userData.role === 'engineer') {
+            q = q.where('engineerId','==',currentUser.uid);
+        } else if(userData.role === 'technician') {
+            q = q.where('technicianId','==',currentUser.uid);
+        }
+
+        q.onSnapshot(snap => {
+            const currentIds = requestsCache.map(r => r.id);
+            let newItems = [];
+            let updatedCache = [];
+
+            snap.forEach(doc => {
+                const data = {id: doc.id, ...doc.data()};
+                updatedCache.push(data);
+                if (!isFirstLoad && !currentIds.includes(doc.id)) {
+                    newItems.push(data);
+                }
+            });
+
+            requestsCache = updatedCache;
+            requestsCache.sort((a,b) => (b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+            
+            if(!isFirstLoad && newItems.length > 0) {
+                checkAndPlaySound(newItems);
+            }
+            isFirstLoad = false;
+            
+            renderFeed();
+        });
+    }
+
+    function checkAndPlaySound(newRequests) {
+        let notify = false;
+        if(userData.role === 'supervisor' && newRequests.some(r => r.status === 'pending')) notify = true;
+        if(userData.role === 'engineer' && newRequests.some(r => r.status === 'at_engineer')) notify = true;
+        if(userData.role === 'technician' && newRequests.some(r => r.status === 'at_tech')) notify = true;
+        if(userData.role === 'employee' && newRequests.some(r => r.status === 'pending_confirmation')) notify = true;
+        
+        if (notify) {
+            const audio = document.getElementById('notify-sound');
+            if(audio) audio.play().catch(e => console.log("Audio play blocked"));
+            toast("🔔 إشعار جديد");
+            document.querySelector('.bell-badge').style.display = 'block';
+        }
+    }
+
+    function renderFeed() {
+        const container = document.getElementById('requests-feed'); container.innerHTML = "";
+        let list = requestsCache;
+
+        if(currentTab === 'trash') {
+            list = list.filter(r => r.isDeleted === true);
+        } else {
+            list = list.filter(r => r.isDeleted !== true);
+            if(currentTab === 'active') {
+                list = list.filter(r => ['pending','at_engineer','at_tech','working','pending_confirmation'].includes(r.status));
+            } else if(currentTab === 'history') {
+                list = list.filter(r => ['done','rejected'].includes(r.status));
+            }
+        }
+
+        if(list.length === 0) { 
+            container.innerHTML = `<div style="text-align:center; padding:50px 20px; color:var(--text-muted);"><i class="fa-regular fa-clipboard fa-3x" style="opacity:0.5; margin-bottom:10px;"></i><p>لا يوجد بيانات</p></div>`; 
+            return; 
+        }
+
+        list.forEach(d => {
+            let statusClass = 'st-' + d.status;
+            let statusText = getStatusLabel(d.status);
+            let codeBadge = `<span class="req-code">#${d.uniqueCode || '---'}</span>`;
+
+            let actionBtns = "";
+            let deleteBtn = "";
+
+            if(userData.role === 'manager' && currentTab !== 'trash') {
+                deleteBtn = `<button onclick="event.stopPropagation(); softDelete('${d.id}')" class="btn-ghost btn-sm" style="color:var(--error); border-color:var(--border); margin-left:10px;"><i class="fa-solid fa-trash"></i></button>`;
+            } else if (userData.role === 'manager' && currentTab === 'trash') {
+                 deleteBtn = `<button onclick="event.stopPropagation(); restoreReq('${d.id}')" class="btn-ghost btn-sm" style="color:var(--success); border-color:var(--success); margin-left:5px;">استعادة</button>
+                              <button onclick="event.stopPropagation(); hardDelete('${d.id}')" class="btn-ghost btn-sm" style="color:var(--error); border-color:var(--border);">حذف نهائي</button>`;
+            }
+
+            if(currentTab === 'active') {
+                if(userData.role === 'supervisor' && d.status === 'pending') {
+                    actionBtns = `
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="event.stopPropagation(); openAction('${d.id}','sup_approve')" class="btn-main btn-sm" style="background:var(--success);">توجيه للمهندس</button>
+                        <button onclick="event.stopPropagation(); openAction('${d.id}','reject')" class="btn-main btn-danger btn-sm">رفض</button>
+                    </div>`;
+                }
+                else if(userData.role === 'engineer' && d.status === 'at_engineer') {
+                    actionBtns = `
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="event.stopPropagation(); openAction('${d.id}','eng_assign')" class="btn-main btn-sm" style="background:var(--purple); color:#fff;">تعيين الفني</button>
+                        <button onclick="event.stopPropagation(); openAction('${d.id}','reject')" class="btn-main btn-danger btn-sm">رفض</button>
+                    </div>`;
+                }
+                else if(userData.role === 'technician') {
+                    if(d.status === 'at_tech') {
+                        actionBtns = `<button onclick="event.stopPropagation(); openAction('${d.id}','tech_start')" class="btn-main btn-sm" style="background:var(--warning); color:#fff;">بدء العمل</button>`;
+                    } else if (d.status === 'working') {
+                        actionBtns = `<button onclick="event.stopPropagation(); openAction('${d.id}','tech_finish')" class="btn-main btn-sm" style="background:var(--success);">تم الإصلاح (إرسال للتأكيد)</button>`;
+                    } else if (d.status === 'pending_confirmation') {
+                        actionBtns = `<span style="font-size:11px; color:var(--text-muted); font-weight:bold;">بانتظار تأكيد الموظف...</span>`;
+                    }
+                }
+                else if(userData.role === 'employee' && d.status === 'pending_confirmation' && d.userId === currentUser.uid) {
+                    actionBtns = `
+                    <div style="display:flex; gap:10px; flex-direction:column; width:100%;">
+                        <p style="font-size:10px; color:var(--success); margin:0;">هل تم إصلاح العطل بالفعل؟</p>
+                        <div style="display:flex; gap:5px;">
+                            <button onclick="event.stopPropagation(); openAction('${d.id}','emp_confirm')" class="btn-main btn-sm" style="background:var(--success); flex:1;">نعم، تأكيد وإنهاء</button>
+                            <button onclick="event.stopPropagation(); openAction('${d.id}','emp_deny')" class="btn-main btn-danger btn-sm" style="flex:1;">لا، لم يتم</button>
+                        </div>
+                    </div>`;
+                }
+            }
+
+            let prioIcon = d.priority === 'high' ? '<i class="fa-solid fa-fire" style="color:var(--error)"></i>' : '';
+            let prioColor = d.priority === 'high' ? 'var(--error)' : d.priority === 'medium' ? 'var(--warning)' : 'var(--success)';
+            
+            container.innerHTML += `
+            <div class="glass-card request-card" onclick="openRequestDetails('${d.id}')" style="border-right-color:${prioColor};">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <img src="${d.userData.photoUrl}" class="avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+                        <div>
+                            <b style="font-size:13px; display:block; color:var(--text);">${d.userData.fullName} ${codeBadge}</b>
+                            <span style="font-size:10px; color:var(--text-muted);"><i class="fa-regular fa-clock"></i> ${d.date}</span>
+                        </div>
+                    </div>
+                    <span class="status-pill ${statusClass}">${statusText}</span>
+                </div>
+                
+                <div style="margin:10px 0; font-size:14px; line-height:1.5; color:var(--text);">
+                    <span style="color:var(--info); font-size:12px; font-weight:bold; display:block; margin-bottom:4px;">[${d.type || 'عام'}]</span>
+                    ${prioIcon} ${d.description}
+                </div>
+                
+                <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px; margin-top:8px;"><i class="fa-solid fa-location-dot"></i> ${d.location}</div>
+                
+                ${d.technicianName ? `<div style="font-size:11px; background:var(--surface-light); padding:5px 10px; border-radius:10px; display:inline-block; margin-bottom:10px;"><i class="fa-solid fa-screwdriver"></i> الفني: ${d.technicianName}</div>` : ''}
+
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    ${deleteBtn}
+                    <div style="margin-right:auto; width:100%; display:flex; justify-content:flex-end;">${actionBtns}</div>
+                </div>
+            </div>`;
+        });
+    }
+
+    // =========================================================================
+    // 4. WORKFLOW MODALS
+    // =========================================================================
+    
     async function openSupModal() { 
         if(!document.getElementById('req-desc').value) return toast("⚠️ الوصف مطلوب");
         if(!document.getElementById('req-type').value) return toast("⚠️ نوع العطل مطلوب");
@@ -1024,7 +1029,6 @@
         const l=document.getElementById('sup-list'); 
         l.innerHTML="<p style='text-align:center'>جاري تحميل المشرفين (الأصدقاء)...</p>"; 
         
-        // 1. Get Supervisors who are friends
         const friendsSnap = await db.collection('users').doc(currentUser.uid).collection('friends').get();
         if(friendsSnap.empty) {
              l.innerHTML = "<div style='text-align:center; padding:20px; color:var(--text-muted);'><p>لا يوجد أصدقاء. يجب إضافة المشرف كصديق أولاً.</p></div>";
@@ -1032,7 +1036,6 @@
         }
         const friendIds = friendsSnap.docs.map(doc => doc.data().friendId);
         
-        // 2. Filter valid supervisors from friends
         const snap = await db.collection('users').where('role','==','supervisor').get();
         l.innerHTML="";
         
@@ -1075,8 +1078,6 @@
             const facSelect = document.getElementById('req-faculty');
             const facText = facSelect.options[facSelect.selectedIndex].text;
             const loc = `${facText} - ${document.getElementById('req-room').value}`;
-            
-            // Generate Unique 4-Char Code (Numbers + Uppercase)
             const uniqueCode = generateUniqueCode();
 
             await db.collection('requests').add({ 
@@ -1103,17 +1104,12 @@
         } catch(e){ toast("❌ خطأ"); console.error(e); } finally{ btn.disabled=false; btn.innerText="إرسال البلاغ"; } 
     }
 
-    // =========================================================================
-    // 5. WORKFLOW ACTIONS (The Surgical Logic)
-    // =========================================================================
-    
-    // --- Open Action Modal & Setup Dynamic Content ---
+    // --- Action Logic ---
     async function openAction(id, type) {
         tempActionData = { id, type };
         document.getElementById('action-modal').classList.remove('hidden');
         document.getElementById('act-comment').value = "";
         
-        // Reset Areas
         document.getElementById('eng-select-area').classList.add('hidden');
         document.getElementById('tech-select-area').classList.add('hidden');
 
@@ -1128,15 +1124,12 @@
         };
         document.getElementById('act-title').innerText = titles[type] || 'إجراء';
 
-        // 1. Supervisor approving -> Select Engineer
         if(type === 'sup_approve') {
             document.getElementById('eng-select-area').classList.remove('hidden');
             loadEngineers();
         }
-        // 2. Engineer assigning -> Select Tech (Internal or External)
         else if(type === 'eng_assign') {
             document.getElementById('tech-select-area').classList.remove('hidden');
-            // Reset to internal by default
             document.querySelector('input[name="tech-type"][value="internal"]').checked = true;
             toggleTechType('internal');
             loadTechnicians();
@@ -1166,7 +1159,6 @@
         el.classList.add('selected'); selectedEng={id, name};
     }
 
-    // --- Technician Selection Logic ---
     function toggleTechType(val) {
         if(val === 'internal') {
             document.getElementById('tech-list-action').classList.remove('hidden');
@@ -1199,7 +1191,6 @@
         el.classList.add('selected'); selectedTech={id, name};
     }
 
-    // --- SUBMIT ACTION (State Machine) ---
     async function submitAction() {
         const { id, type } = tempActionData;
         const comment = document.getElementById('act-comment').value;
@@ -1210,15 +1201,12 @@
             let updateData = { lastUpdate: firebase.firestore.FieldValue.serverTimestamp() };
             if(comment) updateData.notes = comment;
 
-            // 1. Supervisor -> Engineer
             if(type === 'sup_approve') {
                 if(!selectedEng) return toast("⚠️ اختر مهندس");
                 updateData.status = 'at_engineer';
                 updateData.engineerId = selectedEng.id;
                 updateData.engineerName = selectedEng.name;
             }
-
-            // 2. Engineer -> Technician (Internal or External)
             else if(type === 'eng_assign') {
                 const techType = document.querySelector('input[name="tech-type"]:checked').value;
                 if(techType === 'internal') {
@@ -1228,61 +1216,44 @@
                     updateData.technicianName = selectedTech.name;
                     updateData.techType = 'internal';
                 } else {
-                    // External Tech
                     const name = document.getElementById('ext-name').value;
-                    const phone = document.getElementById('ext-phone').value;
                     if(!name) return toast("⚠️ ادخل اسم الفني");
-                    
-                    // Direct to 'working' because external tech has no app access
                     updateData.status = 'working'; 
                     updateData.technicianName = name + " (تعاقد)";
                     updateData.techType = 'external';
                     updateData.extTechData = {
                         name: name,
-                        phone: phone,
+                        phone: document.getElementById('ext-phone').value,
                         company: document.getElementById('ext-company').value,
                         cost: document.getElementById('ext-cost').value
                     };
                 }
             }
-
-            // 3. Technician Logic
-            else if(type === 'tech_start') {
-                updateData.status = 'working';
-            }
-            else if(type === 'tech_finish') {
+            else if(type === 'tech_start') { updateData.status = 'working'; }
+            else if(type === 'tech_finish') { 
                 updateData.status = 'pending_confirmation';
                 updateData.techFinishedAt = firebase.firestore.FieldValue.serverTimestamp();
             }
-
-            // 4. Employee Confirmation
-            else if(type === 'emp_confirm') {
+            else if(type === 'emp_confirm') { 
                 updateData.status = 'done';
                 updateData.completedAt = firebase.firestore.FieldValue.serverTimestamp();
             }
-            else if(type === 'emp_deny') {
-                updateData.status = 'working'; // Return to working
+            else if(type === 'emp_deny') { 
+                updateData.status = 'working'; 
                 updateData.notes = "رفض الموظف الاستلام: " + comment;
             }
-
-            // 5. Rejection
-            else if(type === 'reject') {
+            else if(type === 'reject') { 
                 updateData.status = 'rejected';
                 updateData.rejectedBy = userData.fullName;
             }
 
             await db.collection('requests').doc(id).update(updateData);
             toast("✅ تم تنفيذ الإجراء"); closeModal('action-modal');
-
         } catch(e) { console.error(e); toast("خطأ في النظام"); } 
         finally { btn.disabled = false; }
     }
 
-    // =========================================================================
-    // 6. FRIENDS, PROFILE & UTILS
-    // =========================================================================
-    
-    // Search User (Legacy)
+    // --- Search & Utils ---
     async function searchUser() {
         const q = document.getElementById('search-query').value.trim();
         const resDiv = document.getElementById('search-results');
@@ -1319,46 +1290,45 @@
             toData: { name: tname, pic: tpic }
         });
         toast("✅ تم إرسال الطلب");
-        // Update UI if present
-        const actDiv = document.getElementById('fp-actions');
-        if(actDiv) actDiv.innerHTML = `<button class="btn-ghost" disabled>تم إرسال طلب</button>`;
     }
 
-    // --- Reports ---
-    function generateFullReport() {
-        toast("جاري تحضير PDF...");
-        db.collection('requests').orderBy('createdAt', 'desc').get().then(snap => {
-            let html = `
-            <div style="font-family:'Cairo'; padding:20px; direction:rtl;">
-                <h2 style="text-align:center;color:#0056b3;">التقرير الشامل</h2>
-                <p style="text-align:center;font-size:12px;">${new Date().toLocaleString('ar-EG')}</p>
-                <table style="width:100%; border-collapse:collapse; font-size:10px; margin-top:15px;">
-                    <tr style="background:#f1f5f9;">
-                        <th style="border:1px solid #ccc;padding:5px;">الكود</th>
-                        <th style="border:1px solid #ccc;padding:5px;">التاريخ</th>
-                        <th style="border:1px solid #ccc;padding:5px;">الموقع</th>
-                        <th style="border:1px solid #ccc;padding:5px;">الوصف</th>
-                        <th style="border:1px solid #ccc;padding:5px;">الحالة</th>
-                        <th style="border:1px solid #ccc;padding:5px;">الفني</th>
-                    </tr>`;
-            
-            snap.forEach(doc => {
-                const d = doc.data();
-                html += `
-                <tr>
-                    <td style="border:1px solid #ccc;padding:5px;">${d.uniqueCode || '-'}</td>
-                    <td style="border:1px solid #ccc;padding:5px;">${d.date}</td>
-                    <td style="border:1px solid #ccc;padding:5px;">${d.location}</td>
-                    <td style="border:1px solid #ccc;padding:5px;">${d.description.substring(0,50)}</td>
-                    <td style="border:1px solid #ccc;padding:5px;">${getStatusLabel(d.status)}</td>
-                    <td style="border:1px solid #ccc;padding:5px;">${d.technicianName || '-'}</td>
-                </tr>`;
-            });
-            html += `</table></div>`;
-            
-            const el = document.createElement('div'); el.innerHTML = html;
-            html2pdf().from(el).save('Full_Report.pdf');
+    async function loadTeam() {
+        const list = document.getElementById('team-list'); list.innerHTML = "";
+        const snap = await db.collection('users').doc(currentUser.uid).collection('friends').get();
+        if(snap.empty) { list.innerHTML = "<p style='text-align:center; color:#999; font-size:12px;'>لا يوجد أصدقاء</p>"; return; }
+        snap.forEach(d => {
+            const f = d.data();
+            list.innerHTML += `<div class="friend-item"><img src="${f.pic}" style="width:40px;height:40px;border-radius:50%;"><b>${f.name}</b></div>`;
         });
+    }
+
+    async function loadFriendReqs() {
+        const div = document.getElementById('friend-reqs');
+        const list = document.getElementById('reqs-list');
+        const snap = await db.collection('friend_requests').where('toId','==',currentUser.uid).where('status','==','pending').get();
+        if(snap.empty) { div.classList.add('hidden'); return; }
+        
+        div.classList.remove('hidden'); list.innerHTML = "";
+        snap.forEach(d => {
+            const r = d.data();
+            list.innerHTML += `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:10px; border-radius:10px; margin-bottom:5px;">
+                <div style="display:flex; align-items:center; gap:10px;"><img src="${r.fromData.pic}" style="width:30px;height:30px;border-radius:50%;"><span>${r.fromData.name}</span></div>
+                <div>
+                    <button onclick="acceptFriend('${d.id}', '${r.fromId}', '${r.fromData.name}', '${r.fromData.pic}')" class="btn-main btn-sm" style="background:var(--success);">قبول</button>
+                </div>
+            </div>`;
+        });
+    }
+
+    async function acceptFriend(reqId, fid, fname, fpic) {
+        // Add to My Friends
+        await db.collection('users').doc(currentUser.uid).collection('friends').add({ friendId: fid, name: fname, pic: fpic });
+        // Add Me to His Friends
+        await db.collection('users').doc(fid).collection('friends').add({ friendId: currentUser.uid, name: userData.fullName, pic: userData.photoUrl });
+        // Delete Request
+        await db.collection('friend_requests').doc(reqId).delete();
+        toast("✅ تم قبول الصداقة"); loadFriendReqs(); loadTeam();
     }
 
     // --- Helpers ---
@@ -1366,11 +1336,9 @@
         currentTab = tab; 
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
         el.classList.add('active'); 
-        if(tab === 'history') document.getElementById('archive-actions').classList.remove('hidden');
-        else document.getElementById('archive-actions').classList.add('hidden');
         renderFeed();
     }
-
+    
     function getStatusLabel(s) {
         const map = {
             'pending': 'في انتظار المشرف', 'at_engineer': 'عند المهندس', 'at_tech': 'عند الفني',
@@ -1387,31 +1355,22 @@
         let mediaHtml = "";
         if(d.media) d.media.forEach(m => {
             if(m.type === 'audio') mediaHtml += `<div class="media-item" onclick="openAudioPlayer('${m.url}')" style="background:#e0f2fe;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-play-circle fa-2x"></i></div>`;
-            else mediaHtml += `<div class="media-item" onclick="openMediaViewer('${m.url}','${m.type}')"><img src="${m.url}"></div>`;
+            else mediaHtml += `<div class="media-item"><img src="${m.url}" style="width:100%;height:100%;object-fit:cover;"></div>`;
         });
 
-        // Timeline Construction
-        let steps = [
-            { id: 'pending', label: 'إرسال' },
-            { id: 'at_engineer', label: 'المهندس' },
-            { id: 'working', label: 'التنفيذ' },
-            { id: 'pending_confirmation', label: 'المراجعة' },
-            { id: 'done', label: 'تم' }
-        ];
-        
+        // Simple Timeline Logic
         let tlHtml = '<div class="timeline">';
+        const statusOrder = ['pending', 'at_engineer', 'at_tech', 'working', 'pending_confirmation', 'done'];
+        const labels = ['إرسال', 'المهندس', 'الفني', 'التنفيذ', 'المراجعة', 'تم'];
+        
         if(d.status === 'rejected') {
             tlHtml += `<div class="timeline-item active rejected"><div class="tl-icon"><i class="fa-solid fa-xmark"></i></div><div class="tl-content"><h4>مرفوض</h4><p>${d.rejectedBy}</p></div></div>`;
         } else {
-            steps.forEach(s => {
-                let active = false;
-                // Simple logic for active steps based on flow order
-                const statusOrder = ['pending', 'at_engineer', 'at_tech', 'working', 'pending_confirmation', 'done'];
-                if(statusOrder.indexOf(d.status) >= statusOrder.indexOf(s.id)) active = true;
-                if(d.status === 'at_tech' && s.id === 'working') active = false; // Not yet working
-
-                tlHtml += `<div class="timeline-item ${active?'active':''}"><div class="tl-icon"><i class="fa-solid fa-check"></i></div><div class="tl-content"><h4>${s.label}</h4></div></div>`;
-            });
+             const currentIndex = statusOrder.indexOf(d.status);
+             labels.forEach((lbl, idx) => {
+                 let active = idx <= currentIndex;
+                 tlHtml += `<div class="timeline-item ${active?'active':''}"><div class="tl-icon"><i class="fa-solid fa-check"></i></div><div class="tl-content"><h4>${lbl}</h4></div></div>`;
+             });
         }
         tlHtml += '</div>';
 
@@ -1424,24 +1383,7 @@
             <div class="media-grid">${mediaHtml}</div>
         `;
     }
-
-    // Audio Player
-    function openAudioPlayer(url) {
-        const modal = document.getElementById('audio-player-modal');
-        const audio = document.getElementById('modal-audio-player');
-        audio.src = url; modal.classList.remove('hidden'); audio.play();
-    }
-    function closeAudioPlayer() {
-        const modal = document.getElementById('audio-player-modal');
-        const audio = document.getElementById('modal-audio-player');
-        audio.pause(); modal.classList.add('hidden');
-    }
-    function openMediaViewer(u, t) { 
-        document.getElementById('media-viewer').classList.remove('hidden'); 
-        document.getElementById('media-content-container').innerHTML = `<img src="${u}" style="max-width:100%;">`; 
-    }
-
-    // Delete (Manager Only)
+    
     async function softDelete(id) { 
         openConfirmModal("نقل للمهملات؟", async () => { await db.collection('requests').doc(id).update({isDeleted:true}); toast("تم النقل"); }); 
     }
@@ -1459,24 +1401,59 @@
         newBtn.onclick = function() { action(); closeModal('confirm-modal'); };
     }
 
-    // Profiles & Updates
     function loadProfilePageData() {
         document.getElementById('edit-current-pic').src = userData.photoUrl;
         document.getElementById('edit-id-display').innerText = userData.shortId;
         document.getElementById('edit-name').value = userData.fullName;
         document.getElementById('edit-job').value = userData.jobTitle;
-        // ... fill other fields ...
+        document.getElementById('edit-loc').value = userData.location;
+        document.getElementById('edit-phone').value = userData.phone;
+        document.getElementById('edit-gender').value = userData.gender;
     }
+    
     async function saveProfile() {
-        // ... (Same as original logic) ...
-        toast("تم الحفظ (محاكاة)");
+        const newName = document.getElementById('edit-name').value;
+        const newJob = document.getElementById('edit-job').value;
+        const newLoc = document.getElementById('edit-loc').value;
+        const newPhone = document.getElementById('edit-phone').value;
+        const newGender = document.getElementById('edit-gender').value;
+
+        // Upload new pic if exists
+        let picUrl = userData.photoUrl;
+        const btn = document.getElementById('save-profile-btn');
+        btn.innerText = "جاري الحفظ..."; btn.disabled = true;
+
+        if(newProfilePicFile) {
+             const fd = new FormData(); fd.append('file', newProfilePicFile); fd.append('upload_preset', CLOUD_PRESET);
+             const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, {method:'POST', body:fd});
+             const d = await res.json();
+             picUrl = d.secure_url;
+        }
+
+        // Selected Frame logic would go here, assuming frame class is stored in userData
+        const selectedFrameEl = document.querySelector('.frame-option.selected');
+        let frameClass = '';
+        if(selectedFrameEl.classList.contains('f-gold')) frameClass = 'f-gold';
+        if(selectedFrameEl.classList.contains('f-blue')) frameClass = 'f-blue';
+        if(selectedFrameEl.classList.contains('f-grad')) frameClass = 'f-grad';
+
+        await db.collection('users').doc(currentUser.uid).update({
+             fullName: newName, jobTitle: newJob, location: newLoc, phone: newPhone, gender: newGender, photoUrl: picUrl, frame: frameClass
+        });
+        
+        toast("✅ تم تحديث الملف الشخصي");
+        btn.innerText = "حفظ التعديلات"; btn.disabled = false;
+        location.reload(); 
     }
-    function previewProfilePic(i) { document.getElementById('edit-current-pic').src = URL.createObjectURL(i.files[0]); }
+
+    function previewProfilePic(i) { 
+        newProfilePicFile = i.files[0];
+        document.getElementById('edit-current-pic').src = URL.createObjectURL(i.files[0]); 
+    }
     function copyId() { navigator.clipboard.writeText(userData.shortId); toast("تم نسخ ID"); }
     function selectFrame(el, c) { 
         document.querySelectorAll('.frame-option').forEach(f=>f.classList.remove('selected'));
         el.classList.add('selected'); 
-        // Save frame logic here 
     }
 
 </script>
