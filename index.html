@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام الصيانة الذكي - جامعة الريادة (V9.0 - Camera Feature)</title>
+    <title>نظام الصيانة الذكي - جامعة الريادة (V10.0 - Private Inventory)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -304,7 +304,7 @@
     <div id="loader">
         <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color:var(--primary);"></i>
         <h2 style="margin-top:20px; color:var(--primary-dark); font-size:18px; font-weight:800;">نظام الصيانة الذكي</h2>
-        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V9.0 Camera Feature</p>
+        <p style="color:var(--text-muted); font-size:14px; margin:0;">جامعة الريادة - V10.0 Private Inventory</p>
     </div>
 
     <div id="auth-screen" class="hidden" style="min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:25px;">
@@ -487,7 +487,7 @@
                 <div class="glass-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                         <h3 style="margin:0;"><i class="fa-solid fa-boxes-stacked" style="color:var(--primary);"></i> جرد العهدة</h3>
-                        <button onclick="sendInventoryReport()" class="btn-sm btn-main" style="width:auto; background:var(--gold);">إرسال تقرير للمدير <i class="fa-regular fa-paper-plane"></i></button>
+                        <button onclick="openSendReportModal()" class="btn-sm btn-main" style="width:auto; background:var(--gold);">إرسال تقرير للمدير <i class="fa-regular fa-paper-plane"></i></button>
                     </div>
                     
                     <div class="inventory-search">
@@ -743,6 +743,16 @@
         </div>
     </div>
 
+    <div id="send-report-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="close-btn" onclick="closeModal('send-report-modal')"><i class="fa-solid fa-xmark"></i></div>
+            <h3 style="margin-bottom:20px; border-right:4px solid var(--gold); padding-right:15px; color:var(--text);">إرسال التقرير</h3>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">اختر المدير لإرسال تقرير العهدة الخاص بك:</p>
+            <div id="manager-select-list" style="max-height:200px; overflow-y:auto; margin-bottom:20px; display:grid; gap:10px;"></div>
+            <button onclick="confirmSendReport()" id="confirm-send-rep-btn" class="btn-main" disabled>إرسال الآن <i class="fa-regular fa-paper-plane"></i></button>
+        </div>
+    </div>
+
     <div id="seen-users-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="close-btn" onclick="closeModal('seen-users-modal')"><i class="fa-solid fa-xmark"></i></div>
@@ -887,6 +897,7 @@
     let systemFloors = []; 
     let reportChart = null;
     let postsListener = null;
+    let selectedManagerForReport = null; // New global
 
     // --- Helpers ---
     function generateUniqueCode() {
@@ -1007,23 +1018,20 @@
                     await db.collection('users').doc(currentUser.uid).update({shortId: Math.random().toString(36).substr(2,6).toUpperCase()});
                 }
                 
-                // 1. Fetch System Data
                 await fetchSystemData();
 
                 renderHeader();
                 showScreen('app-container');
-                setupRoleUI(); // Apply Permissions
+                setupRoleUI(); // Permissions
                 
                 loadFeed();
                 loadTeam(); 
                 loadFriendReqs();
                 loadProfilePageData();
                 
-                // Defaults
                 document.getElementById('req-date').valueAsDate = new Date();
                 document.getElementById('req-time').value = new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
 
-                // Check for unseen posts initially
                 checkUnseenNotifications();
 
                 setTimeout(() => { document.getElementById('loader').classList.add('hidden'); }, 500);
@@ -1063,35 +1071,28 @@
         const typeSelect = document.getElementById('req-type');
         const locSelect = document.getElementById('req-faculty');
         const floorSelect = document.getElementById('req-floor');
-        
         const invLocSelect = document.getElementById('inv-faculty');
         const invFloorSelect = document.getElementById('inv-floor');
 
         // Specialties
         typeSelect.innerHTML = '<option value="">اختر التخصص...</option>';
-        systemSpecialties.forEach(spec => {
-            typeSelect.innerHTML += `<option value="${spec}">${spec}</option>`;
-        });
+        systemSpecialties.forEach(spec => { typeSelect.innerHTML += `<option value="${spec}">${spec}</option>`; });
 
         // Locations
         let locOptions = '<option value="">اختر المبنى/الكلية...</option>';
-        systemLocations.forEach(loc => {
-            locOptions += `<option value="${loc}">${loc}</option>`;
-        });
+        systemLocations.forEach(loc => { locOptions += `<option value="${loc}">${loc}</option>`; });
         locSelect.innerHTML = locOptions + '<option value="Other">موقع آخر...</option>';
         invLocSelect.innerHTML = locOptions;
 
         // Floors
         let floorOptions = '<option value="">اختر الدور...</option>';
-        systemFloors.forEach(f => {
-            floorOptions += `<option value="${f}">${f}</option>`;
-        });
+        systemFloors.forEach(f => { floorOptions += `<option value="${f}">${f}</option>`; });
         floorSelect.innerHTML = floorOptions;
         invFloorSelect.innerHTML = floorOptions;
     }
 
     // =========================================================================
-    // V8.1 STRICT ROLE UI SETUP (CORRECTED & VERIFIED)
+    // V10.0 STRICT ROLE UI SETUP
     // =========================================================================
     function setupRoleUI() {
         const r = userData.role;
@@ -1103,35 +1104,26 @@
         const createPostBox = document.getElementById('create-post-box');
         const navCreateBtn = document.getElementById('nav-create-btn'); 
 
-        // 1. CREATE REQUEST BUTTON:
-        // HIDDEN for: Manager, Engineer, Technician
+        // 1. CREATE REQUEST BUTTON: HIDE for Manager, Engineer, Technician
         if(r === 'manager' || r === 'engineer' || r === 'technician') {
              navCreateBtn.classList.add('hidden');
-             // Also lock the page content if accessed directly via console
              document.getElementById('page-create').innerHTML = "<div style='text-align:center; padding:50px; color:#999;'><i class='fa-solid fa-lock fa-2x'></i><p>غير مصرح بإنشاء بلاغات لهذا الحساب.</p></div>";
         }
 
-        // 2. REPORTS & ADMIN PANEL:
-        // VISIBLE for: Manager, Engineer ONLY
+        // 2. REPORTS & ADMIN PANEL: VISIBLE for Manager, Engineer ONLY
         if(r === 'manager' || r === 'engineer') {
-            shortcuts.classList.remove('hidden'); // Home Shortcuts
-            settingsManagerArea.classList.remove('hidden'); // Settings Area
-            
-            // Only Manager sees "Admin Panel" inside shortcuts
-            if(r === 'manager') {
-                adminBtn.classList.remove('hidden');
-            }
+            shortcuts.classList.remove('hidden');
+            settingsManagerArea.classList.remove('hidden');
+            if(r === 'manager') adminBtn.classList.remove('hidden');
         }
 
-        // 3. INVENTORY (OHDA):
-        // VISIBLE for: Supervisor, Employee ONLY
+        // 3. INVENTORY (OHDA): VISIBLE for Supervisor, Employee ONLY
         if(r === 'supervisor' || r === 'employee') {
-            staffShortcuts.classList.remove('hidden'); // Show button in Home
-            settingsStaffArea.classList.remove('hidden'); // Show button in Settings
+            staffShortcuts.classList.remove('hidden');
+            settingsStaffArea.classList.remove('hidden');
         }
 
-        // 4. POSTING IN AL-BAYAN:
-        // VISIBLE for: Manager, Engineer, Supervisor
+        // 4. POSTING: Manager, Engineer, Supervisor
         if(r === 'manager' || r === 'engineer' || r === 'supervisor') {
             createPostBox.classList.remove('hidden'); 
         }
@@ -1174,19 +1166,13 @@
         const floorsDiv = document.getElementById('admin-floors-list');
         
         specsDiv.innerHTML = "";
-        systemSpecialties.forEach(item => {
-            specsDiv.innerHTML += `<div class="admin-list-item"><span>${item}</span><div class="delete-icon" onclick="deleteSystemData('specialties', '${item}')"><i class="fa-solid fa-trash"></i></div></div>`;
-        });
+        systemSpecialties.forEach(item => { specsDiv.innerHTML += `<div class="admin-list-item"><span>${item}</span><div class="delete-icon" onclick="deleteSystemData('specialties', '${item}')"><i class="fa-solid fa-trash"></i></div></div>`; });
 
         locsDiv.innerHTML = "";
-        systemLocations.forEach(item => {
-            locsDiv.innerHTML += `<div class="admin-list-item"><span>${item}</span><div class="delete-icon" onclick="deleteSystemData('locations', '${item}')"><i class="fa-solid fa-trash"></i></div></div>`;
-        });
+        systemLocations.forEach(item => { locsDiv.innerHTML += `<div class="admin-list-item"><span>${item}</span><div class="delete-icon" onclick="deleteSystemData('locations', '${item}')"><i class="fa-solid fa-trash"></i></div></div>`; });
 
         floorsDiv.innerHTML = "";
-        systemFloors.forEach(item => {
-            floorsDiv.innerHTML += `<div class="admin-list-item"><span>${item}</span><div class="delete-icon" onclick="deleteSystemData('floors', '${item}')"><i class="fa-solid fa-trash"></i></div></div>`;
-        });
+        systemFloors.forEach(item => { floorsDiv.innerHTML += `<div class="admin-list-item"><span>${item}</span><div class="delete-icon" onclick="deleteSystemData('floors', '${item}')"><i class="fa-solid fa-trash"></i></div></div>`; });
     }
 
     // --- Navigation ---
@@ -1195,7 +1181,6 @@
         document.getElementById('page-'+p).classList.remove('hidden'); 
         
         document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active')); 
-        // Ensure create button isn't activated if hidden
         if(p !== 'create' && p !== 'reports' && p !== 'admin-settings' && p !== 'inventory') {
             if(el) el.classList.add('active'); 
         }
@@ -1273,7 +1258,7 @@
     }
 
     // =========================================================================
-    // FEED & NOTIFICATIONS (UPDATED WITH SOUNDS)
+    // FEED & NOTIFICATIONS
     // =========================================================================
 
     function loadFeed() {
@@ -1775,25 +1760,76 @@
     function selectFrame(el, c) { document.querySelectorAll('.frame-option').forEach(f=>f.classList.remove('selected')); el.classList.add('selected'); }
 
     // =========================================================================
-    // NEW: INVENTORY (OHDA) LOGIC (UPDATED WITH LOCATION & REPORT)
+    // REPORTS
+    // =========================================================================
+
+    function generateReports() {
+        let start = document.getElementById('report-start-date').valueAsDate;
+        let end = document.getElementById('report-end-date').valueAsDate;
+        if(!start) start = new Date(0); if(!end) end = new Date(); end.setHours(23, 59, 59);
+
+        const reportData = requestsCache.filter(r => { const rDate = new Date(r.date); return rDate >= start && rDate <= end && r.isDeleted !== true; });
+        const total = reportData.length;
+        const done = reportData.filter(r => r.status === 'done').length;
+        const rejected = reportData.filter(r => r.status === 'rejected').length;
+        const active = total - done - rejected;
+        const pHigh = reportData.filter(r => r.priority === 'high').length;
+        const pMed = reportData.filter(r => r.priority === 'medium').length;
+        const pLow = reportData.filter(r => r.priority === 'low').length;
+
+        document.getElementById('rep-total').innerText = total; document.getElementById('rep-done').innerText = done;
+        document.getElementById('rep-rejected').innerText = rejected; document.getElementById('rep-active').innerText = active;
+        document.getElementById('rep-prio-high').innerText = pHigh; document.getElementById('rep-prio-med').innerText = pMed;
+        document.getElementById('rep-prio-low').innerText = pLow;
+
+        updateChart([done, active, rejected]); renderTechTable(reportData);
+    }
+
+    function updateChart(data) {
+        if(reportChart) reportChart.destroy();
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        reportChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['مكتمل', 'قيد العمل', 'مرفوض'], datasets: [{ data: data, backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+    }
+
+    function renderTechTable(data) {
+        const tbody = document.getElementById('tech-performance-body'); tbody.innerHTML = "";
+        const techs = {};
+        data.forEach(r => { if(r.technicianName) { const name = r.technicianName; if(!techs[name]) techs[name] = { total: 0, done: 0, pic: 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png' }; techs[name].total++; if(r.status === 'done') techs[name].done++; } });
+
+        if(Object.keys(techs).length === 0) { tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>لا يوجد بيانات فنيين</td></tr>"; return; }
+
+        for (const [name, stats] of Object.entries(techs)) {
+            const efficiency = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
+            let badgeColor = efficiency >= 80 ? 'green' : (efficiency >= 50 ? 'orange' : 'red');
+            tbody.innerHTML += `<tr><td><div class="tech-row"><img src="${stats.pic}"><span>${name}</span></div></td><td style="text-align:center">${stats.total}</td><td style="text-align:center; color:var(--success); font-weight:bold;">${stats.done}</td><td style="text-align:center"><span style="color:${badgeColor}; font-weight:bold;">%${efficiency}</span></td></tr>`;
+        }
+    }
+
+    function exportReportsPDF() {
+        const element = document.getElementById('page-reports');
+        const opt = { margin:0.5, filename:`report_${new Date().toISOString().slice(0,10)}.pdf`, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'in',format:'a4',orientation:'portrait'} };
+        html2pdf().set(opt).from(element).save();
+    }
+
+    // =========================================================================
+    // NEW: INVENTORY (OHDA) LOGIC (PRIVATE TO USER)
     // =========================================================================
     
     function loadInventory() {
         const body = document.getElementById('inventory-body');
         body.innerHTML = '<tr><td colspan="5" style="text-align:center;">جاري التحميل...</td></tr>';
         
-        // Listen to inventory collection
-        db.collection('inventory').onSnapshot(snap => {
+        // **KEY CHANGE: FILTER BY USER ID (Private Inventory)**
+        db.collection('inventory').where('userId', '==', currentUser.uid).onSnapshot(snap => {
             body.innerHTML = "";
             if(snap.empty) {
-                body.innerHTML = '<tr><td colspan="5" style="text-align:center;">لا يوجد أصناف</td></tr>';
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center;">لا يوجد أصناف في عهدتك</td></tr>';
                 return;
             }
             
             snap.forEach(doc => {
                 const item = doc.data();
                 const id = doc.id;
-                // Construct location string
                 let locationStr = item.faculty ? item.faculty : '';
                 if(item.floor) locationStr += ` - ${item.floor}`;
                 if(item.room) locationStr += ` (غرفة: ${item.room})`;
@@ -1830,13 +1866,12 @@
         const total = parseInt(document.getElementById('inv-total').value);
         const current = parseInt(document.getElementById('inv-current').value);
         
-        // Location Fields
         const facSelect = document.getElementById('inv-faculty');
         const floorSelect = document.getElementById('inv-floor');
         const room = document.getElementById('inv-room').value;
         
         let facText = facSelect.options[facSelect.selectedIndex].text;
-        if(facSelect.value === "") facText = ""; // Not selected
+        if(facSelect.value === "") facText = ""; 
         let floorText = floorSelect.value ? floorSelect.value : "";
 
         if(!name || isNaN(total) || isNaN(current)) return toast("⚠️ أدخل بيانات صحيحة");
@@ -1848,12 +1883,11 @@
             faculty: facText,
             floor: floorText,
             room: room,
-            updatedBy: userData.fullName, // Storing who added/updated
-            userId: currentUser.uid,
+            updatedBy: userData.fullName, 
+            userId: currentUser.uid, // Ensuring ownership
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        // Reset basic fields only, keep location for ease of entry
         document.getElementById('inv-name').value = "";
         document.getElementById('inv-total').value = "";
         document.getElementById('inv-current').value = "";
@@ -1865,7 +1899,6 @@
         if(doc.exists) {
             let newVal = (doc.data()[field] || 0) + change;
             if(newVal < 0) newVal = 0;
-            // Update value AND the user who modified it
             await db.collection('inventory').doc(id).update({ 
                 [field]: newVal,
                 updatedBy: userData.fullName,
@@ -1881,33 +1914,98 @@
         }
     }
     
-    // NEW: Send Report to Manager Logic
-    async function sendInventoryReport() {
-        if(!confirm("هل تريد إرسال تقرير العهدة الحالي للمدير؟")) return;
+    // =========================================================================
+    // NEW: MANAGER SELECTION FOR REPORT
+    // =========================================================================
+    
+    async function openSendReportModal() {
+        const list = document.getElementById('manager-select-list');
+        const modal = document.getElementById('send-report-modal');
+        const btn = document.getElementById('confirm-send-rep-btn');
+        
+        list.innerHTML = "<p style='text-align:center;'>جاري تحميل المديرين...</p>";
+        btn.disabled = true;
+        modal.classList.remove('hidden');
         
         try {
-            // Get current inventory snapshot
-            const snap = await db.collection('inventory').get();
+            // Fetch Managers
+            const snap = await db.collection('users').where('role', '==', 'manager').get();
+            list.innerHTML = "";
+            
+            if(snap.empty) {
+                list.innerHTML = "<p style='text-align:center; color:#999;'>لا يوجد مديرين مسجلين</p>";
+                return;
+            }
+            
+            snap.forEach(doc => {
+                const u = doc.data();
+                list.innerHTML += `
+                <div class="tech-select-card" onclick="selectManager(this, '${doc.id}')" style="display:flex; align-items:center; gap:10px; text-align:right;">
+                    <img src="${u.photoUrl}" style="width:40px; height:40px; border-radius:50%;">
+                    <div>
+                        <div style="font-weight:bold; font-size:12px;">${u.fullName}</div>
+                        <div style="font-size:10px; color:var(--text-muted);">${u.jobTitle || 'مدير'}</div>
+                    </div>
+                </div>`;
+            });
+            
+        } catch(e) {
+            console.error(e);
+            list.innerHTML = "<p style='color:red; text-align:center;'>خطأ في التحميل</p>";
+        }
+    }
+    
+    function selectManager(el, uid) {
+        // Visual Selection
+        document.querySelectorAll('#manager-select-list .tech-select-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        
+        // Logic Selection
+        selectedManagerForReport = uid;
+        document.getElementById('confirm-send-rep-btn').disabled = false;
+    }
+
+    async function confirmSendReport() {
+        if(!selectedManagerForReport) return;
+        
+        const btn = document.getElementById('confirm-send-rep-btn');
+        btn.innerText = "جاري الإرسال...";
+        btn.disabled = true;
+        
+        try {
+            // 1. Get User's Private Inventory
+            const snap = await db.collection('inventory').where('userId', '==', currentUser.uid).get();
             let items = [];
             snap.forEach(doc => items.push(doc.data()));
             
-            // Create a report document in a separate collection (e.g. 'reports' or 'messages')
-            // This allows the manager to view it later.
-            // For now, we simulate sending by adding to a 'notifications' collection for manager
+            if(items.length === 0) {
+                toast("⚠️ عهدتك فارغة، لا يوجد ما يتم إرساله.");
+                closeModal('send-report-modal');
+                return;
+            }
+            
+            // 2. Create Report Object
             await db.collection('inventory_reports').add({
-                sender: userData.fullName,
+                senderName: userData.fullName,
                 senderId: currentUser.uid,
+                recipientId: selectedManagerForReport, // The selected manager
                 role: userData.role,
-                date: firebase.firestore.FieldValue.serverTimestamp(),
-                itemsCount: items.length,
-                data: items, // Save snapshot of items
+                reportDate: firebase.firestore.FieldValue.serverTimestamp(),
+                itemCount: items.length,
+                inventoryData: items,
                 status: 'unread'
             });
             
             toast("✅ تم إرسال التقرير للمدير بنجاح");
+            closeModal('send-report-modal');
+            
         } catch(e) {
             console.error(e);
             toast("❌ حدث خطأ أثناء الإرسال");
+        } finally {
+            btn.innerText = "إرسال الآن";
+            btn.disabled = false;
+            selectedManagerForReport = null; // Reset
         }
     }
 
@@ -1940,8 +2038,6 @@
                 // Detect *changes* to identify new posts for sound
                 snap.docChanges().forEach(change => {
                     if (change.type === 'added') {
-                        // If it's a new post (not initial load if possible to distinguish, but here complex)
-                        // Simple check: if timestamp is very recent (within last 30 seconds)
                         const p = change.doc.data();
                         const now = new Date().getTime() / 1000;
                         if (p.createdAt && (now - p.createdAt.seconds) < 30 && p.authorId !== currentUser.uid) {
